@@ -30,7 +30,7 @@ interface RegisterData {
   
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      const url = "https://login-production-d568.up.railway.app/api/auth";
+      const url = "https://login-production-d568.up.railway.app/api/auth/register";
   
       try {
         const response = await fetch(url, {
