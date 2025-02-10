@@ -30,7 +30,7 @@ export default function LoginForm() {
     setError(null);  
     setLoading(true); 
 
-    const url = "https://login-production-d568.up.railway.app/api/auth";
+    const url = "https://login-production-d568.up.railway.app/api/auth/login";
 
     try {
       const response = await fetch(url, {
