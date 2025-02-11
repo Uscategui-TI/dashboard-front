@@ -30,7 +30,7 @@ interface RegisterData {
   
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      const url = "https://login-production-0754.up.railway.app/api/auth/register";
+      const url = "http://localhost:8080/api/auth/register";
   
       try {
         const response = await fetch(url, {
@@ -101,6 +101,7 @@ interface RegisterData {
               onChange={handleChange}
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400"
               required
+              autoComplete="email"
             />
             <input
               type="password"
