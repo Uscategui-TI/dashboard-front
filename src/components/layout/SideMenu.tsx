@@ -1,67 +1,91 @@
-'use client'
+'use client';
 
+import { FiLogOut } from "react-icons/fi";
 import { DropdownSelect } from '@/components/ui/dropdown';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import NextLink from 'next/link';
-import { FaWallet, FaImage, FaWhatsapp } from "react-icons/fa6";
-import { FaHome, FaUsers } from "react-icons/fa";
-import { IoFastFoodOutline } from "react-icons/io5";
+import { FaImage, FaWhatsapp, FaHome, FaUsers } from "react-icons/fa";
 import { BsRobot } from 'react-icons/bs';
-import { rolePermissions } from '@/hooks/modal/auth/rolesPermissions'; // Asegúrate de importar tus permisos
+import { rolePermissions } from '@/hooks/modal/auth/rolesPermissions';
+import { useRouter } from "next/navigation";
+import axios from 'axios';
 
 const subRoutes = [
-    {
-        name: 'Campañas',
-        url: '/mycenter/attractions',
-        icon: <FaWhatsapp className="w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"/>
-    },
-    {
-        name: 'Bot',
-        url: '/mycenter/tours',
-        icon: <BsRobot className="w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"/>
-    },
-    {
-        name: 'Prospectos',
-        url: '/mycenter/accommodations',
-        icon: <FaUsers className="w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"/>
-    }
+    { name: 'Campañas', url: '/mycenter/attractions', icon: <FaWhatsapp className="w-6 h-6"/> },
+    { name: 'Bot', url: '/mycenter/tours', icon: <BsRobot className="w-6 h-6"/> },
+    { name: 'Prospectos', url: '/mycenter/accommodations', icon: <FaUsers className="w-6 h-6"/> }
 ];
 
 export const SideMenu = () => {
     const [allowedMenuItems, setAllowedMenuItems] = useState<string[]>([]);
+    const router = useRouter();
+    const [initialToken, setInitialToken] = useState<string | null>(null);
+
+    const handleLogout = useCallback(() => {
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("roles");
+        router.push("http://localhost:3000/auth/sing-in");
+    },[router]);
+
 
     useEffect(() => {
-        const roles = JSON.parse(localStorage.getItem("roles") || "[]");
+        const storedToken = localStorage.getItem("authToken");
+        setInitialToken(storedToken); // Guarda el token original al cargar
 
-        console.log("Roles obtenidos de localStorage:", roles);
+        const fetchRoles = async () => {
+            if (!storedToken) {
+                handleLogout();
+                return;
+            }
 
-        if (roles.length === 0) {
-            console.error("No roles found in localStorage");
-            return; // Si no hay roles, no se filtran elementos
-        }
+            try {
+                const response = await axios.get('http://localhost:8080/api/auth/role', {
+                    headers: { 'Authorization': `Bearer ${storedToken}` },
+                    withCredentials: true,
+                });
 
-        console.log("RolePermissions:", rolePermissions); // 🔍 Verifica el objeto de permisos
-        console.log("Roles en localStorage:", roles);
-    
-        roles.forEach((role: string | number) => {
-            console.log(`Permisos para ${role}:`, rolePermissions[role]); // 🔍 Verifica los permisos asignados
-        });
+                const data = response.data;
+                const roles = data?.roles || [];
 
-        // Filtrar las opciones del menú según los roles
-        const getAllowedMenuItems = () => {
-            const allowedItems: string[] = [];
-            roles.forEach((role: string) => {
-                if (rolePermissions[role]) {
-                    allowedItems.push(...rolePermissions[role]);
+                if (roles.length === 0) {
+                    handleLogout();
+                    return;
                 }
-            });
 
-            // Eliminar duplicados
-            return [...new Set(allowedItems)];
+                localStorage.setItem("roles", JSON.stringify(roles));
+
+                const allowedItems: string[] = [];
+                roles.forEach((role: string) => {
+                    if (rolePermissions[role]) {
+                        allowedItems.push(...rolePermissions[role]);
+                    }
+                });
+
+                setAllowedMenuItems([...new Set(allowedItems)]);
+            } catch (error) {
+                console.error("Error fetching roles:", error);
+                handleLogout();
+            }
         };
 
-        setAllowedMenuItems(getAllowedMenuItems());
-    }, []); // Solo se ejecuta una vez al cargar el componente
+        fetchRoles();
+    }, [handleLogout]);
+
+    // Monitorea si el token fue modificado
+    useEffect(() => {
+        const checkTokenChange = () => {
+            const currentToken = localStorage.getItem("authToken");
+            if (initialToken && currentToken !== initialToken) {
+                console.warn("Token modificado, cerrando sesión...");
+                handleLogout();
+            }
+        };
+
+        window.addEventListener("storage", checkTokenChange);
+        return () => window.removeEventListener("storage", checkTokenChange);
+    }, [initialToken, handleLogout]);
+
+    
 
     return (
         <>
@@ -196,6 +220,17 @@ export const SideMenu = () => {
                                     </div>
                                 </NextLink>
                             </div>
+                            <li>
+                            <button
+                                    onClick={handleLogout}
+                                    className="w-full flex items-center p-2 text-base text-gray-900 transition rounded-lg hover:bg-gray-100 group dark:text-gray-200 dark:hover:bg-gray-700"
+                                >
+                                    <FiLogOut className="w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white" />
+                                    <span className="ml-3">Cerrar sesión</span>
+                                </button>
+                            </li>
+                            
+                            
                         </div>
                     </div>
                 </div>

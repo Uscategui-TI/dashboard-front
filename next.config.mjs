@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: false,
   images: {
     remotePatterns: [
       {
@@ -16,5 +17,10 @@ const nextConfig = {
     ],
   },
   productionBrowserSourceMaps: false, // Deshabilitar mapas de fuentes en producción
+  webpack: (config) => {
+    config.infrastructureLogging = { level: 'error' }; // Oculta advertencias de Webpack
+    config.stats = 'errors-only'; 
+    return config;
+  },
 };
 export default nextConfig;

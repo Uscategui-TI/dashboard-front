@@ -2,6 +2,7 @@
 
 import { useState, ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/navigation"; 
+import axios from "axios";
 import '@/app/page.module.css';
 
 interface LoginData {
@@ -29,44 +30,39 @@ export default function LoginForm() {
     e.preventDefault();
     setError(null);  
     setLoading(true); 
-  
-    const url = "http://localhost:8080/api/auth/login";
-  
+
     try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(loginData),
+      const { data } = await axios.post("http://localhost:8080/api/auth/login", loginData, {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true, 
       });
-  
-      if (!response.ok) {
-        const errorData = await response.json();
-        setError(errorData.message || "Error al iniciar sesión"); 
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-  
-      const data = await response.json();
-      console.log(data);
-  
+
       if (data.token && data.roles) {
-        localStorage.setItem("authToken", data.token); 
-        localStorage.setItem("roles", JSON.stringify(data.roles)); // Guardamos los roles
+        localStorage.setItem("authToken", data.token);
+        localStorage.setItem("roles", JSON.stringify(data.roles)); 
         setRoles(data.roles);
         router.push("/admin/what-panel");
       } else {
-        setError("No se recibió un token o roles en la respuesta");
+        throw new Error("No se recibió un token o roles en la respuesta");
       }
-      
-    } catch (error) {
+
+    } catch (error: any) {
       console.error("Error en la autenticación:", error);
-      setError("Hubo un problema al intentar iniciar sesión");
+      
+      if (error.response) {
+        setError(error.response.data.message || "Error en la autenticación");
+      } else {
+        setError("Error de conexión con el servidor");
+      }
+
+      localStorage.removeItem("authToken"); // Limpia en caso de error
+      localStorage.removeItem("roles");
+
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
-  
+
 
   return (
     <div className="flex justify-center items-center h-screen bg-gradient-to-r from-blue-500 to-blue-500">
