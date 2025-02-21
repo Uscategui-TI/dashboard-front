@@ -1,65 +1,75 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, ChangeEvent, FormEvent } from "react";
 import '@/app/page.module.css'
 
 interface RegisterData {
-    username: string;
-    password: string;
-    fullName: string;
-    birthDate: string;
-    idNumber: string;
-    role: string;
-  }
-  
-  export default function RegisterForm() {
-    const [registerData, setRegisterData] = useState<RegisterData>({
-      username: "",
-      password: "",
-      fullName: "",
-      birthDate: "",
-      idNumber: "",
-      role: "",
-    });
-  
-    const roles = ["Admin", "Secretario", "Periodista", "Coordinador", "Pasante"];
-  
-    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-      setRegisterData({ ...registerData, [e.target.name]: e.target.value });
-    };
+  username: string;
+  password: string;
+  fullName: string;
+  birthDate: string;
+  idNumber: string;
+  role: string;
+}
 
-  
-    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      const url = `https://auth-service-production-40be.up.railway.app/api/auth/register`;
-  
-      try {
-        const response = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(registerData),
-        });
-  
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.error("Error:", errorData);
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-  
-        const data = await response.json();
-        console.log(data);
-        if (data.token) {
-          localStorage.setItem("authToken", data.token);
-          console.log("Token guardado:", data.token);
+export default function RegisterForm() {
+  const [registerData, setRegisterData] = useState<RegisterData>({
+    username: "",
+    password: "",
+    fullName: "",
+    birthDate: "",
+    idNumber: "",
+    role: "",
+  });
+
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+
+  const roles = ["Admin", "Secretario", "Periodista", "Coordinador", "Pasante"];
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setRegisterData({ ...registerData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const url = `https://auth-service-production-40be.up.railway.app/api/auth/register`;
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(registerData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 400 && data.message.includes("Username already exists")) {
+          setError("El usuario ya existe.");
         } else {
-          console.error("No token received in the response");
+          setError(data.message || "Error al registrar usuario.");
         }
-      } catch (error) {
-        console.error("Error during fetch:", error);
+        setMessage(null);
+        return;
       }
-    };
+
+      setMessage("¡Registro exitoso! Redirigiendo al login...");
+      setError(null);
+
+      setTimeout(() => {
+        router.push("`https://auth-service-production-40be.up.railway.app/api/auth/login`");
+      }, 2000);
+    } catch (error) {
+      console.error("Error during fetch:", error);
+      setError("Error al conectar con el servidor.");
+      setMessage(null);
+    }
+  };
   
     return (
       <div className="flex justify-center items-center h-screen bg-gradient-to-r from-blue-500 to-blue-500">
