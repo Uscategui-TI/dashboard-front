@@ -15,7 +15,7 @@ const subRoutes = [
     { name: 'Bot', url: '/mycenter/tours', icon: <BsRobot className="w-6 h-6"/> },
     { name: 'Prospectos', url: '/mycenter/accommodations', icon: <FaUsers className="w-6 h-6"/> }
 ];
-
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 export const SideMenu = () => {
     const [allowedMenuItems, setAllowedMenuItems] = useState<string[]>([]);
     const router = useRouter();
@@ -24,7 +24,7 @@ export const SideMenu = () => {
     const handleLogout = useCallback(() => {
         localStorage.removeItem("authToken");
         localStorage.removeItem("roles");
-        router.push("http://localhost:3000/auth/sing-in");
+        router.push("https://dashboard-front-production.up.railway.app/auth/sing-in");
     },[router]);
 
 
@@ -39,7 +39,7 @@ export const SideMenu = () => {
             }
 
             try {
-                const response = await axios.get('http://localhost:8080/api/auth/role', {
+                const response = await axios.get(`${API_URL}/api/auth/role`, {
                     headers: { 'Authorization': `Bearer ${storedToken}` },
                     withCredentials: true,
                 });

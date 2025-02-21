@@ -14,8 +14,8 @@ const CheckRole = ({ children }: { children: React.ReactNode }) => {
           localStorage.removeItem('roles'); // Limpiamos si no hay token
           return;
         }
-
-        const response = await axios.get('http://localhost:8080/api/auth/role', {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL;
+        const response = await axios.get(`${API_URL}/api/auth/role`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
