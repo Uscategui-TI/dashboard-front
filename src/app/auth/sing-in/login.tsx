@@ -30,9 +30,9 @@ export default function LoginForm() {
     e.preventDefault();
     setError(null);  
     setLoading(true); 
-    const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
     try {
-      const { data } = await axios.post(`${API_URL}/api/auth/login`, loginData, {
+      const { data } = await axios.post(`https://auth-service-production-40be.up.railway.app/api/auth/login`, loginData, {
         headers: { "Content-Type": "application/json" },
         withCredentials: true, 
       });

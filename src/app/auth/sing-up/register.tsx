@@ -28,11 +28,10 @@ interface RegisterData {
       setRegisterData({ ...registerData, [e.target.name]: e.target.value });
     };
 
-    const API_URL = process.env.NEXT_PUBLIC_API_URL;
   
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      const url = `${API_URL}/api/auth/register`;
+      const url = `https://auth-service-production-40be.up.railway.app/api/auth/register`;
   
       try {
         const response = await fetch(url, {

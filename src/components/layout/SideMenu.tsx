@@ -15,7 +15,7 @@ const subRoutes = [
     { name: 'Bot', url: '/mycenter/tours', icon: <BsRobot className="w-6 h-6"/> },
     { name: 'Prospectos', url: '/mycenter/accommodations', icon: <FaUsers className="w-6 h-6"/> }
 ];
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 export const SideMenu = () => {
     const [allowedMenuItems, setAllowedMenuItems] = useState<string[]>([]);
     const router = useRouter();
@@ -39,7 +39,7 @@ export const SideMenu = () => {
             }
 
             try {
-                const response = await axios.get(`${API_URL}/api/auth/role`, {
+                const response = await axios.get(`https://auth-service-production-40be.up.railway.app/api/auth/role`, {
                     headers: { 'Authorization': `Bearer ${storedToken}` },
                     withCredentials: true,
                 });
