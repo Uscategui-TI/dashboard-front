@@ -2,7 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState, ChangeEvent, FormEvent } from "react";
-import '@/app/page.module.css'
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface RegisterData {
   username: string;
@@ -23,10 +24,7 @@ export default function RegisterForm() {
     role: "",
   });
 
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-
   const roles = ["Admin", "Secretario", "Periodista", "Coordinador", "Pasante"];
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -47,30 +45,27 @@ export default function RegisterForm() {
       });
 
       const data = await response.json();
+      console.log("Respuesta del servidor:", data);
 
       if (!response.ok) {
-        if (response.status === 400 && data.message.includes("Username already exists")) {
-          setError("El usuario ya existe.");
+        if (response.status === 400 && data.message?.includes("Username already exists")) {
+          toast.error("❌ El usuario ya existe.");
         } else {
-          setError(data.message || "Error al registrar usuario.");
+          toast.error(`❌ Error: ${data.message || "Error al registrar usuario."}`);
         }
-        setMessage(null);
         return;
       }
 
-      setMessage("¡Registro exitoso! Redirigiendo al login...");
-      setError(null);
-
+      toast.success("✅ ¡Registro exitoso! Redirigiendo al login...");
       setTimeout(() => {
         router.push("https://dashboard-front-production.up.railway.app/auth/sing-in");
       }, 2000);
+
     } catch (error) {
-      console.error("Error during fetch:", error);
-      setError("Error al conectar con el servidor.");
-      setMessage(null);
+      console.error("Error durante la petición:", error);
+      toast.error("❌ Error al conectar con el servidor.");
     }
   };
-  
     return (
       <div className="flex justify-center items-center h-screen bg-gradient-to-r from-blue-500 to-blue-500">
         <div className="w-full max-w-md p-8 space-y-6 bg-white shadow-lg rounded-xl text-black ">
