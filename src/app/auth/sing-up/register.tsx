@@ -62,7 +62,7 @@ export default function RegisterForm() {
       setError(null);
 
       setTimeout(() => {
-        router.push("`https://auth-service-production-40be.up.railway.app/api/auth/login`");
+        router.push("https://dashboard-front-production.up.railway.app/auth/sing-in");
       }, 2000);
     } catch (error) {
       console.error("Error during fetch:", error);
