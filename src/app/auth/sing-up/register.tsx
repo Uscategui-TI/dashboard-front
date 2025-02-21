@@ -73,6 +73,7 @@ export default function RegisterForm() {
     return (
       <div className="flex justify-center items-center h-screen bg-gradient-to-r from-blue-500 to-blue-500">
         <div className="w-full max-w-md p-8 space-y-6 bg-white shadow-lg rounded-xl text-black ">
+        <ToastContainer position="top-right" autoClose={3000} />
           <h2 className="text-3xl font-bold text-center text-black">
             Registrarse
           </h2>
