@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, ChangeEvent, FormEvent } from "react";
-import { toast } from "react-toastify";
+import { toast,ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 interface RegisterData {
@@ -50,13 +50,16 @@ export default function RegisterForm() {
       if (!response.ok) {
         if (response.status === 400 && data.message?.includes("Username already exists")) {
           toast.error("❌ El usuario ya existe.");
+          console.log("Mostrando toast de error...");
         } else {
           toast.error(`❌ Error: ${data.message || "Error al registrar usuario."}`);
+          console.log("Mostrando toast de otro error...");
         }
         return;
       }
 
       toast.success("✅ ¡Registro exitoso! Redirigiendo al login...");
+      console.log("Mostrando toast de éxito...");
       setTimeout(() => {
         router.push("https://dashboard-front-production.up.railway.app/auth/sing-in");
       }, 2000);
@@ -64,6 +67,7 @@ export default function RegisterForm() {
     } catch (error) {
       console.error("Error durante la petición:", error);
       toast.error("❌ Error al conectar con el servidor.");
+      console.log("Mostrando toast de error de conexión...");
     }
   };
     return (
