@@ -2,8 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, ChangeEvent, FormEvent } from "react";
-import { toast,ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import "@/app/page.module.css";
 
 interface RegisterData {
   username: string;
@@ -24,7 +23,10 @@ export default function RegisterForm() {
     role: "",
   });
 
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
   const roles = ["Admin", "Secretario", "Periodista", "Coordinador", "Pasante"];
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -49,31 +51,30 @@ export default function RegisterForm() {
 
       if (!response.ok) {
         if (response.status === 400 && data.message?.includes("Username already exists")) {
-          toast.error("❌ El usuario ya existe.");
-          console.log("Mostrando toast de error...");
+          setError("El usuario ya existe.");
         } else {
-          toast.error(`❌ Error: ${data.message || "Error al registrar usuario."}`);
-          console.log("Mostrando toast de otro error...");
+          setError(data.message || "Error al registrar usuario.");
         }
+        setMessage(null);
         return;
       }
 
-      toast.success("✅ ¡Registro exitoso! Redirigiendo al login...");
-      console.log("Mostrando toast de éxito...");
-      setTimeout(() => {
-        router.push("https://dashboard-front-production.up.railway.app/auth/sing-in");
-      }, 2000);
+      setMessage("¡Registro exitoso! Redirigiendo al login...");
+      setError(null);
 
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      router.push("https://dashboard-front-production.up.railway.app/auth/sing-in");
+      
     } catch (error) {
       console.error("Error durante la petición:", error);
-      toast.error("❌ Error al conectar con el servidor.");
-      console.log("Mostrando toast de error de conexión...");
+      setError("Error al conectar con el servidor.");
+      setMessage(null);
     }
   };
+  
     return (
       <div className="flex justify-center items-center h-screen bg-gradient-to-r from-blue-500 to-blue-500">
         <div className="w-full max-w-md p-8 space-y-6 bg-white shadow-lg rounded-xl text-black ">
-        <ToastContainer position="top-right" autoClose={3000} />
           <h2 className="text-3xl font-bold text-center text-black">
             Registrarse
           </h2>
