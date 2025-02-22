@@ -14,7 +14,7 @@ const CheckRole = ({ children }: { children: React.ReactNode }) => {
           localStorage.removeItem('roles'); // Limpiamos si no hay token
           return;
         }
-        const response = await axios.get(`https://auth-service-production-40be.up.railway.app/api/auth/role`, {
+        const response = await axios.get(`https://auth.uscateguicol.com/api/auth/role`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
