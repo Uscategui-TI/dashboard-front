@@ -35,7 +35,7 @@ export default function RegisterForm() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const url = `https://auth-service-production-40be.up.railway.app/api/auth/register`;
+    const url = `https://auth-service-production-1a7a.up.railway.app/api/auth/register`;
 
     try {
       const response = await fetch(url, {
