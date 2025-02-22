@@ -35,7 +35,7 @@ const WhatPanelClient: any = () => {
     formDataToSend.append('urlMedia', formData.urlMedia);
     formDataToSend.append('message', formData.message);
     
-    await axios.post(`https://difusion-service-production.up.railway.app/upload`, formDataToSend);
+    await axios.post(`https://api.uscateguicol.com/upload`, formDataToSend);
     toast.success('Envio de mensajes exitoso');
     router.refresh();
     reset()
