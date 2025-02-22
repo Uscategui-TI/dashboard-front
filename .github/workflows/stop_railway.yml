@@ -1,0 +1,19 @@
+name: Stop Railway Service
+
+on:
+  schedule:
+    - cron: '0 22 * * *'  # Ejecuta el workflow todos los días a las 10 PM UTC (5 PM Colombia)
+  workflow_dispatch:  # Permite ejecutarlo manualmente desde GitHub Actions
+
+jobs:
+  stop-railway:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Railway API to stop service
+        run: |
+          curl -X POST "https://backboard.railway.app/graphql/v2" \
+          -H "Content-Type: application/json" \
+          -H "Authorization: Bearer ${{ secrets.RAILWAY_API_KEY }}" \
+          -d '{
+            "query": "mutation { serviceDelete(id: \"${{ secrets.RAILWAY_SERVICE_ID }}\") { id } }"
+          }'
