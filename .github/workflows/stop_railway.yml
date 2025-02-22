@@ -13,7 +13,8 @@ jobs:
         run: |
           curl -X POST "https://backboard.railway.app/graphql/v2" \
           -H "Content-Type: application/json" \
-          -H "Authorization: Bearer ${{ secrets.RAILWAY_API_KEY }}" \
+          -H "Authorization: Bearer TU_API_KEY" \
           -d '{
-            "query": "mutation { serviceDelete(id: \"${{ secrets.RAILWAY_SERVICE_ID }}\") { id } }"
+            "query": "mutation { serviceUpdate(id: \"TU_SERVICE_ID\", input: { numReplicas: 0 }) { id } }"
           }'
+
