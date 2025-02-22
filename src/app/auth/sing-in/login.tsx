@@ -32,7 +32,7 @@ export default function LoginForm() {
     setLoading(true); 
 
     try {
-      const { data } = await axios.post(`https://auth-service-production-40be.up.railway.app/api/auth/login`, loginData, {
+      const { data } = await axios.post(`https://auth-service-production-1a7a.up.railway.app/api/auth/login`, loginData, {
         headers: { "Content-Type": "application/json" },
         withCredentials: true, 
       });
