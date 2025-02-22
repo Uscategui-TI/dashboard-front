@@ -39,7 +39,7 @@ export const SideMenu = () => {
             }
 
             try {
-                const response = await axios.get(`https://auth-service-production-40be.up.railway.app/api/auth/role`, {
+                const response = await axios.get(`https://auth-service-production-1a7a.up.railway.app/api/auth/role`, {
                     headers: { 'Authorization': `Bearer ${storedToken}` },
                     withCredentials: true,
                 });
