@@ -24,7 +24,7 @@ export const SideMenu = () => {
     const handleLogout = useCallback(() => {
         localStorage.removeItem("authToken");
         localStorage.removeItem("roles");
-        router.push("https://dashboard-front-production.up.railway.app/auth/sing-in");
+        router.push("https://uscate-front-production.up.railway.app/auth/sing-in");
     },[router]);
 
 
