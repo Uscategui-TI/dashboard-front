@@ -24,7 +24,7 @@ export const SideMenu = () => {
     const handleLogout = useCallback(() => {
         localStorage.removeItem("authToken");
         localStorage.removeItem("roles");
-        router.push("https://dashboardqa.uscateguicol.com/auth/sing-in");
+        router.push("https://dashboard.uscateguicol.com/auth/sing-in");
     },[router]);
 
 
@@ -39,7 +39,7 @@ export const SideMenu = () => {
             }
 
             try {
-                const response = await axios.get(`https://authqa.uscateguicol.com/api/auth/role`, {
+                const response = await axios.get(`https://auth.uscateguicol.com/api/auth/role`, {
                     headers: { 'Authorization': `Bearer ${storedToken}` },
                     withCredentials: true,
                 });
