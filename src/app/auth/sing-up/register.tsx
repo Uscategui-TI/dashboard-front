@@ -35,7 +35,7 @@ export default function RegisterForm() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const url = `https://auth.uscateguicol.com/api/auth/register`;
+    const url = `https://authqa.uscateguicol.com/api/auth/register`;
 
     try {
       const response = await fetch(url, {
@@ -63,7 +63,7 @@ export default function RegisterForm() {
       setError(null);
 
       await new Promise(resolve => setTimeout(resolve, 2000));
-      router.push("https://dashboard-front-production.up.railway.app/auth/sing-in");
+      router.push("https://dashboardqa.uscateguicol.com/auth/sing-in");
       
     } catch (error) {
       console.error("Error durante la petición:", error);
