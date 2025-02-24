@@ -6,6 +6,9 @@ import { ImageUpload } from "@/components/ui/inputs";
 import { useState } from "react";
 import { LoadingMessages } from '@/components/ui/loadings';
 
+const apiWhatsApp = process.env.NEXT_PUBLIC_WHATSAPP_URL;
+
+
 const WhatPanelClient: any = () => {
 
   const router = useRouter();
@@ -35,7 +38,7 @@ const WhatPanelClient: any = () => {
     formDataToSend.append('urlMedia', formData.urlMedia);
     formDataToSend.append('message', formData.message);
     
-    await axios.post(`https://whatsappqa.uscateguicol.com/upload`, formDataToSend);
+    await axios.post(`${apiWhatsApp}/upload`, formDataToSend);
     toast.success('Envio de mensajes exitoso');
     router.refresh();
     reset()
