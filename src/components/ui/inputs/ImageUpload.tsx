@@ -5,12 +5,7 @@ import Image from "next/image";
 import { useCallback } from "react";
 import { TbPhotoPlus } from 'react-icons/tb'
 
-declare global {
-  var cloudinary: any
-}
-
-const uploadPreset = "qdxm961x";
-
+const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_PRESET;
 interface ImageUploadProps {
   onChange: (value: string) => void;
   value: string;
@@ -26,11 +21,12 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
 
   return (
     <CldUploadWidget 
-      onUpload={handleUpload} 
+      onUploadAddedAction={handleUpload}
       uploadPreset={uploadPreset}
       options={{
         maxFiles: 1
       }}
+      onSuccess={handleUpload}
     >
       {({ open }) => {
         return (

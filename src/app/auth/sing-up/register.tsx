@@ -1,11 +1,7 @@
-"use client";
-
 import { useRouter } from "next/navigation";
 import { useState, ChangeEvent, FormEvent } from "react";
-import "@/app/page.module.css";
 const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
 const dashURL = process.env.NEXT_PUBLIC_DASHBOARD_URL;
-
 interface RegisterData {
   username: string;
   password: string;
