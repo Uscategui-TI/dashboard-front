@@ -9,6 +9,9 @@ import { BsRobot } from 'react-icons/bs';
 import { rolePermissions } from '@/hooks/modal/auth/rolesPermissions';
 import { useRouter } from "next/navigation";
 import axios from 'axios';
+const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
+const dashURL = process.env.NEXT_PUBLIC_DASHBOARD_URL;
+
 
 const subRoutes = [
     { name: 'Campañas', url: '/mycenter/attractions', icon: <FaWhatsapp className="w-6 h-6"/> },
@@ -24,7 +27,7 @@ export const SideMenu = () => {
     const handleLogout = useCallback(() => {
         localStorage.removeItem("authToken");
         localStorage.removeItem("roles");
-        router.push("https://dashboard.uscateguicol.com/auth/sing-in");
+        router.push(`${dashURL}/auth/sing-in`);
     },[router]);
 
 
@@ -39,7 +42,7 @@ export const SideMenu = () => {
             }
 
             try {
-                const response = await axios.get(`https://auth.uscateguicol.com/api/auth/role`, {
+                const response = await axios.get(`${authUrl}/api/auth/role`, {
                     headers: { 'Authorization': `Bearer ${storedToken}` },
                     withCredentials: true,
                 });

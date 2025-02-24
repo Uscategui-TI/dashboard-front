@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState, ChangeEvent, FormEvent } from "react";
 import "@/app/page.module.css";
+const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
+const dashURL = process.env.NEXT_PUBLIC_DASHBOARD_URL;
 
 interface RegisterData {
   username: string;
@@ -35,7 +37,7 @@ export default function RegisterForm() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const url = `https://auth.uscateguicol.com/api/auth/register`;
+    const url = `${authUrl}/api/auth/register`;
 
     try {
       const response = await fetch(url, {
@@ -63,7 +65,7 @@ export default function RegisterForm() {
       setError(null);
 
       await new Promise(resolve => setTimeout(resolve, 2000));
-      router.push("https://dashboard.uscateguicol.com/auth/sing-in");
+      router.push(`${dashURL}/auth/sing-in`);
       
     } catch (error) {
       console.error("Error durante la petición:", error);
