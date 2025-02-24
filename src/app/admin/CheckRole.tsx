@@ -1,6 +1,8 @@
 'use client';
 import axios from 'axios';
 import { useState, useEffect } from 'react';
+const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
+
 
 const CheckRole = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
@@ -14,7 +16,7 @@ const CheckRole = ({ children }: { children: React.ReactNode }) => {
           localStorage.removeItem('roles'); // Limpiamos si no hay token
           return;
         }
-        const response = await axios.get(`https://authqa.uscateguicol.com/api/auth/role`, {
+        const response = await axios.get(`${authUrl}/api/auth/role`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',

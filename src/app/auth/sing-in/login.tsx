@@ -4,6 +4,7 @@ import { useState, ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/navigation"; 
 import axios from "axios";
 import '@/app/page.module.css';
+const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
 
 interface LoginData {
   username: string;
@@ -32,7 +33,7 @@ export default function LoginForm() {
     setLoading(true); 
 
     try {
-      const { data } = await axios.post(`https://authqa.uscateguicol.com/api/auth/login`, loginData, {
+      const { data } = await axios.post(`${authUrl}/api/auth/login`, loginData, {
         headers: { "Content-Type": "application/json" },
         withCredentials: true, 
       });
