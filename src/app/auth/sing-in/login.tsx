@@ -1,9 +1,6 @@
-"use client";
-
 import { useState, ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/navigation"; 
 import axios from "axios";
-import '@/app/page.module.css';
 const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
 
 interface LoginData {
