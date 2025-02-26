@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { ImageUpload } from "@/components/ui/inputs";
 import { useState } from "react";
 import { LoadingMessages } from '@/components/ui/loadings';
-import { Dialog } from '@headlessui/react';
+import { Dialog, Transition } from "@headlessui/react";
+import { Fragment } from "react";
 
 const apiWhatsApp = process.env.NEXT_PUBLIC_WHATSAPP_URL;
 
@@ -34,7 +35,14 @@ const WhatPanelClient: any = () => {
 
   const urlMedia = watch('urlMedia');
 
+  const handlePreview = (formData: any) => {
+    setPreviewMessage(formData.message);
+    setIsConfirmOpen(true); 
+  };
+
   const onSubmitGenreal = async (formData: any) => {
+    setIsConfirmOpen(false);
+
   try {
     setLoading(true);
     const formDataToSend = new FormData();
@@ -152,18 +160,42 @@ const WhatPanelClient: any = () => {
         </div>
     
 
-        <Dialog open={isConfirmOpen} onClose={() => setIsConfirmOpen(false)}>
+        <Transition appear show={isConfirmOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={() => setIsConfirmOpen(false)}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0 scale-95"
+            enterTo="opacity-100 scale-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100 scale-100"
+            leaveTo="opacity-0 scale-95"
+          >
             <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-96">
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Confirmar envío</h2>
-                    <p className="text-gray-700 dark:text-gray-300 mb-2">{previewMessage}</p>
-                    <div className="mt-4 flex justify-end gap-2">
-                    <button onClick={() => setIsConfirmOpen(false)} className="px-4 py-2 bg-gray-300 rounded-lg">Cancelar</button>
-                    <button onClick={onSubmitGenreal} className="px-4 py-2 bg-green-600 text-white rounded-lg">Confirmar</button>
-                    </div>
+              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-md">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                  Confirmar Envío
+                </h2>
+                <p className="text-gray-700 dark:text-gray-300 mb-4">{previewMessage}</p>
+                <div className="flex justify-end space-x-2">
+                  <button
+                    className="px-4 py-2 bg-gray-500 text-white rounded-lg"
+                    onClick={() => setIsConfirmOpen(false)}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    className="px-4 py-2 bg-cyan-600 text-white rounded-lg"
+                    onClick={onSubmitGenreal}
+                  >
+                    Confirmar Envío
+                  </button>
                 </div>
+              </div>
             </div>
+          </Transition.Child>
         </Dialog>
+      </Transition>
     </div>
    );
 }
