@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ImageUpload } from "@/components/ui/inputs";
 import { useState } from "react";
 import { LoadingMessages } from '@/components/ui/loadings';
+import { Dialog } from '@headlessui/react';
 
 const apiWhatsApp = process.env.NEXT_PUBLIC_WHATSAPP_URL;
 
@@ -13,6 +14,9 @@ const WhatPanelClient: any = () => {
 
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [previewMessage, setPreviewMessage] = useState('');
+
   
   const { register, handleSubmit, setValue, watch, reset, formState: { errors: errorsGeneral } } = useForm<FieldValues>({
     defaultValues: {
@@ -146,6 +150,20 @@ const WhatPanelClient: any = () => {
                 </form>
             </div>
         </div>
+    
+
+        <Dialog open={isConfirmOpen} onClose={() => setIsConfirmOpen(false)}>
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-96">
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Confirmar envío</h2>
+                    <p className="text-gray-700 dark:text-gray-300 mb-2">{previewMessage}</p>
+                    <div className="mt-4 flex justify-end gap-2">
+                    <button onClick={() => setIsConfirmOpen(false)} className="px-4 py-2 bg-gray-300 rounded-lg">Cancelar</button>
+                    <button onClick={onSubmitGenreal} className="px-4 py-2 bg-green-600 text-white rounded-lg">Confirmar</button>
+                    </div>
+                </div>
+            </div>
+        </Dialog>
     </div>
    );
 }
