@@ -1,12 +1,11 @@
+
 import { toast } from "react-hot-toast";
 import { FieldValues, useForm } from "react-hook-form";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { ImageUpload } from "@/components/ui/inputs";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { LoadingMessages } from '@/components/ui/loadings';
-import { Dialog, Transition } from "@headlessui/react";
-import { Fragment } from "react";
 
 const apiWhatsApp = process.env.NEXT_PUBLIC_WHATSAPP_URL;
 
@@ -15,9 +14,6 @@ const WhatPanelClient: any = () => {
 
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  const [previewMessage, setPreviewMessage] = useState('');
-
   
   const { register, handleSubmit, setValue, watch, reset, formState: { errors: errorsGeneral } } = useForm<FieldValues>({
     defaultValues: {
@@ -35,14 +31,7 @@ const WhatPanelClient: any = () => {
 
   const urlMedia = watch('urlMedia');
 
-  const handlePreview = (formData: any) => {
-    setPreviewMessage(formData.message);
-    setIsConfirmOpen(true); 
-  };
-
   const onSubmitGenreal = async (formData: any) => {
-    setIsConfirmOpen(false);
-
   try {
     setLoading(true);
     const formDataToSend = new FormData();
@@ -60,14 +49,26 @@ const WhatPanelClient: any = () => {
     setLoading(false); 
   }
 };
+const cancelBroadcast = async () => {
+    try {
+        const response = await axios.post(`${apiWhatsApp}/cancel-broadcast`);
+        console.log(response.data);
+        alert('Difusión cancelada');
+    } catch (error) {
+        console.error('Error al cancelar la difusión:', error);
+    }
+};
+
+
 
 
   return ( 
     <div className="grid grid-cols-1 pt-6 xl:gap-4 justify-center dark:bg-gray-900">
         {
             loading && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50">
+                <div className="flex flex-col gap-4 fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50">
                     <LoadingMessages />
+                    <button className=" text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-cyan-600 dark:hover:bg-cyan-700 dark:focus:ring-primary-800" type="submit" onClick={cancelBroadcast}>Cancelar Difusión</button>
                 </div>
             )
         }
@@ -112,7 +113,6 @@ const WhatPanelClient: any = () => {
                                 placeholder="Redacta el mensaje ideal para tu campaña" 
                                 required
                             >
-
                             </textarea>
                         </div>
                         <div className="col-span-6 sm:col-span-3">
@@ -149,53 +149,19 @@ const WhatPanelClient: any = () => {
                             accept=".csv"
                             />
                         </div>
-                        <div className="col-span-6 sm:col-full">
+                        <div className="flex space-x-4 col-span-6 sm:col-full">
                             <button className="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-cyan-600 dark:hover:bg-cyan-700 dark:focus:ring-primary-800" type="submit">
                                 Enviar
                             </button>
+                            <div className="col-span-6 sm:col-full">
+                                <button className="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-cyan-600 dark:hover:bg-cyan-700 dark:focus:ring-primary-800" type="submit" onClick={cancelBroadcast}>Cancelar Difusión</button>
+                            </div>
                         </div>
+                        
                     </div>
                 </form>
             </div>
         </div>
-    
-
-        <Transition appear show={isConfirmOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-50" onClose={() => setIsConfirmOpen(false)}>
-          <Transition.Child
-            as={Fragment}
-            enter="ease-out duration-300"
-            enterFrom="opacity-0 scale-95"
-            enterTo="opacity-100 scale-100"
-            leave="ease-in duration-200"
-            leaveFrom="opacity-100 scale-100"
-            leaveTo="opacity-0 scale-95"
-          >
-            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-md">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  Confirmar Envío
-                </h2>
-                <p className="text-gray-700 dark:text-gray-300 mb-4">{previewMessage}</p>
-                <div className="flex justify-end space-x-2">
-                  <button
-                    className="px-4 py-2 bg-gray-500 text-white rounded-lg"
-                    onClick={() => setIsConfirmOpen(false)}
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    className="px-4 py-2 bg-cyan-600 text-white rounded-lg"
-                    onClick={onSubmitGenreal}
-                  >
-                    Confirmar Envío
-                  </button>
-                </div>
-              </div>
-            </div>
-          </Transition.Child>
-        </Dialog>
-      </Transition>
     </div>
    );
 }
