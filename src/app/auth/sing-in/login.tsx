@@ -4,13 +4,13 @@ import axios from "axios";
 const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
 
 interface LoginData {
-  username: string;
+  idNumber: string;  // Cambiado de "username" a "idNumber"
   password: string;
 }
 
 export default function LoginForm() {
   const [loginData, setLoginData] = useState<LoginData>({
-    username: "",
+    idNumber: "", // Cambiado de "username" a "idNumber"
     password: "",
   });
 
@@ -30,8 +30,9 @@ export default function LoginForm() {
     setLoading(true); 
 
     try {
+      //const { data } = await axios.post(`http://localhost:8080/api/auth/login`, loginData, {
       const { data } = await axios.post(`${authUrl}/api/auth/login`, loginData, {
-        headers: { "Content-Type": "application/json" },
+              headers: { "Content-Type": "application/json" },
         withCredentials: true, 
       });
 
@@ -53,14 +54,13 @@ export default function LoginForm() {
         setError("Error de conexión con el servidor");
       }
 
-      localStorage.removeItem("authToken"); // Limpia en caso de error
+      localStorage.removeItem("authToken"); 
       localStorage.removeItem("roles");
 
     } finally {
       setLoading(false);
     }
   };
-
 
   return (
     <div className="flex justify-center items-center h-screen bg-gradient-to-r from-blue-500 to-blue-500">
@@ -71,14 +71,14 @@ export default function LoginForm() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
-            type="email"
-            name="username"
-            placeholder="Correo electrónico"
-            value={loginData.username}
+            type="text"
+            name="idNumber" 
+            placeholder="Número de identificación" 
+            value={loginData.idNumber} 
             onChange={handleChange}
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400"
             required
-            autoComplete="email"
+            autoComplete="off"
           />
           <input
             type="password"
