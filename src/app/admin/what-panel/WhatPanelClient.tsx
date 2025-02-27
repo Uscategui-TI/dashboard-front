@@ -1,9 +1,10 @@
+
 import { toast } from "react-hot-toast";
 import { FieldValues, useForm } from "react-hook-form";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { ImageUpload } from "@/components/ui/inputs";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { LoadingMessages } from '@/components/ui/loadings';
 
 const apiWhatsApp = process.env.NEXT_PUBLIC_WHATSAPP_URL;
@@ -48,14 +49,26 @@ const WhatPanelClient: any = () => {
     setLoading(false); 
   }
 };
+const cancelBroadcast = async () => {
+    try {
+        const response = await axios.post(`${apiWhatsApp}/cancel-broadcast`);
+        console.log(response.data);
+        alert('Difusión cancelada');
+    } catch (error) {
+        console.error('Error al cancelar la difusión:', error);
+    }
+};
+
+
 
 
   return ( 
     <div className="grid grid-cols-1 pt-6 xl:gap-4 justify-center dark:bg-gray-900">
         {
             loading && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50">
+                <div className="flex flex-col gap-4 fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50">
                     <LoadingMessages />
+                    <button className=" text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-cyan-600 dark:hover:bg-cyan-700 dark:focus:ring-primary-800" type="submit" onClick={cancelBroadcast}>Cancelar Difusión</button>
                 </div>
             )
         }
@@ -100,7 +113,6 @@ const WhatPanelClient: any = () => {
                                 placeholder="Redacta el mensaje ideal para tu campaña" 
                                 required
                             >
-
                             </textarea>
                         </div>
                         <div className="col-span-6 sm:col-span-3">
@@ -137,11 +149,15 @@ const WhatPanelClient: any = () => {
                             accept=".csv"
                             />
                         </div>
-                        <div className="col-span-6 sm:col-full">
+                        <div className="flex space-x-4 col-span-6 sm:col-full">
                             <button className="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-cyan-600 dark:hover:bg-cyan-700 dark:focus:ring-primary-800" type="submit">
                                 Enviar
                             </button>
+                            <div className="col-span-6 sm:col-full">
+                                <button className="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-cyan-600 dark:hover:bg-cyan-700 dark:focus:ring-primary-800" type="submit" onClick={cancelBroadcast}>Cancelar Difusión</button>
+                            </div>
                         </div>
+                        
                     </div>
                 </form>
             </div>
