@@ -62,7 +62,7 @@ const [phoneNumber, setPhoneNumber] = useState('');
 
 const handleSetPhoneNumber = async () => {
     try {
-        await axios.post(`${apiWhatsApp}/set-phone-number`, { phoneNumber });
+        await axios.post(`${apiWhatsApp}/update-number`, { phoneNumber });
         toast.success('Número de teléfono actualizado correctamente');
     } catch (error) {
         console.error('Error al actualizar el número:', error);
