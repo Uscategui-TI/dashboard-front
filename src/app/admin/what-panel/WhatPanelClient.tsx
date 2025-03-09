@@ -58,17 +58,6 @@ const cancelBroadcast = async () => {
         console.error('Error al cancelar la difusión:', error);
     }
 };
-const [phoneNumber, setPhoneNumber] = useState('');
-
-const handleSetPhoneNumber = async () => {
-    try {
-        await axios.post(`${apiWhatsApp}/update-number`, { phoneNumber });
-        toast.success('Número de teléfono actualizado correctamente');
-    } catch (error) {
-        console.error('Error al actualizar el número:', error);
-        toast.error('Error al actualizar el número de teléfono');
-    }
-};
 
 
 
@@ -167,24 +156,6 @@ const handleSetPhoneNumber = async () => {
                             <div className="col-span-6 sm:col-full">
                                 <button className="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-cyan-600 dark:hover:bg-cyan-700 dark:focus:ring-primary-800" type="submit" onClick={cancelBroadcast}>Cancelar Difusión</button>
                             </div>
-                        </div>
-                        <div className="col-span-6 sm:col-span-3">
-                        <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                            Número de teléfono
-                        </label>
-                        <input
-                            type="text"
-                            value={phoneNumber}
-                            onChange={(e) => setPhoneNumber(e.target.value)}
-                            className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                            placeholder="Ingrese el número de teléfono"
-                        />
-                            <button 
-                                className="mt-2 text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-primary-800"
-                                onClick={handleSetPhoneNumber}
-                            >
-                                Conectar número
-                            </button>
                         </div>
                     </div>
                 </form>
