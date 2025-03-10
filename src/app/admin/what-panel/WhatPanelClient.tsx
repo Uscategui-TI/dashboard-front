@@ -45,7 +45,7 @@ const WhatPanelClient: any = () => {
       return;
     }
     
-    const apiWhatsApp = `http://localhost:${port}`;
+    const apiWhatsApp = `http://localhost:8080`;
 
     await axios.post(`${apiWhatsApp}/upload`, formDataToSend);
     toast.success('Envio de mensajes exitoso');
