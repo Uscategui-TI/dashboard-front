@@ -1,7 +1,17 @@
 import { useState } from "react";
 import axios from "axios";
 
-const apiWhatsApp = process.env.NEXT_PUBLIC_WHATSAPP_URL;
+
+
+const getServerPort = async () => {
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/current-port`);
+      return response.data.port;
+    } catch (error) {
+      console.error('Error obteniendo el puerto del backend:', error);
+      return null;
+    }
+  };
 
 export default function PhoneNumberForm() {
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -9,8 +19,12 @@ export default function PhoneNumberForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+      
+    const port = await getServerPort();
 
     try {
+        const apiWhatsApp = `http://localhost:${port}`;
       const response = await axios.post(`${apiWhatsApp}/set-phone-number`, 
         { phoneNumber }, 
         { headers: { "Content-Type": "application/json" } }

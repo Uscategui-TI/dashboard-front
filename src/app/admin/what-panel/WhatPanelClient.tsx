@@ -51,6 +51,7 @@ const WhatPanelClient: any = () => {
     formDataToSend.append('csvFile', formData.csvFile[0]);
     formDataToSend.append('urlMedia', formData.urlMedia);
     formDataToSend.append('message', formData.message);
+    
     const port = await getServerPort();
     if (!port) {
       toast.error('No se pudo obtener el puerto del servidor.');
