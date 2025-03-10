@@ -157,7 +157,6 @@ const cancelBroadcast = async () => {
                                 <button className="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-cyan-600 dark:hover:bg-cyan-700 dark:focus:ring-primary-800" type="submit" onClick={cancelBroadcast}>Cancelar Difusión</button>
                             </div>
                         </div>
-                        
                     </div>
                 </form>
             </div>
