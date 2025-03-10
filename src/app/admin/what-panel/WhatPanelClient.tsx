@@ -7,7 +7,7 @@ import { ImageUpload } from "@/components/ui/inputs";
 import { useState,useEffect } from "react";
 import { LoadingMessages } from '@/components/ui/loadings';
 
-const apiWhatsApp = process.env.NEXT_PUBLIC_WHATSAPP_URL;
+
 
 
 const WhatPanelClient: any = () => {
@@ -31,6 +31,19 @@ const WhatPanelClient: any = () => {
 
   const urlMedia = watch('urlMedia');
 
+  const getServerPort = async () => {
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/current-port`);
+      return response.data.port;
+    } catch (error) {
+      console.error('Error obteniendo el puerto del backend:', error);
+      return null;
+    }
+  };
+
+
+
+
   const onSubmitGenreal = async (formData: any) => {
   try {
     setLoading(true);
@@ -38,6 +51,13 @@ const WhatPanelClient: any = () => {
     formDataToSend.append('csvFile', formData.csvFile[0]);
     formDataToSend.append('urlMedia', formData.urlMedia);
     formDataToSend.append('message', formData.message);
+    const port = await getServerPort();
+    if (!port) {
+      toast.error('No se pudo obtener el puerto del servidor.');
+      return;
+    }
+   
+    const apiWhatsApp = `http://localhost:${port}`;
     
     await axios.post(`${apiWhatsApp}/upload`, formDataToSend);
     toast.success('Envio de mensajes exitoso');
@@ -51,6 +71,15 @@ const WhatPanelClient: any = () => {
 };
 const cancelBroadcast = async () => {
     try {
+       
+        const port = await getServerPort();
+        if (!port) {
+          toast.error('No se pudo obtener el puerto del servidor.');
+          return;
+        }
+       
+        const apiWhatsApp = `http://localhost:${port}`;
+
         const response = await axios.post(`${apiWhatsApp}/cancel-broadcast`);
         console.log(response.data);
         alert('Difusión cancelada');
@@ -58,6 +87,7 @@ const cancelBroadcast = async () => {
         console.error('Error al cancelar la difusión:', error);
     }
 };
+
 
 
 
