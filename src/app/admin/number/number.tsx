@@ -3,7 +3,6 @@ import axios from "axios";
 
 const apiWhatsApp = process.env.NEXT_PUBLIC_WHATSAPP_URL;
 
-
 export default function PhoneNumberForm() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [linkToken, setLinkToken] = useState(""); // Estado para el token
