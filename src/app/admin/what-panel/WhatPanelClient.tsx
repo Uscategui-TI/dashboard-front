@@ -13,8 +13,8 @@ const WhatPanelClient: any = () => {
 
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [totalMessages, setTotalMessages] = useState<number | null>(null);
-  
+  const [lastNumber, setLastNumber] = useState<string | null>(null);
+
   const { register, handleSubmit, setValue, watch, reset, formState: { errors: errorsGeneral } } = useForm<FieldValues>({
     defaultValues: {
 
@@ -42,19 +42,13 @@ const WhatPanelClient: any = () => {
     formDataToSend.append('message', formData.message);
     
     await axios.post(`${apiWhatsApp}/upload`, formDataToSend);
-    const response = await axios.post(`${apiWhatsApp}/upload`, formDataToSend);
-    
-    if (response.data.totalMessages !== undefined) {
-      setTotalMessages(response.data.totalMessages);
-    }
-
-    toast.success(`Se enviaron ${response.data.totalMessages} mensajes.`);
+    toast.success('Envio de mensajes exitoso');
     router.refresh();
-    reset();
+    reset()
   } catch (error: any) {
     toast.error('¡Oops! Algo salió mal.');
   } finally {
-    setLoading(false);
+    setLoading(false); 
   }
 };
 const cancelBroadcast = async () => {
@@ -66,6 +60,18 @@ const cancelBroadcast = async () => {
         console.error('Error al cancelar la difusión:', error);
     }
 };
+useEffect(() => {
+    const fetchLastNumber = async () => {
+        try {
+            const response = await axios.get(`${apiWhatsApp}/v1/last-sent-number`);
+            setLastNumber(response.data.lastPhoneNumber);
+        } catch (error) {
+            console.error("Error al obtener el último número enviado:", error);
+        }
+    };
+
+    fetchLastNumber();
+}, []);
 
 
 
@@ -164,11 +170,12 @@ const cancelBroadcast = async () => {
                                 <button className="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-cyan-600 dark:hover:bg-cyan-700 dark:focus:ring-primary-800" type="submit" onClick={cancelBroadcast}>Cancelar Difusión</button>
                             </div>
                         </div>
-                        {totalMessages !== null && (
-                        <div className="mt-4 p-4 bg-green-100 text-green-800 rounded-lg">
-                            <p><strong>Total de mensajes enviados:</strong> {totalMessages}</p>
+                        <div>
+                            <h1>mensajes</h1>
+                            {lastNumber && (
+                                <p>Último número enviado: <strong>{lastNumber}</strong></p>
+                            )}
                         </div>
-                        )}
                     </div>
                 </form>
             </div>
