@@ -37,11 +37,6 @@ const WhatPanelClient: any = () => {
     formDataToSend.append('urlMedia', formData.urlMedia);
     formDataToSend.append('message', formData.message);
     
-    await axios.post(`${authUrl}/api/messages/add`, {
-        eventName,
-        messageCount: formData.csvFile.length // Ajustar según la cantidad de mensajes enviados
-    });
-    
     await axios.post(`${apiWhatsApp}/upload`, formDataToSend);
     toast.success('Envio de mensajes exitoso');
     router.refresh();
@@ -51,6 +46,11 @@ const WhatPanelClient: any = () => {
   } finally {
     setLoading(false); 
   }
+  await axios.post(`${authUrl}/api/messages/add`, {
+    eventName,
+    messageCount: formData.csvFile.length // Ajustar según la cantidad de mensajes enviados
+});
+
 };
 const cancelBroadcast = async () => {
     try {
