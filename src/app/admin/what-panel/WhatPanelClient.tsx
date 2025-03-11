@@ -1,4 +1,3 @@
-
 import { toast } from "react-hot-toast";
 import { FieldValues, useForm } from "react-hook-form";
 import axios from "axios";
@@ -129,12 +128,11 @@ const cancelBroadcast = async () => {
                             <select 
                                 id="activity" 
                                 className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" 
-                                required
-                            >
-                                <option value="" selected>Seleccionar</option>
-                                <option value="">Evento</option>
-                                <option value="">Control de seguridad</option>
-                                <option value="">Actividad ludica</option>
+                                required>
+                                <option value="" disabled selected>Seleccionar</option>
+                                <option value="evento">Evento</option>
+                                <option value="seguridad">Control de seguridad</option>
+                                <option value="ludica">Actividad lúdica</option>
                             </select>
                         </div>
                         <div className="col-span-6 sm:col-span-3">

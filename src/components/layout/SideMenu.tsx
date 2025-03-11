@@ -1,6 +1,6 @@
 'use client';
 
-import { FiLogOut } from "react-icons/fi";
+import { FiHash, FiLogOut } from "react-icons/fi";
 import { DropdownSelect } from '@/components/ui/dropdown';
 import React, { useCallback, useEffect, useState } from 'react';
 import NextLink from 'next/link';
@@ -103,7 +103,7 @@ export const SideMenu = () => {
                             <ul className="pb-2 space-y-2">
                                 {/* Elementos del Sidebar */}
                                 <li>
-                                    <NextLink href={`/mycenter?centerId=`} passHref legacyBehavior>
+                                    <NextLink href="https://dashboardqa.uscateguicol.com/admin/what-panel" passHref legacyBehavior>
                                         <div className="flex items-center p-2 text-base text-gray-900 rounded-lg hover:bg-gray-100 group dark:text-gray-200 dark:hover:bg-gray-700">
                                             <svg
                                                 className="w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
@@ -181,6 +181,14 @@ export const SideMenu = () => {
                                         </NextLink>
                                     </li>
                                 )}
+                                <li>
+                                    <NextLink href="https://dashboardqa.uscateguicol.com/admin/number" passHref legacyBehavior>
+                                        <div className="flex items-center p-2 text-base text-gray-900 rounded-lg hover:bg-gray-100 group dark:text-gray-200 dark:hover:bg-gray-700">
+                                            <FiHash className="w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white" />
+                                            <span className="ml-3">Conectar Bot</span>
+                                        </div>
+                                    </NextLink>
+                                </li>
 
                                 {allowedMenuItems.includes('Configuraciones') && (
                                     <li>
