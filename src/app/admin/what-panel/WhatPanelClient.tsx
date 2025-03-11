@@ -13,7 +13,7 @@ const WhatPanelClient: any = () => {
 
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [totalMessagesSent, setTotalMessagesSent] = useState<number>(0);
+  const [totalMessagesSent, setTotalMessagesSent] = useState<number | null>(null);
 
   const { register, handleSubmit, setValue, watch, reset, formState: { errors: errorsGeneral } } = useForm<FieldValues>({
     defaultValues: {
