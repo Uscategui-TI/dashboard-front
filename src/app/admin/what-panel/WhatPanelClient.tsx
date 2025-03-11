@@ -7,87 +7,67 @@ import { useState,useEffect } from "react";
 import { LoadingMessages } from '@/components/ui/loadings';
 
 const apiWhatsApp = process.env.NEXT_PUBLIC_WHATSAPP_URL;
-const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
+
 
 const WhatPanelClient: any = () => {
-    const router = useRouter();
-    const [loading, setLoading] = useState(false);
-    const [eventName, setEventName] = useState("");
-    const [totalMessages, setTotalMessages] = useState<number | null>(null);
-    
-    const { register, handleSubmit, setValue, watch, reset, formState: { errors: errorsGeneral } } = useForm<FieldValues>({
-      defaultValues: {},
-    });
+
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [totalMessages, setTotalMessages] = useState<number | null>(null);
   
-    const setCustomValue = (id: any, value: any) => {
-      setValue(id, value, {
+  const { register, handleSubmit, setValue, watch, reset, formState: { errors: errorsGeneral } } = useForm<FieldValues>({
+    defaultValues: {
+
+    },
+  });
+
+  const setCustomValue = (id: any, value: any) => {
+        setValue(id, value, {
         shouldDirty: true,
         shouldTouch: true,
-        shouldValidate: true,
-      });
-    };
-  
-    const urlMedia = watch('urlMedia');
-  
-    const onSubmitGenreal = async (formData: any) => {
-      try {
-        setLoading(true);
-        const formDataToSend = new FormData();
-        formDataToSend.append('csvFile', formData.csvFile[0]);
-        if (formData.urlMedia) {
-            formDataToSend.append('urlMedia', formData.urlMedia);
-        }
-        formDataToSend.append('message', formData.message);
-        
-        await axios.post(`${apiWhatsApp}/upload`, formDataToSend);
-        
-        
-        toast.success('Envio de mensajes exitoso');
-        router.refresh();
-        reset();
-      } catch (error: any) {
-        toast.error('¡Oops! Algo salió mal.');
-      } finally {
-        setLoading(false);
-      }
-      await axios.post(`${authUrl}/api/messages/add`, {
-        eventName,
-        messageCount: formData.csvFile.length // Ajustar según la cantidad de mensajes enviados
-      });
+        shouldValidate: true
+        })
+    }
 
-    };
-  
-    const fetchTotalMessages = async () => {
-        try {
-            if (!eventName) {
-                console.error("El nombre del evento está vacío.");
-                return;
-            }
+  const urlMedia = watch('urlMedia');
+
+  const onSubmitGenreal = async (formData: any) => {
+  try {
+    setLoading(true);
+    const formDataToSend = new FormData();
+    formDataToSend.append('csvFile', formData.csvFile[0]);
+    if (formData.urlMedia) {
+        formDataToSend.append('urlMedia', formData.urlMedia);
+    }
+    formDataToSend.append('message', formData.message);
     
-            const token = localStorage.getItem("token"); // Asegúrate de obtener el token si es necesario
+    await axios.post(`${apiWhatsApp}/upload`, formDataToSend);
+    const response = await axios.post(`${apiWhatsApp}/upload`, formDataToSend);
     
-            const response = await axios.get(`${authUrl}/api/messages/total/${eventName}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-    
-            console.log("Respuesta del servidor:", response.data); // Verifica la respuesta
-    
-            setTotalMessages(response.data.totalMessages);
-        } catch (error) {
-            console.error("Error obteniendo el total de mensajes: ", error);
-        }
-    };
-    const cancelBroadcast = async () => {
-        try {
-            const response = await axios.post(`${apiWhatsApp}/cancel-broadcast`);
-            console.log(response.data);
-            alert('Difusión cancelada');
-        } catch (error) {
-            console.error('Error al cancelar la difusión:', error);
-        }
-    };
+    if (response.data.totalMessages !== undefined) {
+      setTotalMessages(response.data.totalMessages);
+    }
+
+    toast.success(`Se enviaron ${response.data.totalMessages} mensajes.`);
+    router.refresh();
+    reset();
+  } catch (error: any) {
+    toast.error('¡Oops! Algo salió mal.');
+  } finally {
+    setLoading(false);
+  }
+};
+const cancelBroadcast = async () => {
+    try {
+        const response = await axios.post(`${apiWhatsApp}/cancel-broadcast`);
+        console.log(response.data);
+        alert('Difusión cancelada');
+    } catch (error) {
+        console.error('Error al cancelar la difusión:', error);
+    }
+};
+
+
 
 
   return ( 
@@ -184,22 +164,10 @@ const WhatPanelClient: any = () => {
                                 <button className="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-cyan-600 dark:hover:bg-cyan-700 dark:focus:ring-primary-800" type="submit" onClick={cancelBroadcast}>Cancelar Difusión</button>
                             </div>
                         </div>
-                        <div className="col-span-6 sm:col-span-3">
-                            <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nombre del Evento</label>
-                            <input 
-                            type="text"
-                            value={eventName}
-                            onChange={(e) => setEventName(e.target.value.trim())} // Eliminamos espacios en blanco
-                            className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        />
+                        {totalMessages !== null && (
+                        <div className="mt-4 p-4 bg-green-100 text-green-800 rounded-lg">
+                            <p><strong>Total de mensajes enviados:</strong> {totalMessages}</p>
                         </div>
-                        {eventName && (
-                            <div className="mt-4">
-                                <button onClick={fetchTotalMessages} className="bg-blue-500 text-white px-4 py-2 rounded-lg">
-                                    Ver Total de Mensajes
-                                </button>
-                                {totalMessages !== null && <p className="mt-2 text-lg font-semibold">Total Mensajes: {totalMessages}</p>}
-                            </div>
                         )}
                     </div>
                 </form>
