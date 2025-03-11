@@ -71,11 +71,6 @@ useEffect(() => {
     };
 
     fetchTotalMessagesSent();
-
-    const interval = setInterval(fetchTotalMessagesSent, 5000);
-    
-    return () => clearInterval(interval); // Limpia el intervalo al desmontar
-
 }, []);
 
 
