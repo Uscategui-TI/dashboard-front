@@ -56,12 +56,26 @@ const WhatPanelClient: any = () => {
     };
   
     const fetchTotalMessages = async () => {
-      try {
-        const response = await axios.get(`${authUrl}/api/messages/total/${eventName}`);
-        setTotalMessages(response.data.totalMessages);
-      } catch (error) {
-        console.error("Error obteniendo el total de mensajes: ", error);
-      }
+        try {
+            if (!eventName) {
+                console.error("El nombre del evento está vacío.");
+                return;
+            }
+    
+            const token = localStorage.getItem("token"); // Asegúrate de obtener el token si es necesario
+    
+            const response = await axios.get(`${authUrl}/api/messages/total/${eventName}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+    
+            console.log("Respuesta del servidor:", response.data); // Verifica la respuesta
+    
+            setTotalMessages(response.data.totalMessages);
+        } catch (error) {
+            console.error("Error obteniendo el total de mensajes: ", error);
+        }
     };
     const cancelBroadcast = async () => {
         try {
@@ -171,16 +185,17 @@ const WhatPanelClient: any = () => {
                         <div className="col-span-6 sm:col-span-3">
                             <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nombre del Evento</label>
                             <input 
-                                type="text"
-                                value={eventName}
-                                onChange={(e) => setEventName(e.target.value)}
-                                className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                                required
-                            />
+                            type="text"
+                            value={eventName}
+                            onChange={(e) => setEventName(e.target.value.trim())} // Eliminamos espacios en blanco
+                            className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                        />
                         </div>
                         {eventName && (
                             <div className="mt-4">
-                                <button onClick={fetchTotalMessages} className="bg-blue-500 text-white px-4 py-2 rounded-lg">Ver Total de Mensajes</button>
+                                <button onClick={fetchTotalMessages} className="bg-blue-500 text-white px-4 py-2 rounded-lg">
+                                    Ver Total de Mensajes
+                                </button>
                                 {totalMessages !== null && <p className="mt-2 text-lg font-semibold">Total Mensajes: {totalMessages}</p>}
                             </div>
                         )}
