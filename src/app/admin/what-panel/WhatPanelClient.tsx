@@ -14,64 +14,63 @@ const WhatPanelClient: any = () => {
     const [loading, setLoading] = useState(false);
     const [eventName, setEventName] = useState("");
     const [totalMessages, setTotalMessages] = useState<number | null>(null);
+    
+    const { register, handleSubmit, setValue, watch, reset, formState: { errors: errorsGeneral } } = useForm<FieldValues>({
+      defaultValues: {},
+    });
   
-  const { register, handleSubmit, setValue, watch, reset, formState: { errors: errorsGeneral } } = useForm<FieldValues>({
-    defaultValues: {},
-  });
-
-  const setCustomValue = (id: any, value: any) => {
-        setValue(id, value, {
+    const setCustomValue = (id: any, value: any) => {
+      setValue(id, value, {
         shouldDirty: true,
         shouldTouch: true,
-        shouldValidate: true
-        })
-    }
-
-  const urlMedia = watch('urlMedia');
-
-  const onSubmitGenreal = async (formData: any) => {
-  try {
-    setLoading(true);
-    const formDataToSend = new FormData();
-    formDataToSend.append('csvFile', formData.csvFile[0]);
-    formDataToSend.append('urlMedia', formData.urlMedia);
-    formDataToSend.append('message', formData.message);
-    
-    await axios.post(`${apiWhatsApp}/upload`, formDataToSend);
-    toast.success('Envio de mensajes exitoso');
-    router.refresh();
-    await axios.post(`${authUrl}/api/messages/add`, {
-        eventName,
-        messageCount: formData.csvFile.length // Ajustar según la cantidad de mensajes enviados
-    });
-    reset()
-  } catch (error: any) {
-    toast.error('¡Oops! Algo salió mal.');
-  } finally {
-    setLoading(false); 
-  }
+        shouldValidate: true,
+      });
+    };
   
-
-};
-const cancelBroadcast = async () => {
-    try {
-        const response = await axios.post(`${apiWhatsApp}/cancel-broadcast`);
-        console.log(response.data);
-        alert('Difusión cancelada');
-    } catch (error) {
-        console.error('Error al cancelar la difusión:', error);
-    }
-};
-const fetchTotalMessages = async () => {
-    try {
-      const response = await axios.get(`${authUrl}/api/messages/total/${eventName}`);
-      setTotalMessages(response.data.totalMessages);
-    } catch (error) {
-      console.error("Error obteniendo el total de mensajes: ", error);
-    }
-  };
-
-
+    const urlMedia = watch('urlMedia');
+  
+    const onSubmitGenreal = async (formData: any) => {
+      try {
+        setLoading(true);
+        const formDataToSend = new FormData();
+        formDataToSend.append('csvFile', formData.csvFile[0]);
+        formDataToSend.append('urlMedia', formData.urlMedia);
+        formDataToSend.append('message', formData.message);
+        
+        await axios.post(`${apiWhatsApp}/upload`, formDataToSend);
+        
+        await axios.post(`${authUrl}/api/messages/add`, {
+          eventName,
+          messageCount: formData.csvFile.length // Ajustar según la cantidad de mensajes enviados
+        });
+  
+        toast.success('Envio de mensajes exitoso');
+        router.refresh();
+        reset();
+      } catch (error: any) {
+        toast.error('¡Oops! Algo salió mal.');
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    const fetchTotalMessages = async () => {
+      try {
+        const response = await axios.get(`${authUrl}/api/messages/total/${eventName}`);
+        setTotalMessages(response.data.totalMessages);
+      } catch (error) {
+        console.error("Error obteniendo el total de mensajes: ", error);
+      }
+    };
+    const cancelBroadcast = async () => {
+        try {
+            const response = await axios.post(`${apiWhatsApp}/cancel-broadcast`);
+            console.log(response.data);
+            alert('Difusión cancelada');
+        } catch (error) {
+            console.error('Error al cancelar la difusión:', error);
+        }
+    };
 
 
   return ( 
