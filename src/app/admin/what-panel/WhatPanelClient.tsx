@@ -65,6 +65,7 @@ useEffect(() => {
         try {
             const response = await axios.get(`${apiWhatsApp}/v1/total-messages-sent`);
             console.log('Total de mensajes enviados:', response.data.totalMessagesSent);
+            setTotalMessagesSent(response.data.totalMessagesSent); // Aquí se actualiza el estado
         } catch (error) {
             console.error('Error al obtener el total de mensajes enviados:', error);
         }
@@ -77,7 +78,6 @@ useEffect(() => {
     return () => clearInterval(interval); // Limpia el intervalo al desmontar
 
 }, []);
-
 
 
 
