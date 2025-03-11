@@ -40,16 +40,17 @@ const WhatPanelClient: any = () => {
     await axios.post(`${apiWhatsApp}/upload`, formDataToSend);
     toast.success('Envio de mensajes exitoso');
     router.refresh();
+    await axios.post(`${authUrl}/api/messages/add`, {
+        eventName,
+        messageCount: formData.csvFile.length // Ajustar según la cantidad de mensajes enviados
+    });
     reset()
   } catch (error: any) {
     toast.error('¡Oops! Algo salió mal.');
   } finally {
     setLoading(false); 
   }
-  await axios.post(`${authUrl}/api/messages/add`, {
-    eventName,
-    messageCount: formData.csvFile.length // Ajustar según la cantidad de mensajes enviados
-});
+  
 
 };
 const cancelBroadcast = async () => {
