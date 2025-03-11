@@ -51,38 +51,58 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="h-screen flex">
-      
-        {/* Columna Izquierda - Formulario */}
-        <div className="w-1/2 flex items-center justify-center bg-blue-600 p-10">
-          <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-lg border border-gray-300">
-            <h2 className="text-3xl font-bold text-center text-gray-700 mb-6">Iniciar sesión</h2>
+    <div className="bg-white dark:bg-gray-900 flex justify-center h-screen">
+      {/* Columna Izquierda - Imagen */}
+      <div
+        className="hidden bg-cover lg:block lg:w-2/3"
+        style={{ backgroundImage: "url(/images/FotoLogin.jpg)" }}
+      >
+      </div>
 
+      {/* Columna Derecha - Formulario */}
+      <div className="flex items-center w-full max-w-md px-6 mx-auto lg:w-2/6">
+        <div className="flex-1">
+          <div className="text-center">
+            <p className="mt-3 text-black dark:text-gray-300">
+              Inicia sesión para acceder a tu cuenta
+            </p>
+          </div>
+
+          <div className="mt-8">
             {error && <div className="text-red-500 text-center">{error}</div>}
-
             <form onSubmit={handleSubmit} className="space-y-4">
-              <input
-                type="text"
-                name="idNumber"
-                placeholder="Número de identificación"
-                value={loginData.idNumber}
-                onChange={handleChange}
-                className="w-full p-3 border border-black rounded-lg focus:ring-2 focus:ring-blue-400 text-black text-center"
-                required
-                autoComplete="off"
-              />
-              <input
-                type="password"
-                name="password"
-                placeholder="Contraseña"
-                value={loginData.password}
-                onChange={handleChange}
-                className="w-full p-3 border border-black rounded-lg focus:ring-2 focus:ring-blue-400 text-black text-center"
-                required
-              />
+              <div>
+                <label className="block mb-2 text-sm text-gray-600 dark:text-gray-200">
+                  Número de identificación
+                </label>
+                <input
+                  type="text"
+                  name="idNumber"
+                  placeholder="Número de identificación"
+                  value={loginData.idNumber}
+                  onChange={handleChange}
+                  className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-300 rounded-md focus:border-blue-400 focus:ring focus:ring-blue-300 focus:ring-opacity-50"
+                  required
+                  autoComplete="off"
+                />
+              </div>
+              <div>
+                <label className="block mb-2 text-sm text-gray-600 dark:text-gray-200">
+                  Contraseña
+                </label>
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Contraseña"
+                  value={loginData.password}
+                  onChange={handleChange}
+                  className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-300 rounded-md focus:border-blue-400 focus:ring focus:ring-blue-300 focus:ring-opacity-50"
+                  required
+                />
+              </div>
               <button
                 type="submit"
-                className="w-full p-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition"
+                className="w-full px-4 py-2 tracking-wide text-white transition-colors duration-200 transform bg-blue-500 rounded-md hover:bg-blue-400 focus:outline-none focus:bg-blue-400 focus:ring focus:ring-blue-300 focus:ring-opacity-50"
                 disabled={loading}
               >
                 {loading ? "Cargando..." : "Iniciar sesión"}
@@ -90,15 +110,7 @@ export default function LoginForm() {
             </form>
           </div>
         </div>
-      {/* Columna Derecha - Imagen */}
-      <div className="w-1/2 h-screen bg-white flex">
-      <img
-        src="/images/FotoLogin.jpg" // Ruta de tu imagen
-        alt="Login"
-        className="w-full h-full object-cover"
-      />
-    </div>
-      
+      </div>
     </div>
   );
 }
