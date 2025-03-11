@@ -34,7 +34,9 @@ const WhatPanelClient: any = () => {
         setLoading(true);
         const formDataToSend = new FormData();
         formDataToSend.append('csvFile', formData.csvFile[0]);
-        formDataToSend.append('urlMedia', formData.urlMedia);
+        if (formData.urlMedia) {
+            formDataToSend.append('urlMedia', formData.urlMedia);
+        }
         formDataToSend.append('message', formData.message);
         
         await axios.post(`${apiWhatsApp}/upload`, formDataToSend);
@@ -64,7 +66,7 @@ const WhatPanelClient: any = () => {
     
             const token = localStorage.getItem("token"); // Asegúrate de obtener el token si es necesario
     
-            const response = await axios.get(`${authUrl}/api/messages/total/all`, {
+            const response = await axios.get(`${authUrl}/api/messages/total/${eventName}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -146,8 +148,8 @@ const WhatPanelClient: any = () => {
                                Carga tu archivo multimedia
                             </label>
                             <ImageUpload
-                                onChange={(value) => setCustomValue('urlMedia', value)}
-                                value={urlMedia || ''}
+                            onChange={(value) => setCustomValue('urlMedia', value)}
+                            value={urlMedia || undefined}
                             />
                         </div>
                         <div className="col-span-6 sm:col-span-3">
