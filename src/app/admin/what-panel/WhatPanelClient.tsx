@@ -7,17 +7,16 @@ import { useState,useEffect } from "react";
 import { LoadingMessages } from '@/components/ui/loadings';
 
 const apiWhatsApp = process.env.NEXT_PUBLIC_WHATSAPP_URL;
-
+const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
 
 const WhatPanelClient: any = () => {
-
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
+    const router = useRouter();
+    const [loading, setLoading] = useState(false);
+    const [eventName, setEventName] = useState("");
+    const [totalMessages, setTotalMessages] = useState<number | null>(null);
   
   const { register, handleSubmit, setValue, watch, reset, formState: { errors: errorsGeneral } } = useForm<FieldValues>({
-    defaultValues: {
-
-    },
+    defaultValues: {},
   });
 
   const setCustomValue = (id: any, value: any) => {
@@ -38,6 +37,11 @@ const WhatPanelClient: any = () => {
     formDataToSend.append('urlMedia', formData.urlMedia);
     formDataToSend.append('message', formData.message);
     
+    await axios.post(`${authUrl}/api/messages/add`, {
+        eventName,
+        messageCount: formData.csvFile.length // Ajustar según la cantidad de mensajes enviados
+    });
+    
     await axios.post(`${apiWhatsApp}/upload`, formDataToSend);
     toast.success('Envio de mensajes exitoso');
     router.refresh();
@@ -57,6 +61,14 @@ const cancelBroadcast = async () => {
         console.error('Error al cancelar la difusión:', error);
     }
 };
+const fetchTotalMessages = async () => {
+    try {
+      const response = await axios.get(`${authUrl}/api/messages/total/${eventName}`);
+      setTotalMessages(response.data.totalMessages);
+    } catch (error) {
+      console.error("Error obteniendo el total de mensajes: ", error);
+    }
+  };
 
 
 
@@ -155,6 +167,22 @@ const cancelBroadcast = async () => {
                                 <button className="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-cyan-600 dark:hover:bg-cyan-700 dark:focus:ring-primary-800" type="submit" onClick={cancelBroadcast}>Cancelar Difusión</button>
                             </div>
                         </div>
+                        <div className="col-span-6 sm:col-span-3">
+                            <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nombre del Evento</label>
+                            <input 
+                                type="text"
+                                value={eventName}
+                                onChange={(e) => setEventName(e.target.value)}
+                                className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                required
+                            />
+                        </div>
+                        {eventName && (
+                            <div className="mt-4">
+                                <button onClick={fetchTotalMessages} className="bg-blue-500 text-white px-4 py-2 rounded-lg">Ver Total de Mensajes</button>
+                                {totalMessages !== null && <p className="mt-2 text-lg font-semibold">Total Mensajes: {totalMessages}</p>}
+                            </div>
+                        )}
                     </div>
                 </form>
             </div>
