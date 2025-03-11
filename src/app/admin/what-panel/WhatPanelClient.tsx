@@ -13,7 +13,7 @@ const WhatPanelClient: any = () => {
 
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [lastNumber, setLastNumber] = useState<string | null>(null);
+  const [totalMessagesSent, setTotalMessagesSent] = useState<number>(0);
 
   const { register, handleSubmit, setValue, watch, reset, formState: { errors: errorsGeneral } } = useForm<FieldValues>({
     defaultValues: {
@@ -61,16 +61,21 @@ const cancelBroadcast = async () => {
     }
 };
 useEffect(() => {
-    const fetchLastNumber = async () => {
+    const fetchTotalMessagesSent = async () => {
         try {
-            const response = await axios.get(`${apiWhatsApp}/v1/last-sent-number`);
-            setLastNumber(response.data.lastPhoneNumber);
+            const response = await axios.get(`${apiWhatsApp}/v1/total-messages-sent`);
+            console.log('Total de mensajes enviados:', response.data.totalMessagesSent);
         } catch (error) {
-            console.error("Error al obtener el último número enviado:", error);
+            console.error('Error al obtener el total de mensajes enviados:', error);
         }
     };
 
-    fetchLastNumber();
+    fetchTotalMessagesSent();
+
+    const interval = setInterval(fetchTotalMessagesSent, 5000);
+    
+    return () => clearInterval(interval); // Limpia el intervalo al desmontar
+
 }, []);
 
 
@@ -170,16 +175,11 @@ useEffect(() => {
                                 <button className="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-cyan-600 dark:hover:bg-cyan-700 dark:focus:ring-primary-800" type="submit" onClick={cancelBroadcast}>Cancelar Difusión</button>
                             </div>
                             <h1>mensajes</h1>
-                            {lastNumber && (
-                                <p>Último número enviado: <strong>{lastNumber}</strong></p>
+                            {totalMessagesSent !== undefined && (
+                                <p>Total de mensajes enviados: <strong>{totalMessagesSent}</strong></p>
                             )}
                         </div>
-                        <div>
-                            <h1>mensajes</h1>
-                            {lastNumber && (
-                                <p>Último número enviado: <strong>{lastNumber}</strong></p>
-                            )}
-                        </div>
+                        
                     </div>
                 </form>
             </div>
