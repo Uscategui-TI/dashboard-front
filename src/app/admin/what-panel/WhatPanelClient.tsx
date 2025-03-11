@@ -7,60 +7,77 @@ import { useState,useEffect } from "react";
 import { LoadingMessages } from '@/components/ui/loadings';
 
 const apiWhatsApp = process.env.NEXT_PUBLIC_WHATSAPP_URL;
-
+const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
 
 const WhatPanelClient: any = () => {
-
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
+    const router = useRouter();
+    const [loading, setLoading] = useState(false);
+    const [eventList, setEventList] = useState([]);
+    const [messageCounts, setMessageCounts] = useState({});
   
-  const { register, handleSubmit, setValue, watch, reset, formState: { errors: errorsGeneral } } = useForm<FieldValues>({
-    defaultValues: {
-
-    },
-  });
-
-  const setCustomValue = (id: any, value: any) => {
-        setValue(id, value, {
+    const { register, handleSubmit, setValue, watch, reset, formState: { errors: errorsGeneral } } = useForm<FieldValues>();
+  
+    const setCustomValue = (id: any, value: any) => {
+      setValue(id, value, {
         shouldDirty: true,
         shouldTouch: true,
         shouldValidate: true
-        })
+      })
     }
-
-  const urlMedia = watch('urlMedia');
-
-  const onSubmitGenreal = async (formData: any) => {
-  try {
-    setLoading(true);
-    const formDataToSend = new FormData();
-    formDataToSend.append('csvFile', formData.csvFile[0]);
-    formDataToSend.append('urlMedia', formData.urlMedia);
-    formDataToSend.append('message', formData.message);
-    
-    await axios.post(`${apiWhatsApp}/upload`, formDataToSend);
-    toast.success('Envio de mensajes exitoso');
-    router.refresh();
-    reset()
-  } catch (error: any) {
-    toast.error('¡Oops! Algo salió mal.');
-  } finally {
-    setLoading(false); 
-  }
-};
-const cancelBroadcast = async () => {
-    try {
+  
+    const urlMedia = watch('urlMedia');
+  
+    const onSubmitGeneral = async (formData: any) => {
+      try {
+        setLoading(true);
+        const formDataToSend = new FormData();
+        formDataToSend.append('csvFile', formData.csvFile[0]);
+        formDataToSend.append('urlMedia', formData.urlMedia);
+        formDataToSend.append('message', formData.message);
+  
+        await axios.post(`${apiWhatsApp}/upload`, formDataToSend);
+        toast.success('Envio de mensajes exitoso');
+        router.refresh();
+        reset();
+      } catch (error: any) {
+        toast.error('¡Oops! Algo salió mal.');
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    const cancelBroadcast = async () => {
+      try {
         const response = await axios.post(`${apiWhatsApp}/cancel-broadcast`);
         console.log(response.data);
         alert('Difusión cancelada');
-    } catch (error) {
+      } catch (error) {
         console.error('Error al cancelar la difusión:', error);
-    }
-};
-
-
-
-
+      }
+    };
+  
+    const fetchEvents = async () => {
+      try {
+        const response = await axios.get(`${authUrl}/api/messages/all-events`);
+        setEventList(response.data);
+      } catch (error) {
+        console.error("Error al obtener eventos:", error);
+      }
+    };
+  
+    const fetchMessageCounts = async () => {
+      try {
+        const response = await axios.get(`${authUrl}/api/messages/total/all`);
+        setMessageCounts(response.data);
+      } catch (error) {
+        console.error("Error al obtener conteo de mensajes:", error);
+      }
+    };
+  
+    useEffect(() => {
+      fetchEvents();
+      fetchMessageCounts();
+    }, []);
   return ( 
     <div className="grid grid-cols-1 pt-6 xl:gap-4 justify-center dark:bg-gray-900">
         {
@@ -98,7 +115,7 @@ const cancelBroadcast = async () => {
         <div className="col">
             <div className="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
                 <h3 className="mb-4 text-xl font-semibold dark:text-white">Personaliza tu campaña</h3>
-                <form onSubmit={handleSubmit(onSubmitGenreal)} encType="multipart/form-data">
+                <form onSubmit={handleSubmit(onSubmitGeneral)} encType="multipart/form-data">
                     <div className="grid grid-cols-6 gap-6">
                         <div className="col-span-6 sm:col-span-3">
                             <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
@@ -159,7 +176,32 @@ const cancelBroadcast = async () => {
                 </form>
             </div>
         </div>
+        <div className="grid grid-cols-1 pt-6 xl:gap-4 justify-center dark:bg-gray-900">
+      {/* Sección de Eventos */}
+      <div className="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+        <h3 className="mb-4 text-xl font-semibold dark:text-white">Eventos Registrados</h3>
+        <ul>
+          {eventList.map((event: any, index: number) => (
+            <li key={index} className="text-gray-900 dark:text-white">{event.name}</li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Sección de Cantidad de Mensajes Enviados por Evento */}
+      <div className="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+        <h3 className="mb-4 text-xl font-semibold dark:text-white">Mensajes Enviados por Evento</h3>
+        <ul>
+          {Object.entries(messageCounts).map(([eventName, count]) => (
+            <li key={eventName} className="text-gray-900 dark:text-white">
+              {String(eventName)}: {Number(count)} mensajes
+
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
+    </div>
+    
    );
 }
  
