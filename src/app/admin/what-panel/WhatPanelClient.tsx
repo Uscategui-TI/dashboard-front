@@ -64,7 +64,7 @@ const WhatPanelClient: any = () => {
     
             const token = localStorage.getItem("token"); // Asegúrate de obtener el token si es necesario
     
-            const response = await axios.get(`${authUrl}/api/messages/total/${eventName}`, {
+            const response = await axios.get(`${authUrl}/api/messages/total/all`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
