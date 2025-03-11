@@ -93,7 +93,7 @@ export default function LoginForm() {
       {/* Columna Derecha - Imagen */}
       <div className="w-1/2 h-screen bg-white flex">
       <img
-        src="/images/ImgLogin.jpg" // Ruta de tu imagen
+        src="/images/FotoLogin.jpg" // Ruta de tu imagen
         alt="Login"
         className="w-full h-full object-cover"
       />
