@@ -61,11 +61,18 @@ const cancelBroadcast = async () => {
     }
 };
 useEffect(() => {
+    let lastCount: null = null; // Para almacenar el último conteo de mensajes
     const fetchTotalMessagesSent = async () => {
         try {
             const response = await axios.get(`${apiWhatsApp}/v1/total-messages-sent`);
             console.log('Total de mensajes enviados:', response.data.totalMessagesSent);
-            setTotalMessagesSent(response.data.totalMessagesSent); // Aquí se actualiza el estado
+            setTotalMessagesSent(response.data.totalMessagesSent);
+
+            if (lastCount !== null && lastCount === response.data.totalMessagesSent) {
+                clearInterval(interval); // Detener intervalo si el número de mensajes no cambia
+            }
+
+            lastCount = response.data.totalMessagesSent;
         } catch (error) {
             console.error('Error al obtener el total de mensajes enviados:', error);
         }
@@ -74,14 +81,13 @@ useEffect(() => {
     fetchTotalMessagesSent();
 
     const interval = setInterval(fetchTotalMessagesSent, 5000);
-    
-    return () => clearInterval(interval); // Limpia el intervalo al desmontar
 
+    return () => clearInterval(interval); // Limpia el intervalo al desmontar
 }, []);
 
 
 
-  return ( 
+return ( 
     <div className="grid grid-cols-1 pt-6 xl:gap-4 justify-center dark:bg-gray-900">
         {
             loading && (
@@ -145,15 +151,16 @@ useEffect(() => {
                         </div>
                         <div className="col-span-6 sm:col-span-3">
                             <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Actividad</label>
-                            <select 
-                                id="activity" 
-                                className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" 
-                                required>
-                                <option value="" disabled selected>Seleccionar</option>
-                                <option value="evento">Evento</option>
-                                <option value="seguridad">Control de seguridad</option>
-                                <option value="ludica">Actividad lúdica</option>
-                            </select>
+                        <select
+                        defaultValue=""
+                        className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                        required
+                        >
+                            <option value="" disabled>Seleccionar</option>
+                            <option value="evento">Evento</option>
+                            <option value="seguridad">Control de seguridad</option>
+                            <option value="ludica">Actividad lúdica</option>
+                        </select>
                         </div>
                         <div className="col-span-6 sm:col-span-3">
                             <label htmlFor="csvFile" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
@@ -167,22 +174,31 @@ useEffect(() => {
                             accept=".csv"
                             />
                         </div>
-                        <div className="flex space-x-4 col-span-6 sm:col-full">
-                            <button className="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-cyan-600 dark:hover:bg-cyan-700 dark:focus:ring-primary-800" type="submit">
-                                Enviar
-                            </button>
-                            <div className="col-span-6 sm:col-full">
-                                <button className="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-cyan-600 dark:hover:bg-cyan-700 dark:focus:ring-primary-800" type="submit" onClick={cancelBroadcast}>Cancelar Difusión</button>
+                        <div className="col-span-6 sm:col-full flex flex-col items-center space-y-4">
+                            <div className="flex space-x-4">
+                                <button 
+                                    className="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-cyan-600 dark:hover:bg-cyan-700 dark:focus:ring-primary-800"
+                                    type="submit"
+                                >
+                                    Enviar
+                                </button>
+                                <button 
+                                    className="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-cyan-600 dark:hover:bg-cyan-700 dark:focus:ring-primary-800"
+                                    type="button"
+                                    onClick={cancelBroadcast}
+                                >
+                                    Cancelar Difusión
+                                </button>
                             </div>
+
                             {totalMessagesSent !== undefined && (
-                                <div className="bg-cyan-600 text-white p-4 rounded-lg shadow-md mt-4">
-                                    <p className="text-lg font-semibold text-center">
+                                <div className="bg-cyan-600 text-white p-4 rounded-lg shadow-md w-full max-w-md text-center">
+                                    <p className="text-lg font-semibold">
                                         Total de mensajes enviados: <strong>{totalMessagesSent}</strong>
                                     </p>
                                 </div>
                             )}
                         </div>
-                        
                     </div>
                 </form>
             </div>
