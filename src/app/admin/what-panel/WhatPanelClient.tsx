@@ -14,6 +14,8 @@ const WhatPanelClient: any = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [totalMessagesSent, setTotalMessagesSent] = useState<number | null>(null);
+  const [isBroadcasting, setIsBroadcasting] = useState(false);
+
 
   const { register, handleSubmit, setValue, watch, reset, formState: { errors: errorsGeneral } } = useForm<FieldValues>({
     defaultValues: {
@@ -34,6 +36,7 @@ const WhatPanelClient: any = () => {
   const onSubmitGenreal = async (formData: any) => {
   try {
     setLoading(true);
+    setIsBroadcasting(true);
     const formDataToSend = new FormData();
     formDataToSend.append('csvFile', formData.csvFile[0]);
     if (formData.urlMedia) {
@@ -45,6 +48,7 @@ const WhatPanelClient: any = () => {
     toast.success('Envio de mensajes exitoso');
     router.refresh();
     reset()
+    setIsBroadcasting(false);
   } catch (error: any) {
     toast.error('¡Oops! Algo salió mal.');
   } finally {
@@ -61,14 +65,16 @@ const cancelBroadcast = async () => {
     }
 };
 useEffect(() => {
+    if (!isBroadcasting) return;
+    
     const fetchTotalMessagesSent = async () => {
-        try {
-            const response = await axios.get(`${apiWhatsApp}/v1/total-messages-sent`);
-            console.log('Total de mensajes enviados:', response.data.totalMessagesSent);
-            setTotalMessagesSent(response.data.totalMessagesSent); // Aquí se actualiza el estado
-        } catch (error) {
-            console.error('Error al obtener el total de mensajes enviados:', error);
-        }
+      try {
+        const response = await axios.get(`${apiWhatsApp}/v1/total-messages-sent`);
+        console.log('Total de mensajes enviados:', response.data.totalMessagesSent);
+        setTotalMessagesSent(response.data.totalMessagesSent + 1);
+      } catch (error) {
+        console.error('Error al obtener el total de mensajes enviados:', error);
+      }
     };
 
     fetchTotalMessagesSent();
@@ -76,8 +82,7 @@ useEffect(() => {
     const interval = setInterval(fetchTotalMessagesSent, 5000);
     
     return () => clearInterval(interval); // Limpia el intervalo al desmontar
-
-}, []);
+  }, [isBroadcasting]);
 
 
 
