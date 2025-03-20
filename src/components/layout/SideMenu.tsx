@@ -103,7 +103,7 @@ export const SideMenu = () => {
                             <ul className="pb-2 space-y-2">
                                 {/* Elementos del Sidebar */}
                                 <li>
-                                    <NextLink href="http://localhost:3000/admin/what-panel" passHref legacyBehavior>
+                                    <NextLink href="https://dashboardqa.uscateguicol.com/admin/what-panel" passHref legacyBehavior>
                                         <div className="flex items-center p-2 text-base text-gray-900 rounded-lg hover:bg-gray-100 group dark:text-gray-200 dark:hover:bg-gray-700">
                                             <svg
                                                 className="w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
@@ -182,7 +182,7 @@ export const SideMenu = () => {
                                     </li>
                                 )}
                                 <li>
-                                    <NextLink href="http://localhost:3000/admin/number" passHref legacyBehavior>
+                                    <NextLink href="https://dashboardqa.uscateguicol.com/admin/number" passHref legacyBehavior>
                                         <div className="flex items-center p-2 text-base text-gray-900 rounded-lg hover:bg-gray-100 group dark:text-gray-200 dark:hover:bg-gray-700">
                                             <FiHash className="w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white" />
                                             <span className="ml-3">Conectar Bot</span>
