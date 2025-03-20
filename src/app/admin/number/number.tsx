@@ -6,6 +6,8 @@ const apiWhatsApp = process.env.NEXT_PUBLIC_WHATSAPP_URL;
 export default function PhoneNumberForm() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [linkToken, setLinkToken] = useState(""); // Estado para el token
+  const [isRestartDisabled, setIsRestartDisabled] = useState(true); // Estado para deshabilitar el botón
+  const [countdown, setCountdown] = useState(30); // Estado para el temporizador
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,13 +26,36 @@ export default function PhoneNumberForm() {
         console.log("Token recibido:", response.data.token);
       }
 
+      // Iniciar el temporizador de 30 segundos para habilitar el botón
+      setIsRestartDisabled(true);
+      setCountdown(30);
+      const timer = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            setIsRestartDisabled(false);
+          }
+          return prev - 1;
+        });
+      }, 1000);
     } catch (error) {
       console.error("Error al enviar el número:", error);
       alert("Hubo un error al guardar el número.");
     }
   };
-  
 
+  const handleRestart = async () => {
+    try {
+      const response = await axios.post(`${apiWhatsApp}/restart-bot`, {}, {
+        headers: { "Content-Type": "application/json" }
+      });
+      console.log("Reinicio solicitado:", response.data);
+      alert("El bot se está reiniciando...");
+    } catch (error) {
+      console.error("Error al reiniciar el bot:", error);
+      alert("Error al intentar reiniciar el bot.");
+    }
+  };
   
   return (
     <div className="flex items-center justify-center h-screen p-4">
@@ -64,6 +89,14 @@ export default function PhoneNumberForm() {
             </div>
           </div>
         )}
+
+        <button
+          onClick={handleRestart}
+          disabled={isRestartDisabled}
+          className={`w-full p-3 mt-4 rounded-lg transition ${isRestartDisabled ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-600 text-white hover:bg-red-700'}`}
+        >
+          {isRestartDisabled ? `Actualizar provedor (${countdown}s)` : "Actualizar provedor"}
+        </button>
       </div>
     </div>
   );

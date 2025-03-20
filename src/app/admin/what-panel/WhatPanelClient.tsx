@@ -61,18 +61,11 @@ const cancelBroadcast = async () => {
     }
 };
 useEffect(() => {
-    let lastCount: null = null; // Para almacenar el último conteo de mensajes
     const fetchTotalMessagesSent = async () => {
         try {
             const response = await axios.get(`${apiWhatsApp}/v1/total-messages-sent`);
             console.log('Total de mensajes enviados:', response.data.totalMessagesSent);
-            setTotalMessagesSent(response.data.totalMessagesSent);
-
-            if (lastCount !== null && lastCount === response.data.totalMessagesSent) {
-                clearInterval(interval); // Detener intervalo si el número de mensajes no cambia
-            }
-
-            lastCount = response.data.totalMessagesSent;
+            setTotalMessagesSent(response.data.totalMessagesSent); // Aquí se actualiza el estado
         } catch (error) {
             console.error('Error al obtener el total de mensajes enviados:', error);
         }
@@ -81,13 +74,14 @@ useEffect(() => {
     fetchTotalMessagesSent();
 
     const interval = setInterval(fetchTotalMessagesSent, 5000);
-
+    
     return () => clearInterval(interval); // Limpia el intervalo al desmontar
+
 }, []);
 
 
 
-return ( 
+  return ( 
     <div className="grid grid-cols-1 pt-6 xl:gap-4 justify-center dark:bg-gray-900">
         {
             loading && (
@@ -151,16 +145,15 @@ return (
                         </div>
                         <div className="col-span-6 sm:col-span-3">
                             <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Actividad</label>
-                        <select
-                        defaultValue=""
-                        className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        required
-                        >
-                            <option value="" disabled>Seleccionar</option>
-                            <option value="evento">Evento</option>
-                            <option value="seguridad">Control de seguridad</option>
-                            <option value="ludica">Actividad lúdica</option>
-                        </select>
+                            <select 
+                                id="activity" 
+                                className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" 
+                                required>
+                                <option value="" disabled selected>Seleccionar</option>
+                                <option value="evento">Evento</option>
+                                <option value="seguridad">Control de seguridad</option>
+                                <option value="ludica">Actividad lúdica</option>
+                            </select>
                         </div>
                         <div className="col-span-6 sm:col-span-3">
                             <label htmlFor="csvFile" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
