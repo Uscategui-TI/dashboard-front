@@ -7,70 +7,84 @@ import { useState,useEffect } from "react";
 import { LoadingMessages } from '@/components/ui/loadings';
 
 const apiWhatsApp = process.env.NEXT_PUBLIC_WHATSAPP_URL;
-
+const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
 
 const WhatPanelClient: any = () => {
-
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [totalMessagesSent, setTotalMessagesSent] = useState<number | null>(null);
   const [isBroadcasting, setIsBroadcasting] = useState(false);
+  const [newEventName, setNewEventName] = useState('');
+  const [eventList, setEventList] = useState<string[]>([]);
+  const [selectedEventName, setSelectedEventName] = useState<string | null>(null); // nuevo estado
 
-
-  const { register, handleSubmit, setValue, watch, reset, formState: { errors: errorsGeneral } } = useForm<FieldValues>({
-    defaultValues: {
-
-    },
-  });
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors: errorsGeneral }
+  } = useForm<FieldValues>({ defaultValues: {} });
 
   const setCustomValue = (id: any, value: any) => {
-        setValue(id, value, {
-        shouldDirty: true,
-        shouldTouch: true,
-        shouldValidate: true
-        })
-    }
+    setValue(id, value, {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: true
+    });
+  };
 
   const urlMedia = watch('urlMedia');
 
   const onSubmitGenreal = async (formData: any) => {
-  try {
-    setLoading(true);
-    setIsBroadcasting(true);
-    const formDataToSend = new FormData();
-    formDataToSend.append('csvFile', formData.csvFile[0]);
-    if (formData.urlMedia) {
-        formDataToSend.append('urlMedia', formData.urlMedia);
-    }
-    formDataToSend.append('message', formData.message);
-    
-    await axios.post(`${apiWhatsApp}/upload`, formDataToSend);
-    toast.success('Envio de mensajes exitoso');
-    router.refresh();
-    reset()
-    setIsBroadcasting(false);
-  } catch (error: any) {
-    toast.error('¡Oops! Algo salió mal.');
-  } finally {
-    setLoading(false); 
-  }
-};
-const cancelBroadcast = async () => {
     try {
-        const response = await axios.post(`${apiWhatsApp}/cancel-broadcast`);
-        console.log(response.data);
-        alert('Difusión cancelada');
-    } catch (error) {
-        console.error('Error al cancelar la difusión:', error);
+      setLoading(true);
+      setIsBroadcasting(true);
+
+      if (!formData.csvFile || formData.csvFile.length === 0) {
+        toast.error('❌ Por favor, sube un archivo CSV.');
+        setIsBroadcasting(false);
+        setLoading(false);
+        return;
+      }
+
+      const formDataToSend = new FormData();
+      formDataToSend.append('csvFile', formData.csvFile[0]);
+      if (formData.urlMedia) {
+        formDataToSend.append('urlMedia', formData.urlMedia);
+      }
+      formDataToSend.append('message', formData.message);
+
+      await axios.post(`${apiWhatsApp}/upload`, formDataToSend);
+      toast.success('Envio de mensajes exitoso');
+
+      router.refresh();
+      reset(); // esto limpia el form pero ya no afecta el evento seleccionado
+      setIsBroadcasting(false);
+    } catch (error: any) {
+      toast.error('¡Oops! Algo salió mal.');
+    } finally {
+      setLoading(false);
     }
-};
-useEffect(() => {
+  };
+
+  const cancelBroadcast = async () => {
+    try {
+      const response = await axios.post(`${apiWhatsApp}/cancel-broadcast`);
+      console.log(response.data);
+      alert('Difusión cancelada');
+    } catch (error) {
+      console.error('Error al cancelar la difusión:', error);
+    }
+  };
+
+  useEffect(() => {
     if (!isBroadcasting) return;
-    
+
     const fetchTotalMessagesSent = async () => {
       try {
         const response = await axios.get(`${apiWhatsApp}/v1/total-messages-sent`);
-        console.log('Total de mensajes enviados:', response.data.totalMessagesSent);
         setTotalMessagesSent(response.data.totalMessagesSent + 1);
       } catch (error) {
         console.error('Error al obtener el total de mensajes enviados:', error);
@@ -78,131 +92,191 @@ useEffect(() => {
     };
 
     fetchTotalMessagesSent();
-
     const interval = setInterval(fetchTotalMessagesSent, 5000);
-    
-    return () => clearInterval(interval); // Limpia el intervalo al desmontar
+    return () => clearInterval(interval);
   }, [isBroadcasting]);
 
+  // Nuevo useEffect para guardar estadísticas al finalizar difusión
+  useEffect(() => {
+    if (!isBroadcasting && selectedEventName && totalMessagesSent !== null) {
+      saveEventStats(selectedEventName, totalMessagesSent);
+      setTotalMessagesSent(null); // Evita duplicación
+    }
+  }, [isBroadcasting, totalMessagesSent]);
 
+  const createMessageEvent = async () => {
+    if (!newEventName.trim()) {
+      toast.error("Por favor escribe un nombre para el evento.");
+      return;
+    }
 
-  return ( 
+    try {
+      const response = await axios.post(`${authUrl}/api/messages/create`, {
+        eventName: newEventName,
+      });
+
+      const createdEvent = response.data.eventName;
+      toast.success("✅ Evento creado exitosamente");
+
+      setEventList(prev => [...prev, createdEvent]);
+      setNewEventName('');
+    } catch (error) {
+      console.error("Error al crear el evento:", error);
+      toast.error("Error al crear el evento");
+    }
+  };
+
+  const saveEventStats = async (eventName: string, total: number) => {
+    try {
+      await axios.post(`${authUrl}/api/message-stats/all`, {
+        eventName,
+        totalMessagesSent: total
+      });
+      toast.success("📊 Estadísticas guardadas correctamente");
+    } catch (error) {
+      console.error("Error al guardar estadísticas:", error);
+      toast.error("❌ No se pudieron guardar las estadísticas del evento");
+    }
+  };
+
+  const fetchEvents = async () => {
+    try {
+      const response = await axios.get(`${authUrl}/api/messages/events`);
+      const eventsFromDb = response.data.map((e: any) => e.eventName);
+      setEventList(eventsFromDb);
+    } catch (error) {
+      console.error("Error al obtener eventos:", error);
+      toast.error("❌ No se pudieron cargar los eventos");
+    }
+  };
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  return (
     <div className="grid grid-cols-1 pt-6 xl:gap-4 justify-center dark:bg-gray-900">
-        {
-            loading && (
-                <div className="flex flex-col gap-4 fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50">
-                    <LoadingMessages />
-                    <button className=" text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-cyan-600 dark:hover:bg-cyan-700 dark:focus:ring-primary-800" type="submit" onClick={cancelBroadcast}>Cancelar Difusión</button>
+      {loading && (
+        <div className="flex flex-col gap-4 fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50">
+          <LoadingMessages />
+          <button
+            className="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5"
+            onClick={cancelBroadcast}
+          >
+            Cancelar Difusión
+          </button>
+        </div>
+      )}
+
+      <div className="col">
+        <div className="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <h3 className="mb-4 text-xl font-semibold dark:text-white">Personaliza tu campaña</h3>
+          <form onSubmit={handleSubmit(onSubmitGenreal)} encType="multipart/form-data">
+            <div className="grid grid-cols-6 gap-6">
+              <div className="col-span-6 sm:col-span-3">
+                <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  Mensaje
+                </label>
+                <textarea
+                  rows={12}
+                  id="message"
+                  {...register('message')}
+                  className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:text-white"
+                  placeholder="Redacta el mensaje ideal para tu campaña"
+                  required
+                />
+              </div>
+
+              <div className="col-span-6 sm:col-span-3">
+                <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  Carga tu archivo multimedia
+                </label>
+                <ImageUpload
+                  onChange={(value) => setCustomValue('urlMedia', value)}
+                  value={urlMedia || undefined}
+                />
+              </div>
+
+              <div className="col-span-6 sm:col-span-3 space-y-2">
+                <label className="block text-sm font-medium text-gray-900 dark:text-white">Nombre del Evento</label>
+                <div className="flex space-x-2">
+                  <input
+                    type="text"
+                    value={newEventName}
+                    onChange={(e) => setNewEventName(e.target.value)}
+                    placeholder="Escribe el nombre del evento"
+                    className="flex-1 shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg p-2.5 dark:bg-gray-700 dark:text-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={createMessageEvent}
+                    className="px-4 py-2 text-white bg-green-600 hover:bg-green-700 rounded-lg"
+                  >
+                    +
+                  </button>
                 </div>
-            )
-        }
 
-        <div className="mb-4 col-span-full xl:mb-2">
-            <nav className="flex mb-5" aria-label="Breadcrumb">
-                <ol className="inline-flex items-center space-x-1 text-sm font-medium md:space-x-2">
-                <li className="inline-flex items-center">
-                    <a href="#" className="inline-flex items-center text-gray-700 hover:text-primary-600 dark:text-gray-300 dark:hover:text-white">
-                    <svg className="w-5 h-5 mr-2.5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path></svg>
-                        Centro
-                    </a>
-                </li>
-                <li>
-                    <div className="flex items-center">
-                    <svg className="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd"></path></svg>
-                    <span className="ml-1 text-gray-400 md:ml-2 dark:text-gray-500" aria-current="page">WhatsApp Panel</span>
-                    </div>
-                </li>
-                </ol>
-            </nav>
-            <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">
-                Panel de WhatsApp
-            </h1>
-        </div>
-        
-        {/* <!-- Right Content --> */}
-        <div className="col">
-            <div className="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
-                <h3 className="mb-4 text-xl font-semibold dark:text-white">Personaliza tu campaña</h3>
-                <form onSubmit={handleSubmit(onSubmitGenreal)} encType="multipart/form-data">
-                    <div className="grid grid-cols-6 gap-6">
-                        <div className="col-span-6 sm:col-span-3">
-                            <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                                Mensaje
-                            </label>
-                            <textarea 
-                                rows={12}
-                                id="message"
-                                {...register('message', {})}
-                                className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" 
-                                placeholder="Redacta el mensaje ideal para tu campaña" 
-                                required
-                            >
-                            </textarea>
-                        </div>
-                        <div className="col-span-6 sm:col-span-3">
-                            <label htmlFor="csvFile" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                               Carga tu archivo multimedia
-                            </label>
-                            <ImageUpload
-                            onChange={(value) => setCustomValue('urlMedia', value)}
-                            value={urlMedia || undefined}
-                            />
-                        </div>
-                        <div className="col-span-6 sm:col-span-3">
-                            <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Actividad</label>
-                            <select 
-                                id="activity" 
-                                className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" 
-                                required>
-                                <option value="" disabled selected>Seleccionar</option>
-                                <option value="evento">Evento</option>
-                                <option value="seguridad">Control de seguridad</option>
-                                <option value="ludica">Actividad lúdica</option>
-                            </select>
-                        </div>
-                        <div className="col-span-6 sm:col-span-3">
-                            <label htmlFor="csvFile" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                                Carga tus usuarios receptores
-                            </label>
-                            <input 
-                            type="file" 
-                            id="csvFile" 
-                            {...register('csvFile')}
-                            className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" 
-                            accept=".csv"
-                            />
-                        </div>
-                        <div className="col-span-6 sm:col-full flex flex-col items-center space-y-4">
-                            <div className="flex space-x-4">
-                                <button 
-                                    className="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-cyan-600 dark:hover:bg-cyan-700 dark:focus:ring-primary-800"
-                                    type="submit"
-                                >
-                                    Enviar
-                                </button>
-                                <button 
-                                    className="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-cyan-600 dark:hover:bg-cyan-700 dark:focus:ring-primary-800"
-                                    type="button"
-                                    onClick={cancelBroadcast}
-                                >
-                                    Cancelar Difusión
-                                </button>
-                            </div>
+                <select
+                  id="activity"
+                  {...register('activity')}
+                  onChange={(e) => {
+                    setValue('activity', e.target.value);
+                    setSelectedEventName(e.target.value); // guarda el evento actual
+                  }}
+                  className="mt-2 shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:text-white"
+                  required
+                >
+                  <option value="" disabled hidden>Seleccionar Evento</option>
+                  {eventList.map((event, index) => (
+                    <option key={index} value={event}>{event}</option>
+                  ))}
+                </select>
+              </div>
 
-                            {totalMessagesSent !== undefined && (
-                                <div className="bg-cyan-600 text-white p-4 rounded-lg shadow-md w-full max-w-md text-center">
-                                    <p className="text-lg font-semibold">
-                                        Total de mensajes enviados: <strong>{totalMessagesSent}</strong>
-                                    </p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </form>
+              <div className="col-span-6 sm:col-span-3">
+                <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  Carga tus usuarios receptores
+                </label>
+                <input
+                  type="file"
+                  id="csvFile"
+                  {...register('csvFile')}
+                  accept=".csv"
+                  className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+
+              <div className="col-span-6 sm:col-full flex flex-col items-center space-y-4">
+                <div className="flex space-x-4">
+                  <button
+                    type="submit"
+                    className="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5"
+                  >
+                    Enviar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={cancelBroadcast}
+                    className="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5"
+                  >
+                    Cancelar Difusión
+                  </button>
+                </div>
+
+                {totalMessagesSent !== undefined && (
+                  <div className="bg-cyan-600 text-white p-4 rounded-lg shadow-md w-full max-w-md text-center">
+                    <p className="text-lg font-semibold">
+                      Total de mensajes enviados: <strong>{totalMessagesSent}</strong>
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
+          </form>
         </div>
+      </div>
     </div>
-   );
-}
- 
+  );
+};
+
 export default WhatPanelClient;
