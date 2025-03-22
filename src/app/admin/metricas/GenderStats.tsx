@@ -16,19 +16,24 @@ import {
 } from "recharts";
 
 const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
-
-const COLORS = ["#0088FE", "#FF6384"]; // Azul y rojo para el gráfico de torta
+const COLORS = ["#0088FE", "#FF6384"];
 
 const GenderStats = () => {
   const [genderData, setGenderData] = useState<{ name: string; value: number }[]>([]);
   const [cityData, setCityData] = useState<{ city: string; count: number }[]>([]);
+  const [eventStats, setEventStats] = useState<{ eventName: string; totalMessagesSent: number }[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await axios.get(`${authUrl}/api/person-form/list`);
-        const persons = response.data;
+        const [peopleRes, eventsRes] = await Promise.all([
+          axios.get(`${authUrl}/api/person-form/list`),
+          axios.get(`${authUrl}/api/message-stats/list`)
+        ]);
+
+        const persons = peopleRes.data;
 
         // 👉 Género
         const maleCount = persons.filter((p: any) => p.gender.toLowerCase() === "masculino").length;
@@ -55,6 +60,9 @@ const GenderStats = () => {
         }));
 
         setCityData(cityStats);
+
+        // 👉 Eventos
+        setEventStats(eventsRes.data || []);
       } catch (error) {
         console.error("Error obteniendo datos:", error);
       } finally {
@@ -65,9 +73,13 @@ const GenderStats = () => {
     fetchStats();
   }, []);
 
+  const filteredEventStats = eventStats.filter(event =>
+    event.eventName?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white px-4 py-10 space-y-12">
-      <h1 className="text-2xl font-semibold">Estadísticas de Género y Ciudad</h1>
+      <h1 className="text-2xl font-semibold">Estadísticas de Género, Ciudad y Eventos</h1>
 
       {loading ? (
         <p>Cargando datos...</p>
@@ -100,6 +112,45 @@ const GenderStats = () => {
                 <Bar dataKey="count" fill="#00C49F" />
               </BarChart>
             </ResponsiveContainer>
+          </div>
+
+          {/* Tabla de eventos */}
+          <div className="bg-gray-800 p-4 rounded-lg shadow-md w-full max-w-3xl">
+            <h2 className="text-xl mb-4 text-center">Mensajes por Evento</h2>
+
+            {/* Campo de búsqueda */}
+            <input
+              type="text"
+              placeholder="Filtrar por nombre del evento..."
+              className="mb-4 w-full p-2 rounded text-black"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+
+            <table className="w-full table-auto text-left text-white">
+              <thead>
+                <tr>
+                  <th className="px-4 py-2 border-b border-gray-600">Nombre del Evento</th>
+                  <th className="px-4 py-2 border-b border-gray-600">Total de Mensajes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredEventStats.length > 0 ? (
+                  filteredEventStats.map((event, idx) => (
+                    <tr key={idx} className="hover:bg-gray-700">
+                      <td className="px-4 py-2 border-b border-gray-700">{event.eventName}</td>
+                      <td className="px-4 py-2 border-b border-gray-700">{event.totalMessagesSent}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={2} className="text-center py-4 text-gray-400">
+                      No se encontraron eventos con ese nombre.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </>
       )}
