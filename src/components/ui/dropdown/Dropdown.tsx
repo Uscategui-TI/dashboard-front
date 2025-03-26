@@ -1,60 +1,48 @@
-'use client'
-
-import React, { useState, useEffect, useRef, ReactNode } from 'react';
+"use client";
+import type React from "react";
+import { useEffect, useRef } from "react";
 
 interface DropdownProps {
-  buttonText: string;
-  children: any;
-  icon?: ReactNode;
+  isOpen: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
+  className?: string;
 }
 
-export const Dropdown: React.FC<DropdownProps> = ({ buttonText, icon, children }) => {
-  const [isDropdownOpen, setDropdownOpen] = useState(false);
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
-  const buttonRef = useRef<HTMLButtonElement | null>(null);
+export const Dropdown: React.FC<DropdownProps> = ({
+  isOpen,
+  onClose,
+  children,
+  className = "",
+}) => {
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const handleButtonClick = () => {
-    setDropdownOpen(!isDropdownOpen);
-  };
-
-  const calculateDropdownPosition = () => {
-    if (buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      const top = rect.bottom + window.scrollY;
-      const right = window.innerWidth - rect.right;
-
-      console.log({ top, right })
-      setDropdownPosition({ top, right });
+ useEffect(() => {
+  const handleClickOutside = (event: MouseEvent) => {
+    if (
+      dropdownRef.current &&
+      !dropdownRef.current.contains(event.target as Node) &&
+      !(event.target as HTMLElement).closest('.dropdown-toggle')
+    ) {
+      onClose();
     }
   };
 
-  useEffect(() => {
-    if (isDropdownOpen) {
-      calculateDropdownPosition();
-    }
-  }, [isDropdownOpen]);
+  document.addEventListener("mousedown", handleClickOutside);
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, [onClose]);
+
+
+  if (!isOpen) return null;
 
   return (
-    <>
-      <button
-        ref={buttonRef}
-        type="button"
-        onClick={handleButtonClick}
-        className="p-2 text-gray-500 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700"
-      >
-        <span className="sr-only">{buttonText}</span>
-        { icon }
-      </button>
-
-      {isDropdownOpen && (
-        <div
-          style={{ top: dropdownPosition.top, right: dropdownPosition.right }}
-          className="absolute z-50 w-68 max-w-sm my-4 overflow-hidden text-base list-none bg-white divide-y divide-gray-100 rounded shadow-lg dark:divide-gray-600 dark:bg-gray-700" id="notification-dropdown"
-        >
-          {children}
-        </div>
-      )}
-    </>
+    <div
+      ref={dropdownRef}
+      className={`absolute z-40  right-0 mt-2  rounded-xl border border-gray-200 bg-white  shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark ${className}`}
+    >
+      {children}
+    </div>
   );
 };
-
