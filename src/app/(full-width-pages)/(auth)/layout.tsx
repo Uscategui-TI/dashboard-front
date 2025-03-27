@@ -16,7 +16,7 @@ export default function AuthLayout({
           {children}
           <div className="lg:w-1/2 w-full h-full hidden lg:block">
             <Image
-              src="/images/login/FotoLogin.jpeg"
+              src="/images/login/FotoLogin.jpg"
               alt="Foto Login"
               width={800}
               height={600}
