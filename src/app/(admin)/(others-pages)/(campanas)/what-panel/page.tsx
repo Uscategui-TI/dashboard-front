@@ -256,6 +256,7 @@ export default function WhatPanelPage() {
     
 
   return (
+  
     <>
       <div>
         <PageBreadcrumb pageTitle="WhatsApp Panel" />

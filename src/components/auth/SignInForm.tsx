@@ -8,6 +8,7 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import Cookies from "js-cookie";
 
 const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
 
@@ -38,7 +39,7 @@ export default function SignInForm() {
       });
 
       if (data.token && data.roles) {
-        localStorage.setItem("authToken", data.token);
+        Cookies.set("token", data.token);
         localStorage.setItem("roles", JSON.stringify(data.roles));
         router.push("/what-panel");
       } else {
