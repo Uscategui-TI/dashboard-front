@@ -5,9 +5,10 @@ import { ImageUpload } from "@/components/form/form-elements/ImageUpload";
 import FileInput from "@/components/form/input/FileInput";
 import Label from "@/components/form/Label";
 import Select from "@/components/form/Select";
-import { ChevronDownIcon } from "@/icons";
+import { ChevronDownIcon, PlusIcon } from "@/icons";
 import { Controller,FieldValues, useForm } from "react-hook-form";
 import axios from "axios";
+
 
 
 
@@ -316,7 +317,26 @@ export default function WhatPanelPage() {
                   <Label>Adjunta tu listado de difusión</Label>
                   <FileInput  onChange={(e) => setCustomValue('csvFile', e.target.files)} className="custom-class" />
                 </div>
-
+                {/* CONTENEDOR DE CREACIÓN DE EVENTO */}
+                <div className="w-full max-w-sm mx-auto mb-6">
+                    <Label className="mb-1 block">Crear nuevo evento</Label>
+                    <div className="flex items-center space-x-3">
+                      <input
+                        value={newEventName}
+                        onChange={(e) => setNewEventName(e.target.value)}
+                        placeholder="Nombre del evento"
+                        className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-500 focus:outline-none dark:bg-gray-800 dark:text-white"
+                      />
+                      <Button
+                        onClick={createMessageEvent}
+                        variant="primary"
+                        size="sm"
+                        className="w-11 h-10 flex items-center justify-center rounded-md p-0"
+                      >
+                        <PlusIcon className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
                 <div className="col-span-6 sm:col-full flex flex-col space-y-6">
                   <div className="flex space-x-4">
                    <Button  size="sm" variant="primary" onClick={() => setIsOpenConect(false)}> 
