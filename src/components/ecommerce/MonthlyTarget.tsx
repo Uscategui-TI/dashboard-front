@@ -10,6 +10,7 @@ import { MoreDotIcon } from "@/icons";
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
 });
+const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
 
 export default function MonthlyTarget() {
   const [series, setSeries] = useState<number[]>([0, 0]);
@@ -22,7 +23,7 @@ export default function MonthlyTarget() {
 
   const options: ApexOptions = {
     colors: ["#465FFF", "#6F7DFF"],
-    labels: ["Mujeres", "Hombres"],
+    labels: ["Femenino", "Masculino"],
     chart: { type: "donut", height: 330 },
     fill: { type: "solid" },
     plotOptions: { pie: { donut: { size: "70%" } } },
@@ -33,11 +34,12 @@ export default function MonthlyTarget() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_AUTH_URL}/api/person-form/list`);
+        const response = await axios.get(`${authUrl}/api/person-form/list`);
         const data = response.data;
 
-        const mujeres = data.filter((item: any) => item.genero?.toLowerCase() === "mujer").length;
-        const hombres = data.filter((item: any) => item.genero?.toLowerCase() === "hombre").length;
+        const mujeres = data.filter((item: any) => item.gender?.toLowerCase() === "femenino").length;
+        const hombres = data.filter((item: any) => item.gender?.toLowerCase() === "masculino").length;
+        
 
         setSeries([mujeres, hombres]);
       } catch (error) {
@@ -102,3 +104,4 @@ export default function MonthlyTarget() {
     </div>
   );
 }
+
