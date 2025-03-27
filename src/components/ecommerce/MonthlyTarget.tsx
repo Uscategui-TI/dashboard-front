@@ -33,7 +33,7 @@ export default function MonthlyTarget() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_AUTH_URL}/list`);
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_AUTH_URL}/api/person-form/list`);
         const data = response.data;
 
         const mujeres = data.filter((item: any) => item.genero?.toLowerCase() === "mujer").length;
