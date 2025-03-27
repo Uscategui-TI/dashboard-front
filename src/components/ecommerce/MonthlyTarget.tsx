@@ -38,7 +38,7 @@ export default function MonthlyTarget() {
         const data = response.data;
 
         const mujeres = data.filter((item: any) => item.gender?.toLowerCase() === "femenino").length;
-        const hombres = data.filter((item: any) => item.gender?.toLowerCase() === "masculino").length;
+const hombres = data.filter((item: any) => item.gender?.toLowerCase() === "masculino").length;
         
 
         setSeries([mujeres, hombres]);
