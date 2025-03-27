@@ -254,7 +254,13 @@ export default function WhatPanelPage() {
       }
     };
 
-    
+    useEffect(() => {
+      const fromLogin = localStorage.getItem("fromLogin");
+      if (fromLogin === "true") {
+        localStorage.removeItem("fromLogin");
+        window.location.reload();
+      }
+    }, []);
 
   return (
   
