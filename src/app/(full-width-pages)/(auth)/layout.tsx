@@ -1,5 +1,4 @@
 import ThemeTogglerTwo from "@/components/common/ThemeTogglerTwo";
-
 import { ThemeProvider } from "@/context/ThemeContext";
 import Image from "next/image";
 import React from "react";
@@ -16,10 +15,11 @@ export default function AuthLayout({
           {children}
           <div className="lg:w-1/2 w-full h-full hidden lg:block">
             <Image
-              src="/images/FotoLogin.jpg"
+              src="/images/login/FotoLogin.jpg"
               alt="Foto Login"
               width={800}
               height={600}
+              unoptimized
               className="w-full h-full object-cover"
             />
           </div>
@@ -31,3 +31,4 @@ export default function AuthLayout({
     </div>
   );
 }
+
