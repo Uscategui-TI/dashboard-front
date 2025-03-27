@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
+import type { RuleSetRule } from "webpack";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   images: {
     remotePatterns: [
       {
@@ -18,11 +18,21 @@ const nextConfig: NextConfig = {
     ],
   },
   webpack(config) {
+    // Excluir SVG del rule por defecto de file-loader
+    const fileLoaderRule = config.module.rules.find((rule: RuleSetRule) =>
+      rule?.test instanceof RegExp && rule.test.test(".svg")
+    );
+
+    if (fileLoaderRule) {
+      fileLoaderRule.exclude = /\.svg$/;
+    }
+
+    // Agrega rule para SVGR
     config.module.rules.push({
       test: /\.svg$/,
-      issuer: /\.[jt]sx?$/,
       use: ["@svgr/webpack"],
     });
+
     return config;
   },
 };
