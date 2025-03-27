@@ -10,7 +10,6 @@ import { MoreDotIcon } from "@/icons";
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
 });
-const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
 
 export default function MonthlyTarget() {
   const [series, setSeries] = useState<number[]>([0, 0]);
@@ -34,7 +33,7 @@ export default function MonthlyTarget() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`${authUrl}/list`);
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_AUTH_URL}/list`);
         const data = response.data;
 
         const mujeres = data.filter((item: any) => item.genero?.toLowerCase() === "mujer").length;
