@@ -1,319 +1,324 @@
-"use client"
+"use client";
 
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import { ImageUpload } from "@/components/form/form-elements/ImageUpload";
 import FileInput from "@/components/form/input/FileInput";
 import Label from "@/components/form/Label";
 import Select from "@/components/form/Select";
-import { ChevronDownIcon, PlusIcon } from "@/icons";
-import { Controller,FieldValues, useForm } from "react-hook-form";
+import { FieldValues, useForm } from "react-hook-form";
 import axios from "axios";
-
-
-
-
-// import { Metadata } from "next";
 import React, { useEffect, useState } from "react";
 import Button from "@/components/ui/button/Button";
 import { useRouter } from "next/navigation";
 import PhoneInput from "@/components/form/group-input/PhoneInput";
 
-
-// export const metadata: Metadata = {
-//   title:
-//     "Uscategui Panel",
-//   description: "Gestiona, organiza y parametriza actividades",
-// };
-
 const apiWhatsApp = process.env.NEXT_PUBLIC_WHATSAPP_URL;
 const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
 
 export default function WhatPanelPage() {
-    const [messageTwo, setMessageTwo] = useState("");
-    const [isOpenConect, setIsOpenConect] = useState(false);
+  const [isOpenConect, setIsOpenConect] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [totalMessagesSent, setTotalMessagesSent] = useState<number | null>(null);
+  const [isBroadcasting, setIsBroadcasting] = useState(false);
+  const [eventList, setEventList] = useState<string[]>([]);
+  const [selectedEventName, setSelectedEventName] = useState<string | null>(null);
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [linkToken, setLinkToken] = useState("");
+  const [isRestartDisabled, setIsRestartDisabled] = useState(true);
+  const [countdown, setCountdown] = useState(30);
+  const [selectedEventType, setSelectedEventType] = useState<{ value: string; label: string } | null>(null);
+const [selectedEventStatus, setSelectedEventStatus] = useState<{ value: string; label: string } | null>(null);
+  const [pendingStat, setPendingStat] = useState<null | {
+    eventName: string;
+    total: number | null;
+    imageUrl: string;
+    type: string;
+    status: string;
+    endDate: string;
+  }>(null);
+  const router = useRouter();
 
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors: errorsGeneral },
+  } = useForm<FieldValues>({ defaultValues: {} });
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file) {
-          console.log("Selected file:", file.name);
-        }
-    };
+  const setCustomValue = (id: any, value: any) => {
+    setValue(id, value, {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: true,
+    });
+  };
 
-    const options = [
-      { value: "marketing", label: "Marketing" },
-      { value: "template", label: "Template" },
-      { value: "development", label: "Development" },
-    ];
-      
-    const handleSelectChange = (value: string) => {
-      console.log("Selected value:", value);
-    };
+  const urlMedia = watch("urlMedia");
+  const eventType = watch("eventType");
+  const eventStatus = watch("eventStatus");
 
-    const router = useRouter();
-    const [loading, setLoading] = useState(false);
-    const [totalMessagesSent, setTotalMessagesSent] = useState<number | null>(null);
-    const [isBroadcasting, setIsBroadcasting] = useState(false);
-    const [newEventName, setNewEventName] = useState('');
-    const [eventList, setEventList] = useState<string[]>([]);
-    const [selectedEventName, setSelectedEventName] = useState<string | null>(null); // nuevo estado
-    const [phoneNumber, setPhoneNumber] = useState("");
-    const [linkToken, setLinkToken] = useState("");
-    const [isRestartDisabled, setIsRestartDisabled] = useState(true);
-    const [countdown, setCountdown] = useState(30);
-    
+  const onSubmitGenreal = async (formData: any) => {
+    try {
+      setLoading(true);
+      setIsBroadcasting(true);
 
-  
-    const {
-      register,
-      handleSubmit,
-      setValue,
-      watch,
-      reset,
-      formState: { errors: errorsGeneral }
-    } = useForm<FieldValues>({ defaultValues: {} });
-  
-    const setCustomValue = (id: any, value: any) => {
-      setValue(id, value, {
-        shouldDirty: true,
-        shouldTouch: true,
-        shouldValidate: true
-      });
-    };
-  
-    const urlMedia = watch('urlMedia');
-  
-    const onSubmitGenreal = async (formData: any) => {
-      try {
-        setLoading(true);
-        setIsBroadcasting(true);
-  
-        if (!formData.csvFile || formData.csvFile.length === 0) {
-          // toast.error('❌ Por favor, sube un archivo CSV.');
-          setIsBroadcasting(false);
-          setLoading(false);
-          return;
-        }
-  
-        const formDataToSend = new FormData();
-        formDataToSend.append('csvFile', formData.csvFile[0]);
-        if (formData.urlMedia) {
-          formDataToSend.append('urlMedia', formData.urlMedia);
-        }
-        formDataToSend.append('message', formData.message);
-  
-        await axios.post(`${apiWhatsApp}/upload`, formDataToSend);
-        // toast.success('Envio de mensajes exitoso');
-  
-        router.refresh();
-        reset(); // esto limpia el form pero ya no afecta el evento seleccionado
+      if (!formData.csvFile || formData.csvFile.length === 0) {
         setIsBroadcasting(false);
-      } catch (error: any) {
-        // toast.error('¡Oops! Algo salió mal.');
-      } finally {
         setLoading(false);
+        return;
       }
-    };
-  
-    const cancelBroadcast = async () => {
+
+      const formDataToSend = new FormData();
+      formDataToSend.append("csvFile", formData.csvFile[0]);
+      if (formData.urlMedia) {
+        formDataToSend.append("urlMedia", formData.urlMedia);
+      }
+      formDataToSend.append("message", formData.message);
+
+      await axios.post(`${apiWhatsApp}/upload`, formDataToSend);
+
+      const imageUrl = formData.urlMedia;
+      const type = formData.eventType;
+      const status = formData.eventStatus;
+      const today = new Date().toISOString().split("T")[0];
+
+      setPendingStat({
+        eventName: formData.eventName || selectedEventName || "",
+        total: null,
+        imageUrl,
+        type,
+        status,
+        endDate: today,
+      });
+
+      reset();
+      setIsBroadcasting(false);
+    } catch (error: any) {
+      console.error("Error al enviar difusión:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const saveEventStats = async ({
+    eventName,
+    total,
+    imageUrl,
+    type,
+    status,
+    endDate,
+  }: {
+    eventName: string;
+    total: number;
+    imageUrl: string;
+    type: string;
+    status: string;
+    endDate: string;
+  }) => {
+    try {
+      await axios.post(`${authUrl}/api/message-stats/all`, {
+        eventName,
+        totalMessagesSent: total,
+        imageUrl,
+        type,
+        status,
+        endDate,
+      });
+    } catch (error) {
+      console.error("Error al guardar estadísticas:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (!isBroadcasting) return;
+
+    const fetchTotalMessagesSent = async () => {
       try {
-        const response = await axios.post(`${apiWhatsApp}/cancel-broadcast`);
-        console.log(response.data);
-        alert('Difusión cancelada');
+        const response = await axios.get(`${apiWhatsApp}/v1/total-messages-sent`);
+        setTotalMessagesSent(response.data.totalMessagesSent + 1);
       } catch (error) {
-        console.error('Error al cancelar la difusión:', error);
-      }
-    };
-  
-    useEffect(() => {
-      if (!isBroadcasting) return;
-  
-      const fetchTotalMessagesSent = async () => {
-        try {
-          const response = await axios.get(`${apiWhatsApp}/v1/total-messages-sent`);
-          setTotalMessagesSent(response.data.totalMessagesSent + 1);
-        } catch (error) {
-          console.error('Error al obtener el total de mensajes enviados:', error);
-        }
-      };
-  
-      fetchTotalMessagesSent();
-      const interval = setInterval(fetchTotalMessagesSent, 5000);
-      return () => clearInterval(interval);
-    }, [isBroadcasting]);
-  
-    // Nuevo useEffect para guardar estadísticas al finalizar difusión
-    useEffect(() => {
-      if (!isBroadcasting && selectedEventName && totalMessagesSent !== null) {
-        saveEventStats(selectedEventName, totalMessagesSent);
-        setTotalMessagesSent(null); // Evita duplicación
-      }
-    }, [isBroadcasting, totalMessagesSent]);
-  
-  
-    const saveEventStats = async (eventName: string, total: number) => {
-      try {
-        await axios.post(`${authUrl}/api/message-stats/all`, {
-          eventName,
-          totalMessagesSent: total
-        });
-        // toast.success("📊 Estadísticas guardadas correctamente");
-      } catch (error) {
-        console.error("Error al guardar estadísticas:", error);
-        // toast.error("❌ No se pudieron guardar las estadísticas del evento");
-      }
-    };
-  
-    const fetchEvents = async () => {
-      try {
-        const response = await axios.get(`${authUrl}/api/messages/events`);
-        const eventsFromDb = response.data.map((e: any) => e.eventName);
-        setEventList(eventsFromDb);
-      } catch (error) {
-        console.error("Error al obtener eventos:", error);
-        // toast.error("❌ No se pudieron cargar los eventos");
-      }
-    };
-  
-    useEffect(() => {
-      fetchEvents();
-    }, []);
-  
-    const countries = [
-      { code: "CO", label: "57" },
-      { code: "US", label: "1" },
-    ];
-  
-    const handlePhoneNumberChange = (phoneNumber: string) => {
-      console.log("Updated phone number:", phoneNumber);
-    };
-    const handleRequestToken = async () => {
-      try {
-        const response = await axios.post(`${apiWhatsApp}/set-phone-number`, 
-          { phoneNumber }, 
-          { headers: { "Content-Type": "application/json" } }
-        );
-    
-        console.log("Respuesta del servidor:", response.data);
-    
-        if (response.data.message) alert(response.data.message);
-        if (response.data.token) {
-          setLinkToken(response.data.token);
-          console.log("Token recibido:", response.data.token);
-        }
-    
-        // Temporizador
-        setIsRestartDisabled(true);
-        setCountdown(30);
-        const timer = setInterval(() => {
-          setCountdown(prev => {
-            if (prev <= 1) {
-              clearInterval(timer);
-              setIsRestartDisabled(false);
-            }
-            return prev - 1;
-          });
-        }, 1000);
-      } catch (error) {
-        console.error("Error al enviar el número:", error);
-        alert("Hubo un error al guardar el número.");
+        console.error("Error al obtener el total de mensajes enviados:", error);
       }
     };
 
-    const handleRestart = async () => {
-      try {
-        const response = await axios.post(`${apiWhatsApp}/restart-bot`, {}, {
-          headers: { "Content-Type": "application/json" }
-        });
-        console.log("Reinicio solicitado:", response.data);
-        alert("El bot se está reiniciando...");
-      } catch (error) {
-        console.error("Error al reiniciar el bot:", error);
-        alert("Error al intentar reiniciar el bot.");
-      }
-    };
+    fetchTotalMessagesSent();
+    const interval = setInterval(fetchTotalMessagesSent, 5000);
+    return () => clearInterval(interval);
+  }, [isBroadcasting]);
 
-    useEffect(() => {
-      const fromLogin = localStorage.getItem("fromLogin");
-      if (fromLogin === "true") {
-        localStorage.removeItem("fromLogin");
-        window.location.reload();
-      }
-    }, []);
+  useEffect(() => {
+    if (!isBroadcasting && totalMessagesSent !== null && pendingStat) {
+      saveEventStats({ ...pendingStat, total: totalMessagesSent });
+      setPendingStat(null);
+      setTotalMessagesSent(null);
+  
+      // Limpiar selects personalizados
+      setSelectedEventName(null);
+      setSelectedEventType(null);
+      setSelectedEventStatus(null);
+  
+      // Limpiar formulario
+      reset({
+        message: "",
+        urlMedia: "",
+        eventName: "",
+        eventType: "",
+        eventStatus: "",
+        csvFile: null,
+      });
+    }
+  }, [isBroadcasting, totalMessagesSent]);
+
+  const fetchEvents = async () => {
+    try {
+      const response = await axios.get(`${authUrl}/api/messages/events`);
+      const eventsFromDb = response.data.map((e: any) => e.eventName);
+      setEventList(eventsFromDb);
+    } catch (error) {
+      console.error("Error al obtener eventos:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  const countries = [
+    { code: "CO", label: "57" },
+    { code: "US", label: "1" },
+  ];
+
+  const handlePhoneNumberChange = (phoneNumber: string) => {
+    console.log("Updated phone number:", phoneNumber);
+  };
+
+  const handleRequestToken = async () => {
+    try {
+      const response = await axios.post(`${apiWhatsApp}/set-phone-number`, { phoneNumber });
+      if (response.data.token) setLinkToken(response.data.token);
+
+      setIsRestartDisabled(true);
+      setCountdown(30);
+      const timer = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            setIsRestartDisabled(false);
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } catch (error) {
+      console.error("Error al enviar el número:", error);
+    }
+  };
+
+  const handleRestart = async () => {
+    try {
+      await axios.post(`${apiWhatsApp}/restart-bot`);
+      alert("El bot se está reiniciando...");
+    } catch (error) {
+      console.error("Error al reiniciar el bot:", error);
+    }
+  };
+
+  useEffect(() => {
+    const fromLogin = localStorage.getItem("fromLogin");
+    if (fromLogin === "true") {
+      localStorage.removeItem("fromLogin");
+      window.location.reload();
+    }
+  }, []);
 
   return (
-  
     <>
-      <div>
-        <PageBreadcrumb pageTitle="WhatsApp Panel" />
-        <div className="min-h-screen rounded-2xl border flex flex-col gap-6 border-gray-200 bg-white px-5 py-7 dark:border-gray-800 dark:bg-white/[0.03] xl:px-10 xl:py-12">
-          <div className="mx-auto w-full max-w-[630px] text-center">
-            <h3 className="mb-4 font-semibold text-gray-800 text-theme-xl dark:text-white/90 sm:text-2xl">
-              Personaliza tu difusión
-            </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 sm:text-base">
-              Bienvenido al panel de difusión masiva en el cual podras realizar campañas por medio de WhatsApp
-            </p>
-          </div>
-          <div>
-          <form onSubmit={handleSubmit(onSubmitGenreal)} encType="multipart/form-data">
-              <div className="grid grid-cols-6 gap-6">
-                <div className="col-span-6 sm:col-span-3">
-                  <div>
-                    <Label>Redacta tu mensaje</Label>
-                    <textarea
-                  rows={12}
-                  id="message"
-                  {...register('message')}
-                  className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:text-white"
-                  placeholder="Redacta el mensaje ideal para tu campaña"
-                  required
-                />
-                  </div>
-                </div>
+      <PageBreadcrumb pageTitle="WhatsApp Panel" />
+      <div className="min-h-screen rounded-2xl border flex flex-col gap-6 border-gray-200 bg-white px-5 py-7 dark:border-gray-800 dark:bg-white/[0.03] xl:px-10 xl:py-12">
+        <form onSubmit={handleSubmit(onSubmitGenreal)} encType="multipart/form-data">
+          <div className="grid grid-cols-6 gap-6">
+            <div className="col-span-6 sm:col-span-3">
+              <Label>Redacta tu mensaje</Label>
+              <textarea
+                rows={12}
+                {...register("message")}
+                className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:text-white"
+                placeholder="Redacta el mensaje ideal para tu campaña"
+                required
+              />
+            </div>
 
-                <div className="col-span-6 sm:col-span-3">
-                  <Label>Adjunta tu archivo multimedia</Label>
-                  <ImageUpload
-                    onChange={(value) => setCustomValue('urlMedia', value)}
-                    value={urlMedia || undefined}
-                  />
-                </div>
+            <div className="col-span-6 sm:col-span-3">
+              <Label>Adjunta tu archivo multimedia</Label>
+              <ImageUpload onChange={(value) => setCustomValue("urlMedia", value)} value={urlMedia || undefined} />
+            </div>
 
-                <div className="col-span-6 sm:col-span-3 space-y-2">
-                  <Label>Selecciona tu evento</Label>
-                  <div className="relative">
-                    <Select
-                      options={eventList.map((e) => ({ value: e, label: e }))}
-                      placeholder="Selecciona un evento"
-                      onChange={(value) => {
-                        setSelectedEventName(value);
-                        setValue('eventName', value);
-                      }}
-                      className="dark:bg-dark-900"
-                    />
-                    <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
-                      <ChevronDownIcon />
-                    </span>
-                  </div>
-                </div>
+            <div className="col-span-6 sm:col-span-3">
+              <Label>Selecciona tu evento</Label>
+              <Select
+                value={selectedEventName || ""}
+                options={eventList.map((e) => ({ value: e, label: e }))}
+                placeholder="Selecciona un evento"
+                onChange={(value: string) => {
+                  setSelectedEventName(value);
+                  setValue("eventName", value);
+                }}
+              />
+            </div>
 
-                <div className="col-span-6 sm:col-span-3">
-                  <Label>Adjunta tu listado de difusión</Label>
-                  <FileInput  onChange={(e) => setCustomValue('csvFile', e.target.files)} className="custom-class" />
-                </div>
-                <div className="col-span-6 sm:col-full flex flex-col space-y-6">
-                  <div className="flex space-x-4">
-                   <Button  size="sm" variant="primary" onClick={() => setIsOpenConect(false)}> 
-                      Vincular 
-                    </Button>
-                  <Button size="sm" variant="primary" type="submit" disabled={loading}>
-                    {loading ? 'Enviando...' : 'Enviar Difusión'}
-                  </Button>
-                    <Button  size="sm" variant="primary" onClick={cancelBroadcast}>   
-                      Cancelar Difusión
-                    </Button>
-                  </div>
+            <div className="col-span-6 sm:col-span-3">
+              <Label>Tipo de evento</Label>
+              <Select
+                value={selectedEventType?.value || ""}
+                options={[
+                  { value: "Importante", label: "Importante" },
+                  { value: "Informativo", label: "Informativo" },
+                ]}
+                placeholder="Selecciona el tipo"
+                onChange={(value: string) => {
+                  const option = { value, label: value };
+                  setSelectedEventType(option);
+                  setValue("eventType", value);
+                }}
+              />
+            </div>
+
+            <div className="col-span-6 sm:col-span-3">
+              <Label>Estado del evento</Label>
+              <Select
+                value={selectedEventStatus?.value || ""}
+                options={[
+                  { value: "Finalizado", label: "Finalizado" },
+                  { value: "En proceso", label: "En proceso" },
+                  { value: "Error", label: "Error" },
+                ]}
+                placeholder="Selecciona estado"
+                onChange={(value: string) => {
+                  const option = { value, label: value }; // reconstruir objeto
+                  setSelectedEventStatus(option);
+                  setValue("eventStatus", value);
+                }}
+              />
+            </div>
+
+            <div className="col-span-6 sm:col-span-3">
+              <Label>Adjunta tu listado de difusión</Label>
+              <FileInput onChange={(e) => setCustomValue("csvFile", e.target.files)} />
+            </div>
+
+            <div className="col-span-6 sm:col-full flex flex-col space-y-6">
+              <div className="flex space-x-4">
+                <Button size="sm" variant="primary" onClick={() => setIsOpenConect(false)}>
+                  Vincular
+                </Button>
+                <Button size="sm" variant="primary" type="submit" disabled={loading}>
+                  {loading ? "Enviando..." : "Enviar Difusión"}
+                </Button>
+                <Button size="sm" variant="primary" onClick={() => axios.post(`${apiWhatsApp}/cancel-broadcast`)}>
+                  Cancelar Difusión
+                </Button>
+              </div>
                   {/* 
                   {totalMessagesSent !== undefined && (
                     <div className="bg-cyan-600 text-white p-4 rounded-lg shadow-md w-full max-w-md text-center">
@@ -326,8 +331,6 @@ export default function WhatPanelPage() {
               </div>
             </form>
           </div>
-        </div>
-      </div>
       <div
         className={`fixed top-19 right-0 z-40 h-screen p-4 overflow-y-auto transition-transform w-90 bg-white dark:border-gray-200 dark:bg-gray-900 ${
           isOpenConect ? "translate-x-full" : "-translate-x-0"
