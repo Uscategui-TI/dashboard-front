@@ -150,27 +150,6 @@ export default function WhatPanelPage() {
       }
     }, [isBroadcasting, totalMessagesSent]);
   
-    const createMessageEvent = async () => {
-      if (!newEventName.trim()) {
-        // toast.error("Por favor escribe un nombre para el evento.");
-        return;
-      }
-  
-      try {
-        const response = await axios.post(`${authUrl}/api/messages/create`, {
-          eventName: newEventName,
-        });
-  
-        const createdEvent = response.data.eventName;
-        // toast.success("✅ Evento creado exitosamente");
-  
-        setEventList(prev => [...prev, createdEvent]);
-        setNewEventName('');
-      } catch (error) {
-        console.error("Error al crear el evento:", error);
-        // toast.error("Error al crear el evento");
-      }
-    };
   
     const saveEventStats = async (eventName: string, total: number) => {
       try {
@@ -323,26 +302,6 @@ export default function WhatPanelPage() {
                   <Label>Adjunta tu listado de difusión</Label>
                   <FileInput  onChange={(e) => setCustomValue('csvFile', e.target.files)} className="custom-class" />
                 </div>
-                {/* CONTENEDOR DE CREACIÓN DE EVENTO */}
-                <div className="w-full max-w-sm mx-auto mb-6">
-                    <Label className="mb-1 block">Crear nuevo evento</Label>
-                    <div className="flex items-center space-x-3">
-                      <input
-                        value={newEventName}
-                        onChange={(e) => setNewEventName(e.target.value)}
-                        placeholder="Nombre del evento"
-                        className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-500 focus:outline-none dark:bg-gray-800 dark:text-white"
-                      />
-                      <Button
-                        onClick={createMessageEvent}
-                        variant="primary"
-                        size="sm"
-                        className="w-11 h-10 flex items-center justify-center rounded-md p-0"
-                      >
-                        <PlusIcon className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
                 <div className="col-span-6 sm:col-full flex flex-col space-y-6">
                   <div className="flex space-x-4">
                    <Button  size="sm" variant="primary" onClick={() => setIsOpenConect(false)}> 

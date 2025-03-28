@@ -101,6 +101,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
               absolute inset-0 w-full h-full">
                 <Image
                   fill 
+                  sizes="(max-width: 768px) 100vw, 700px"
                   style={{ objectFit: 'cover' }} 
                   src={value} 
                   alt="House" 
