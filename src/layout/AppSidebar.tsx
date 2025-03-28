@@ -188,8 +188,8 @@ const AppSidebar: React.FC = () => {
         <Link href="/">
           {isExpanded || isHovered || isMobileOpen ? (
             <>
-              <Image className="dark:hidden" src="/images/logo/logo-uscate.webp" alt="Logo" width={150} height={40} />
-              <Image className="hidden dark:block" src="/images/logo/logo-uscate.webp" alt="Logo" width={150} height={40} />
+              <Image className="dark:hidden" src="/images/logo/logo white.png" alt="Logo" width={150} height={40} />
+              <Image className="hidden dark:block" src="/images/logo/logo dark.png" alt="Logo" width={150} height={40} />
             </>
           ) : (
             <Image src="/images/logo/logo-uscate-icon.jpg" alt="Logo" width={32} height={32} />
