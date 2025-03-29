@@ -152,7 +152,6 @@ const [selectedEventStatus, setSelectedEventStatus] = useState<{ value: string; 
     if (!isBroadcasting && totalMessagesSent !== null && pendingStat) {
       saveEventStats({ ...pendingStat, total: totalMessagesSent });
       setPendingStat(null);
-      setTotalMessagesSent(null);
   
       // Limpiar selects personalizados
       setSelectedEventName(null);
@@ -319,18 +318,18 @@ const [selectedEventStatus, setSelectedEventStatus] = useState<{ value: string; 
                   Cancelar Difusión
                 </Button>
               </div>
-                  {/* 
-                  {totalMessagesSent !== undefined && (
-                    <div className="bg-cyan-600 text-white p-4 rounded-lg shadow-md w-full max-w-md text-center">
-                      <p className="text-lg font-semibold">
-                        Total de mensajes enviados: <strong>{totalMessagesSent}</strong>
+                  {totalMessagesSent !== null && (
+                    <div className="bg-cyan-600 text-white px-6 py-3 rounded-lg shadow-md text-center sm:ml-auto sm:w-fit">
+                      <p className="text-sm sm:text-base font-medium">
+                        Total de mensajes enviados:{" "}
+                        <strong className="font-semibold">{totalMessagesSent}</strong>
                       </p>
                     </div>
-                  )} */}
-                </div>
-              </div>
-            </form>
-          </div>
+                  )}
+            </div>
+            </div>
+          </form>
+        </div>
       <div
         className={`fixed top-19 right-0 z-40 h-screen p-4 overflow-y-auto transition-transform w-90 bg-white dark:border-gray-200 dark:bg-gray-900 ${
           isOpenConect ? "translate-x-full" : "-translate-x-0"
