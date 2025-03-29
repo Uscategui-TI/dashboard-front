@@ -92,7 +92,7 @@ export default function RecentOrders() {
           </TableHeader>
 
           <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
-            {data.map((event) => (
+          {filteredData.map((event) => (
               <TableRow key={event.id}>
                 <TableCell className="py-3">
                   <div className="flex items-center gap-3">
