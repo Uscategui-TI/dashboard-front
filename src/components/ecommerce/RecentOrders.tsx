@@ -17,7 +17,7 @@ interface EventStat {
   eventName: string;
   type: string;
   status: "Finalizado" | "En proceso" | "Error";
-  totalBroadcasts?: number;
+  totalBroadcasts: number;
   totalMessagesSent: number;
   endDate: string;
   imageUrl: string;

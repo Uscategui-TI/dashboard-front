@@ -29,7 +29,8 @@ export default function WhatPanelPage() {
   const [isRestartDisabled, setIsRestartDisabled] = useState(true);
   const [countdown, setCountdown] = useState(30);
   const [selectedEventType, setSelectedEventType] = useState<{ value: string; label: string } | null>(null);
-const [selectedEventStatus, setSelectedEventStatus] = useState<{ value: string; label: string } | null>(null);
+  const [selectedEventStatus, setSelectedEventStatus] = useState<{ value: string; label: string } | null>(null);
+  const [statsSavingStatus, setStatsSavingStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [pendingStat, setPendingStat] = useState<null | {
     eventName: string;
     total: number | null;
@@ -94,6 +95,19 @@ const [selectedEventStatus, setSelectedEventStatus] = useState<{ value: string; 
         status,
         endDate: today,
       });
+
+      localStorage.setItem(
+        "pendingStat",
+        JSON.stringify({
+          eventName: formData.eventName || selectedEventName || "",
+          total: null,
+          imageUrl,
+          type,
+          status,
+          endDate: today,
+        })
+      );
+      
   
     } catch (error: any) {
       console.error("Error al enviar difusión:", error);
@@ -118,6 +132,7 @@ const [selectedEventStatus, setSelectedEventStatus] = useState<{ value: string; 
     endDate: string;
   }) => {
     try {
+      setStatsSavingStatus("saving");
       await axios.post(`${authUrl}/api/message-stats/all`, {
         eventName,
         totalMessagesSent: total,
@@ -126,10 +141,23 @@ const [selectedEventStatus, setSelectedEventStatus] = useState<{ value: string; 
         status,
         endDate,
       });
+      setStatsSavingStatus("saved");
+      localStorage.removeItem("pendingStat");
     } catch (error) {
-      console.error("Error al guardar estadísticas:", error);
+      console.error("❌ Error al guardar estadísticas:", error);
+      setStatsSavingStatus("error");
     }
   };
+
+  useEffect(() => {
+    const storedStat = localStorage.getItem("pendingStat");
+    if (storedStat) {
+      const parsed = JSON.parse(storedStat);
+      setPendingStat(parsed);
+      setIsBroadcasting(true);
+      setLoading(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (!isBroadcasting) return;
@@ -140,11 +168,20 @@ const [selectedEventStatus, setSelectedEventStatus] = useState<{ value: string; 
         const { totalMessagesSent, status } = res.data;
   
         setTotalMessagesSent(totalMessagesSent);
-        console.log("🟢 totalMessagesSent desde backend:", totalMessagesSent);
+
+        let formattedStatus = "En proceso";
+        if (status === "finalizada") formattedStatus = "Finalizado";
+        if (status === "cancelada") formattedStatus = "cancelada";
+
+        // Guardar el estado automáticamente
+        setSelectedEventStatus({ value: formattedStatus, label: formattedStatus });
+        setValue("eventStatus", formattedStatus);
   
         if ((status === "finalizada" || status === "cancelada") && pendingStat) {
           // 1. Guardar estadísticas
-          await saveEventStats({ ...pendingStat, total: totalMessagesSent });
+          await saveEventStats({ ...pendingStat, total: totalMessagesSent,status: formattedStatus, });
+          
+          localStorage.removeItem("pendingStat");
   
           // 2. Limpiar estados
           setPendingStat(null);
@@ -163,7 +200,6 @@ const [selectedEventStatus, setSelectedEventStatus] = useState<{ value: string; 
   
           // 3. Apagar el contador
           setIsBroadcasting(false);
-          setLoading(false)
         }
       } catch (error) {
         console.error("Error al obtener estado de difusión:", error);
@@ -289,25 +325,6 @@ const [selectedEventStatus, setSelectedEventStatus] = useState<{ value: string; 
                 }}
               />
             </div>
-
-            <div className="col-span-6 sm:col-span-3">
-              <Label>Estado del evento</Label>
-              <Select
-                value={selectedEventStatus?.value || ""}
-                options={[
-                  { value: "Finalizado", label: "Finalizado" },
-                  { value: "En proceso", label: "En proceso" },
-                  { value: "Error", label: "Error" },
-                ]}
-                placeholder="Selecciona estado"
-                onChange={(value: string) => {
-                  const option = { value, label: value }; // reconstruir objeto
-                  setSelectedEventStatus(option);
-                  setValue("eventStatus", value);
-                }}
-              />
-            </div>
-
             <div className="col-span-6 sm:col-span-3">
               <Label>Adjunta tu listado de difusión</Label>
               <FileInput onChange={(e) => setCustomValue("csvFile", e.target.files)} />
@@ -318,15 +335,15 @@ const [selectedEventStatus, setSelectedEventStatus] = useState<{ value: string; 
                 <Button size="sm" variant="primary" onClick={() => setIsOpenConect(false)}>
                   Vincular
                 </Button>
-                <Button size="sm" variant="primary" type="submit" disabled={loading}>
-                  {loading ? "Enviando..." : "Enviar Difusión"}
+                <Button size="sm" variant="primary" type="submit" disabled={isBroadcasting}>
+                  {isBroadcasting ? "Enviando..." : "Enviar Difusión"}
                 </Button>
                 <Button size="sm" variant="primary" onClick={() => axios.post(`${apiWhatsApp}/cancel-broadcast`)}>
                   Cancelar Difusión
                 </Button>
               </div>
               {totalMessagesSent !== null && (
-                <div className="bg-cyan-600 text-white px-6 py-3 rounded-lg shadow-md text-center sm:ml-auto sm:w-fit">
+                <div className=" bg-brand-500 text-white px-6 py-3 dark:border-gray-800 dark:bg-white/[0.03] rounded-lg shadow-md text-center sm:ml-auto sm:w-fit">
                   <p className="text-sm sm:text-base font-medium">
                     Total de mensajes enviados:{" "}
                     <strong className="font-semibold">

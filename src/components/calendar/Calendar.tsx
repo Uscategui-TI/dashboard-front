@@ -123,28 +123,36 @@ const Calendar: React.FC = () => {
     }
   };
 
-  const handleAddOrUpdateEvent = () => {
+  const handleAddOrUpdateEvent = async () => {
     if (selectedEvent) {
-      setEvents((prevEvents) =>
-        prevEvents.map((event) =>
-          event.id === selectedEvent.id
-            ? {
-                ...event,
-                title: eventTitle,
-                start: eventStartDate,
-                end: eventEndDate,
-                extendedProps: { ...event.extendedProps, calendar: eventLevel },
-              }
-            : event
-        )
-      );
-      closeModal();
-      resetModalFields();
+      try {
+        const response = await fetch(`${authUrl}/api/messages/update/${selectedEvent.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            eventName: eventTitle,
+            color: eventLevel,
+            startDate: eventStartDate,
+            endDate: eventEndDate,
+            imageUrl: urlMedia,
+          }),
+        });
+  
+        if (!response.ok) throw new Error("Error al actualizar el evento");
+  
+        await fetchEvents(); // Recargar eventos
+        closeModal();
+        resetModalFields();
+      } catch (error) {
+        console.error("Error al actualizar el evento:", error);
+        alert("Hubo un problema al actualizar el evento.");
+      }
     } else {
-      createEvent();
+      createEvent(); // creación si no hay evento seleccionado
     }
   };
-
   const handleDateSelect = (selectInfo: DateSelectArg) => {
     resetModalFields();
     setEventStartDate(selectInfo.startStr);
