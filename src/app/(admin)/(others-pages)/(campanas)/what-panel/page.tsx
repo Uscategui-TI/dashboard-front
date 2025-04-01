@@ -11,6 +11,8 @@ import React, { useEffect, useState } from "react";
 import Button from "@/components/ui/button/Button";
 import { useRouter } from "next/navigation";
 import PhoneInput from "@/components/form/group-input/PhoneInput";
+import CountUp from "react-countup";
+
 
 const apiWhatsApp = process.env.NEXT_PUBLIC_WHATSAPP_URL;
 const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
@@ -63,27 +65,27 @@ const [selectedEventStatus, setSelectedEventStatus] = useState<{ value: string; 
     try {
       setLoading(true);
       setIsBroadcasting(true);
-
+  
       if (!formData.csvFile || formData.csvFile.length === 0) {
         setIsBroadcasting(false);
         setLoading(false);
         return;
       }
-
+  
       const formDataToSend = new FormData();
       formDataToSend.append("csvFile", formData.csvFile[0]);
       if (formData.urlMedia) {
         formDataToSend.append("urlMedia", formData.urlMedia);
       }
       formDataToSend.append("message", formData.message);
-
+  
       await axios.post(`${apiWhatsApp}/upload`, formDataToSend);
-
+  
       const imageUrl = formData.urlMedia;
       const type = formData.eventType;
       const status = formData.eventStatus;
       const today = new Date().toISOString().split("T")[0];
-
+  
       setPendingStat({
         eventName: formData.eventName || selectedEventName || "",
         total: null,
@@ -92,12 +94,10 @@ const [selectedEventStatus, setSelectedEventStatus] = useState<{ value: string; 
         status,
         endDate: today,
       });
-
-      reset();
-      setIsBroadcasting(false);
+  
     } catch (error: any) {
       console.error("Error al enviar difusión:", error);
-    } finally {
+      setIsBroadcasting(false);
       setLoading(false);
     }
   };
@@ -133,42 +133,47 @@ const [selectedEventStatus, setSelectedEventStatus] = useState<{ value: string; 
 
   useEffect(() => {
     if (!isBroadcasting) return;
-
-    const fetchTotalMessagesSent = async () => {
+  
+    const fetchStatusAndMessages = async () => {
       try {
-        const response = await axios.get(`${apiWhatsApp}/v1/total-messages-sent`);
-        setTotalMessagesSent(response.data.totalMessagesSent + 1);
+        const res = await axios.get(`${apiWhatsApp}/broadcast-status`);
+        const { totalMessagesSent, status } = res.data;
+  
+        setTotalMessagesSent(totalMessagesSent);
+        console.log("🟢 totalMessagesSent desde backend:", totalMessagesSent);
+  
+        if ((status === "finalizada" || status === "cancelada") && pendingStat) {
+          // 1. Guardar estadísticas
+          await saveEventStats({ ...pendingStat, total: totalMessagesSent });
+  
+          // 2. Limpiar estados
+          setPendingStat(null);
+          setSelectedEventName(null);
+          setSelectedEventType(null);
+          setSelectedEventStatus(null);
+  
+          reset({
+            message: "",
+            urlMedia: "",
+            eventName: "",
+            eventType: "",
+            eventStatus: "",
+            csvFile: null,
+          });
+  
+          // 3. Apagar el contador
+          setIsBroadcasting(false);
+          setLoading(false)
+        }
       } catch (error) {
-        console.error("Error al obtener el total de mensajes enviados:", error);
+        console.error("Error al obtener estado de difusión:", error);
       }
     };
-
-    fetchTotalMessagesSent();
-    const interval = setInterval(fetchTotalMessagesSent, 5000);
+  
+    fetchStatusAndMessages();
+    const interval = setInterval(fetchStatusAndMessages, 5000);
     return () => clearInterval(interval);
-  }, [isBroadcasting]);
-
-  useEffect(() => {
-    if (!isBroadcasting && totalMessagesSent !== null && pendingStat) {
-      saveEventStats({ ...pendingStat, total: totalMessagesSent });
-      setPendingStat(null);
-  
-      // Limpiar selects personalizados
-      setSelectedEventName(null);
-      setSelectedEventType(null);
-      setSelectedEventStatus(null);
-  
-      // Limpiar formulario
-      reset({
-        message: "",
-        urlMedia: "",
-        eventName: "",
-        eventType: "",
-        eventStatus: "",
-        csvFile: null,
-      });
-    }
-  }, [isBroadcasting, totalMessagesSent]);
+  }, [isBroadcasting, pendingStat]);
 
   const fetchEvents = async () => {
     try {
@@ -230,6 +235,8 @@ const [selectedEventStatus, setSelectedEventStatus] = useState<{ value: string; 
       window.location.reload();
     }
   }, []);
+
+
 
   return (
     <>
@@ -318,14 +325,16 @@ const [selectedEventStatus, setSelectedEventStatus] = useState<{ value: string; 
                   Cancelar Difusión
                 </Button>
               </div>
-                  {totalMessagesSent !== null && (
-                    <div className="bg-cyan-600 text-white px-6 py-3 rounded-lg shadow-md text-center sm:ml-auto sm:w-fit">
-                      <p className="text-sm sm:text-base font-medium">
-                        Total de mensajes enviados:{" "}
-                        <strong className="font-semibold">{totalMessagesSent}</strong>
-                      </p>
-                    </div>
-                  )}
+              {totalMessagesSent !== null && (
+                <div className="bg-cyan-600 text-white px-6 py-3 rounded-lg shadow-md text-center sm:ml-auto sm:w-fit">
+                  <p className="text-sm sm:text-base font-medium">
+                    Total de mensajes enviados:{" "}
+                    <strong className="font-semibold">
+                      <CountUp end={totalMessagesSent} duration={0.5} />
+                    </strong>
+                  </p>
+                </div>
+              )}
             </div>
             </div>
           </form>
