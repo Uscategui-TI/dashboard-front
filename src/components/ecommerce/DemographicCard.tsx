@@ -7,6 +7,8 @@ import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import Image from "next/image";
 import { cityCoordinates } from "./coordinates";
+import { usePathname } from "next/navigation";
+
 
 const CountryMap = dynamic(() => import("./CountryMap"), { ssr: false });
 
@@ -24,7 +26,6 @@ export default function DemographicCard() {
     setIsOpen(false);
   }
 
-  useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/api/person-form/list`);
@@ -59,9 +60,13 @@ export default function DemographicCard() {
         console.error("Error al cargar datos demográficos:", error);
       }
     };
-  
-    fetchData();
-  }, [groupBy]);
+    const pathname = usePathname();
+
+    useEffect(() => {
+      if (pathname === "/whatpanel") {
+        fetchData();
+      }
+    }, [pathname]);
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
