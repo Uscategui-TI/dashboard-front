@@ -31,6 +31,8 @@ export default function WhatPanelPage() {
   const [selectedEventType, setSelectedEventType] = useState<{ value: string; label: string } | null>(null);
   const [selectedEventStatus, setSelectedEventStatus] = useState<{ value: string; label: string } | null>(null);
   const [statsSavingStatus, setStatsSavingStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const csvFileRef = React.useRef<HTMLInputElement | null>(null);
   const [pendingStat, setPendingStat] = useState<null | {
     eventName: string;
     total: number | null;
@@ -188,6 +190,7 @@ export default function WhatPanelPage() {
           setSelectedEventName(null);
           setSelectedEventType(null);
           setSelectedEventStatus(null);
+
   
           reset({
             message: "",
@@ -197,9 +200,16 @@ export default function WhatPanelPage() {
             eventStatus: "",
             csvFile: null,
           });
+          if (csvFileRef.current) {
+            csvFileRef.current.value = "";
+          }
   
-
+          // 3. Apagar el contador
           setIsBroadcasting(false);
+          setLoading(false);
+          setPendingStat(null);
+          setShowSuccessMessage(true); 
+          setTimeout(() => setShowSuccessMessage(false), 2000);
         }
       } catch (error) {
         console.error("Error al obtener estado de difusión:", error);
@@ -276,6 +286,11 @@ export default function WhatPanelPage() {
 
   return (
     <>
+    {showSuccessMessage && (
+      <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
+        📢 Difusión completada y estadísticas guardadas exitosamente.
+      </div>
+    )}
       <PageBreadcrumb pageTitle="WhatsApp Panel" />
       <div className="min-h-screen rounded-2xl border flex flex-col gap-6 border-gray-200 bg-white px-5 py-7 dark:border-gray-800 dark:bg-white/[0.03] xl:px-10 xl:py-12">
         <form onSubmit={handleSubmit(onSubmitGenreal)} encType="multipart/form-data">
@@ -327,7 +342,10 @@ export default function WhatPanelPage() {
             </div>
             <div className="col-span-6 sm:col-span-3">
               <Label>Adjunta tu listado de difusión</Label>
-              <FileInput onChange={(e) => setCustomValue("csvFile", e.target.files)} />
+              <FileInput
+                ref={csvFileRef}
+                onChange={(e) => setCustomValue("csvFile", e.target.files)}
+              />
             </div>
 
             <div className="col-span-6 sm:col-full flex flex-col space-y-6">
@@ -335,8 +353,13 @@ export default function WhatPanelPage() {
                 <Button size="sm" variant="primary" onClick={() => setIsOpenConect(false)}>
                   Vincular
                 </Button>
-                <Button size="sm" variant="primary" type="submit" disabled={isBroadcasting}>
-                  {isBroadcasting ? "Enviando..." : "Enviar Difusión"}
+                <Button
+                  size="sm"
+                  variant="primary"
+                  type="submit"
+                  disabled={isBroadcasting || loading}
+                >
+                  {isBroadcasting || loading ? "Enviando..." : "Enviar Difusión"}
                 </Button>
                 <Button size="sm" variant="primary" onClick={() => axios.post(`${apiWhatsApp}/cancel-broadcast`)}>
                   Cancelar Difusión
