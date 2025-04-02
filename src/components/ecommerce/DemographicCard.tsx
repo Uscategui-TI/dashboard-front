@@ -103,7 +103,7 @@ export default function DemographicCard() {
       </div>
       <div className="px-4 py-6 my-6 overflow-hidden border border-gray-200 rounded-2xl bg-gray-50 dark:border-gray-800 dark:bg-gray-900 sm:px-6">
         <div className="h-[400px] w-full">
-          <CountryMap points={points} />
+        <CountryMap key={points.length} points={points} />
         </div>
       </div>
     </div>

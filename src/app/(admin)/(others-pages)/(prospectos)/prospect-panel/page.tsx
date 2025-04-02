@@ -42,6 +42,16 @@ export default function PersonFormPage() {
       setTimeout(() => setSuccessMessage(""), 3000);
     }
   };
+  const watchedFields = watch();
+    const isFormValid =
+    watchedFields.name &&
+    watchedFields.lastname &&
+    watchedFields.gender &&
+    watchedFields.phone &&
+    watchedFields.email &&
+    watchedFields.city &&
+    watchedFields.country &&
+    watchedFields.address;
 
   return (
     <>
@@ -113,10 +123,10 @@ export default function PersonFormPage() {
             <Input {...register("address", { required: true })} placeholder="Dirección" />
           </div>
           <div className="col-span-6">
-            <Button type="submit" disabled={loading}>
-              {loading ? "Enviando..." : "Enviar Formulario"}
+            <Button type="submit" disabled={loading || !isFormValid}>
+                {loading ? "Enviando..." : "Enviar Formulario"}
             </Button>
-          </div>
+            </div>
         </form>
       </div>
     </>
