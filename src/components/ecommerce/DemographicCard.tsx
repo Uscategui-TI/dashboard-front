@@ -50,7 +50,7 @@ export default function DemographicCard() {
           const coords = cityCoordinates[key.toLowerCase()];
           return {
             latLng: coords,
-            name: `${key} (${value.country})  ${value.count} personas`,
+            name: `${key} (colombia)`,
           };
         });
   
