@@ -198,7 +198,7 @@ export default function WhatPanelPage() {
             csvFile: null,
           });
   
-          // 3. Apagar el contador
+
           setIsBroadcasting(false);
         }
       } catch (error) {
