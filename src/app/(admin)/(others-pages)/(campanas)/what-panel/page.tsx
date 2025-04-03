@@ -33,6 +33,9 @@ export default function WhatPanelPage() {
   const [statsSavingStatus, setStatsSavingStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const csvFileRef = React.useRef<HTMLInputElement | null>(null);
+  const [isRequestDisabled, setIsRequestDisabled] = useState(false);
+  const [requestCountdown, setRequestCountdown] = useState(0);
+  const [toastError, setToastError] = useState<string | null>(null);
   const [pendingStat, setPendingStat] = useState<null | {
     eventName: string;
     total: number | null;
@@ -64,59 +67,61 @@ export default function WhatPanelPage() {
   const eventType = watch("eventType");
   const eventStatus = watch("eventStatus");
 
+  useEffect(() => {
+    if (toastError) {
+      const timer = setTimeout(() => setToastError(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastError])
+  
+
   const onSubmitGenreal = async (formData: any) => {
     try {
       setLoading(true);
       setIsBroadcasting(true);
-  
-      if (!formData.csvFile || formData.csvFile.length === 0) {
+
+      const csvFile = csvFileRef.current?.files?.[0];
+      if (!csvFile) {
+        setToastError("❌ Por favor selecciona un archivo CSV.");
         setIsBroadcasting(false);
         setLoading(false);
         return;
       }
-  
+
       const formDataToSend = new FormData();
-      formDataToSend.append("csvFile", formData.csvFile[0]);
-      if (formData.urlMedia) {
-        formDataToSend.append("urlMedia", formData.urlMedia);
-      }
+      formDataToSend.append("csvFile", csvFile);
+      if (formData.urlMedia) formDataToSend.append("urlMedia", formData.urlMedia);
       formDataToSend.append("message", formData.message);
-  
-      await axios.post(`${apiWhatsApp}/upload`, formDataToSend);
-  
-      const imageUrl = formData.urlMedia;
-      const type = formData.eventType;
-      const status = formData.eventStatus;
+
+      const response = await axios.post(`${apiWhatsApp}/upload`, formDataToSend);
+
+      if (response.data?.error) {
+        setToastError(response.data.error);
+        setIsBroadcasting(false);
+        setLoading(false);
+        return;
+      }
+
       const today = new Date().toISOString().split("T")[0];
-  
-      setPendingStat({
+      const newPendingStat = {
         eventName: formData.eventName || selectedEventName || "",
         total: null,
-        imageUrl,
-        type,
-        status,
+        imageUrl: formData.urlMedia,
+        type: formData.eventType,
+        status: formData.eventStatus,
         endDate: today,
-      });
+      };
 
-      localStorage.setItem(
-        "pendingStat",
-        JSON.stringify({
-          eventName: formData.eventName || selectedEventName || "",
-          total: null,
-          imageUrl,
-          type,
-          status,
-          endDate: today,
-        })
-      );
-      
-  
-    } catch (error: any) {
-      console.error("Error al enviar difusión:", error);
+      setPendingStat(newPendingStat);
+      localStorage.setItem("pendingStat", JSON.stringify(newPendingStat));
+    } catch (err) {
+      console.error("Error al enviar difusión:", err);
+      setToastError("❌ Error al enviar difusión.");
       setIsBroadcasting(false);
       setLoading(false);
     }
   };
+  
 
   const saveEventStats = async ({
     eventName,
@@ -240,15 +245,28 @@ export default function WhatPanelPage() {
     { code: "US", label: "1" },
   ];
 
-  const handlePhoneNumberChange = (phoneNumber: string) => {
-    console.log("Updated phone number:", phoneNumber);
-  };
-
   const handleRequestToken = async () => {
+    if (isRequestDisabled) return;
+  
     try {
       const response = await axios.post(`${apiWhatsApp}/set-phone-number`, { phoneNumber });
       if (response.data.token) setLinkToken(response.data.token);
-
+  
+      // 🔒 Desactiva el botón de "Solicitar Token" con contador de 5s
+      setIsRequestDisabled(true);
+      setRequestCountdown(5);
+      const tokenTimer = setInterval(() => {
+        setRequestCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(tokenTimer);
+            setIsRequestDisabled(false);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+  
+      // 🔁 Temporizador de reinicio (30s)
       setIsRestartDisabled(true);
       setCountdown(30);
       const timer = setInterval(() => {
@@ -286,11 +304,28 @@ export default function WhatPanelPage() {
 
   return (
     <>
-    {showSuccessMessage && (
-      <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
-        📢 Difusión completada y estadísticas guardadas exitosamente.
-      </div>
-    )}
+      {toastError && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+                <strong className="font-bold">Error: </strong>
+                <span className="block sm:inline">{toastError}</span>
+                <button
+                  onClick={() => setToastError(null)}
+                  className="absolute top-0 bottom-0 right-0 px-4 py-3"
+                >
+                  <svg className="fill-current h-6 w-6 text-red-500" role="button" viewBox="0 0 20 20">
+                    <title>Cerrar</title>
+                    <path d="M14.348 5.652a1 1 0 00-1.414-1.414L10 7.172 7.066 4.238a1 1 0 10-1.414 1.414L8.586 8.586l-2.934 2.934a1 1 0 101.414 1.414L10 10.828l2.934 2.934a1 1 0 001.414-1.414L11.414 8.586l2.934-2.934z"/>
+                  </svg>
+                </button>
+              </div>
+            )}
+
+            {/* ✅ Toast de éxito (ya lo tenías) */}
+            {showSuccessMessage && (
+              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
+                📢 Difusión completada y estadísticas guardadas exitosamente.
+              </div>
+            )}
       <PageBreadcrumb pageTitle="WhatsApp Panel" />
       <div className="min-h-screen rounded-2xl border flex flex-col gap-6 border-gray-200 bg-white px-5 py-7 dark:border-gray-800 dark:bg-white/[0.03] xl:px-10 xl:py-12">
         <form onSubmit={handleSubmit(onSubmitGenreal)} encType="multipart/form-data">
@@ -436,9 +471,14 @@ export default function WhatPanelPage() {
 
           {/* Botones */}
           <div className="grid grid-cols-2 gap-4">
-            <Button size="sm" variant="outline" onClick={handleRequestToken}>
-              Solicitar Token
-            </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleRequestToken}
+            disabled={isRequestDisabled}
+          >
+            {isRequestDisabled ? `Espera ${requestCountdown}s...` : "Solicitar Token"}
+          </Button>
             <Button
               size="sm"
               variant="primary"
