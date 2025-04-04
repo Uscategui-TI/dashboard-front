@@ -31,7 +31,11 @@ export default function PersonFormPage() {
       setLoading(true);
       await axios.post(`${authUrl}/api/person-form/submit`, data);
       setSuccessMessage("Formulario enviado exitosamente ✅");
-      reset();
+  
+      
+      reset(); 
+      setSelectedGender(null); 
+      setSelectedCountry(null); 
     } catch (error) {
       console.error("Error al enviar el formulario:", error);
     } finally {
