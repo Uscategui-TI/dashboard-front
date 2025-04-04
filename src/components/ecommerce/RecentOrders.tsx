@@ -17,7 +17,7 @@ interface EventStat {
   eventName: string;
   type: string;
   status: "Finalizado" | "En proceso" | "Error";
-  totalBroadcasts?: number;
+  totalBroadcasts: number;
   totalMessagesSent: number;
   endDate: string;
   imageUrl: string;
@@ -92,7 +92,7 @@ export default function RecentOrders() {
           </TableHeader>
 
           <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
-          {filteredData.map((event) => (
+            {filteredData.map((event) => (
               <TableRow key={event.id}>
                 <TableCell className="py-3">
                   <div className="flex items-center gap-3">

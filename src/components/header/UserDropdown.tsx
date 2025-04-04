@@ -1,19 +1,54 @@
 "use client";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
+import axios from "axios";
+
+const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
+
+interface User {
+  name: string;
+  lastName: string;
+  email: string;
+}
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
 
-function toggleDropdown(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
-  e.stopPropagation();
-  setIsOpen((prev) => !prev);
-}
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = Cookies.get("token");
+      if (!token) return;
+
+      try {
+        const { data } = await axios.get(`${authUrl}/api/auth/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setUser({
+          name: data.name,
+          lastName: data.lastName,
+          email: data.email,
+        });
+      } catch (err) {
+        console.error("Error al obtener el usuario:", err);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  function toggleDropdown(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
+    e.stopPropagation();
+    setIsOpen((prev) => !prev);
+  }
 
   function closeDropdown() {
     setIsOpen(false);
@@ -24,30 +59,24 @@ function toggleDropdown(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
     localStorage.removeItem("roles");
     router.push("/signin");
     setTimeout(() => {
-      window.location.reload(); // Luego recarga la página
+      window.location.reload();
     }, 100);
   };
+
   return (
     <div className="relative">
       <button
-        onClick={toggleDropdown} 
+        onClick={toggleDropdown}
         className="flex items-center text-gray-700 dark:text-gray-400 dropdown-toggle"
       >
         <span className="mr-3 overflow-hidden rounded-full h-11 w-11">
-          <Image
-            width={44}
-            height={44}
-            src="/images/user/images.jpeg"
-            alt="User"
-          />
+          <Image width={44} height={44} src="/images/user/logo-uscate-icon.jpg" alt="User" />
         </span>
-
-        <span className="block mr-1 font-medium text-theme-sm">Hola, Admin</span>
-
+        <span className="block mr-1 font-medium text-theme-sm">
+          Hola, {user ? user.name : "Cargando..."}
+        </span>
         <svg
-          className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${
-            isOpen ? "rotate-180" : ""
-          }`}
+          className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
           width="18"
           height="20"
           viewBox="0 0 18 20"
@@ -71,10 +100,10 @@ function toggleDropdown(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
       >
         <div>
           <span className="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
-            Admin
+            {user ? `${user.name} ${user.lastName}` : "Cargando..."}
           </span>
           <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
-            admin@gmail.com
+            {user?.email || "-"}
           </span>
         </div>
 

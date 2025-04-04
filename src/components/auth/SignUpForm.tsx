@@ -10,12 +10,17 @@ import { useRouter } from "next/navigation";
 const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
 
 interface RegisterData {
-  username: string;
+  email: string;
   password: string;
-  fullName: string;
+  name: string;
+  lastName: string;
   birthDate: string;
   idNumber: string;
-  role: string;
+  roles: string;
+  address: string;
+  city: string;
+  country: string;
+  phone: string;
 }
 
 export default function SignUpForm() {
@@ -23,12 +28,17 @@ export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
   const [registerData, setRegisterData] = useState<RegisterData>({
-    username: "",
+    email: "",
     password: "",
-    fullName: "",
+    name: "",
+    lastName: "",
     birthDate: "",
     idNumber: "",
-    role: "",
+    roles: "",
+    address: "",
+    city: "",
+    country: "",
+    phone: "",
   });
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -43,16 +53,30 @@ export default function SignUpForm() {
     e.preventDefault();
 
     try {
+      const mappedData = {
+        email: registerData.email,
+        password: registerData.password,
+        name: registerData.name,
+        lastName: registerData.lastName,
+        birthDate: registerData.birthDate,
+        idNumber: registerData.idNumber,
+        address: registerData.address,
+        city: registerData.city,
+        country: registerData.country,
+        phone: registerData.phone,
+        roles: [registerData.roles], // backend espera Set<Role>
+      };
+
       const response = await fetch(`${authUrl}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(registerData),
+        body: JSON.stringify(mappedData),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.message || "Error al registrar usuario.");
+        setError(data.message || data.error || "Error al registrar usuario.");
         setMessage(null);
         return;
       }
@@ -95,23 +119,30 @@ export default function SignUpForm() {
           <form onSubmit={handleSubmit}>
             <div className="space-y-5">
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                <div className="sm:col-span-1">
-                  <Label>
-                    Nombre completo<span className="text-error-500">*</span>
-                  </Label>
+                <div>
+                  <Label>Nombre<span className="text-error-500">*</span></Label>
                   <Input
                     type="text"
-                    name="fullName"
-                    placeholder="Nombre completo"
-                    value={registerData.fullName}
+                    name="name"
+                    placeholder="Nombre"
+                    value={registerData.name}
                     onChange={handleChange}
                     required
                   />
                 </div>
-                <div className="sm:col-span-1">
-                  <Label>
-                    Fecha de nacimiento<span className="text-error-500">*</span>
-                  </Label>
+                <div>
+                  <Label>Apellido<span className="text-error-500">*</span></Label>
+                  <Input
+                    type="text"
+                    name="lastName"
+                    placeholder="Apellido"
+                    value={registerData.lastName}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label>Fecha de nacimiento<span className="text-error-500">*</span></Label>
                   <Input
                     type="date"
                     name="birthDate"
@@ -123,9 +154,7 @@ export default function SignUpForm() {
               </div>
 
               <div>
-                <Label>
-                  Número de identificación<span className="text-error-500">*</span>
-                </Label>
+                <Label>Número de identificación<span className="text-error-500">*</span></Label>
                 <Input
                   type="text"
                   name="idNumber"
@@ -137,23 +166,68 @@ export default function SignUpForm() {
               </div>
 
               <div>
-                <Label>
-                  Correo electrónico<span className="text-error-500">*</span>
-                </Label>
+                <Label>Correo electrónico<span className="text-error-500">*</span></Label>
                 <Input
                   type="email"
-                  name="username"
+                  name="email"
                   placeholder="Correo electrónico"
-                  value={registerData.username}
+                  value={registerData.email}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <div>
+                  <Label>País<span className="text-error-500">*</span></Label>
+                  <Input
+                    type="text"
+                    name="country"
+                    placeholder="País"
+                    value={registerData.country}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label>Ciudad<span className="text-error-500">*</span></Label>
+                  <Input
+                    type="text"
+                    name="city"
+                    placeholder="Ciudad"
+                    value={registerData.city}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label>Dirección<span className="text-error-500">*</span></Label>
+                <Input
+                  type="text"
+                  name="address"
+                  placeholder="Dirección"
+                  value={registerData.address}
                   onChange={handleChange}
                   required
                 />
               </div>
 
               <div>
-                <Label>
-                  Contraseña<span className="text-error-500">*</span>
-                </Label>
+                <Label>Teléfono<span className="text-error-500">*</span></Label>
+                <Input
+                  type="text"
+                  name="phone"
+                  placeholder="Teléfono"
+                  value={registerData.phone}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <Label>Contraseña<span className="text-error-500">*</span></Label>
                 <div className="relative">
                   <Input
                     type={showPassword ? "text" : "password"}
@@ -177,12 +251,10 @@ export default function SignUpForm() {
               </div>
 
               <div>
-                <Label>
-                  Rol<span className="text-error-500">*</span>
-                </Label>
+                <Label>Rol<span className="text-error-500">*</span></Label>
                 <select
-                  name="role"
-                  value={registerData.role}
+                  name="roles"
+                  value={registerData.roles}
                   onChange={handleChange}
                   className="w-full h-11 rounded-lg border border-gray-300 bg-transparent px-4 text-sm dark:bg-gray-900 dark:text-white/90 dark:border-gray-700"
                   required
@@ -206,13 +278,9 @@ export default function SignUpForm() {
                 />
                 <p className="inline-block font-normal text-gray-500 dark:text-gray-400">
                   Al crear una cuenta aceptas los{" "}
-                  <span className="text-gray-800 dark:text-white/90">
-                    Términos y condiciones,
-                  </span>{" "}
+                  <span className="text-gray-800 dark:text-white/90">Términos y condiciones,</span>{" "}
                   y nuestra{" "}
-                  <span className="text-gray-800 dark:text-white">
-                    Política de privacidad.
-                  </span>
+                  <span className="text-gray-800 dark:text-white">Política de privacidad.</span>
                 </p>
               </div>
 

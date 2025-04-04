@@ -1,0 +1,31 @@
+export const cityCoordinates: Record<string, [number, number]> = {
+    "neiva": [2.9273, -75.2819],
+    "medellin": [6.2518, -75.5636],
+    "pitalito": [1.8539, -76.0507],
+    "bogota": [4.7110, -74.0721],
+    "cali": [3.4516, -76.5320],
+    "barranquilla": [10.9685, -74.7813],
+    "cartagena": [10.3910, -75.4794],
+    "pereira": [4.8133, -75.6961],
+    "bucaramanga": [7.1193, -73.1227],
+    "manizales": [5.0689, -75.5174],
+    "ibague": [4.4389, -75.2322],
+    "villavicencio": [4.1420, -73.6266],
+    "monteria": [8.7479, -75.8814],
+    "pasto": [1.2136, -77.2811],
+    "sincelejo": [9.3047, -75.3978],
+    "riohacha": [11.5444, -72.9072],
+    "valledupar": [10.4631, -73.2532],
+    "quibdo": [5.6947, -76.6610],
+    "tunja": [5.5353, -73.3678],
+    "florencia": [1.6144, -75.6062],
+    "mocoa": [1.1474, -76.6470],
+    "leticia": [-4.2153, -69.9406],
+  
+    // Algunas internacionales por si aparecen en tus registros
+    "rio janeiro": [-22.9068, -43.1729],
+    "quito": [-0.1807, -78.4678],
+    "lima": [-12.0464, -77.0428],
+    "caracas": [10.4806, -66.9036],
+};
+  
