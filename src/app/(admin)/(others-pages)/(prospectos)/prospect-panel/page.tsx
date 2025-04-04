@@ -13,10 +13,7 @@ const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
 
 export default function PersonFormPage() {
     const [selectedGender, setSelectedGender] = useState<{ value: string; label: string } | null>(null);
-    const [selectedCountry, setSelectedCountry] = useState<{ value: string; label: string }>({
-        value: "Colombia",
-        label: "Colombia",
-      });
+    const [selectedCountry, setSelectedCountry] = useState<{ value: string; label: string } | null>(null);
   const {
     register,
     handleSubmit,
@@ -102,7 +99,7 @@ export default function PersonFormPage() {
           <div className="col-span-6 sm:col-span-3">
             <Label>País</Label>
             <Select
-                value={selectedCountry.value}
+                value={selectedCountry?.value || ""}
                 options={[
                 { value: "Colombia", label: "Colombia" },
                 { value: "Estados Unidos", label: "Estados Unidos" },
