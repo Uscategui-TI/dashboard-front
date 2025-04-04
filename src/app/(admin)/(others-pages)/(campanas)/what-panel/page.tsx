@@ -12,6 +12,7 @@ import Button from "@/components/ui/button/Button";
 import { useRouter } from "next/navigation";
 import PhoneInput from "@/components/form/group-input/PhoneInput";
 import CountUp from "react-countup";
+import Cookies from "js-cookie";
 
 
 const apiWhatsApp = process.env.NEXT_PUBLIC_WHATSAPP_URL;
@@ -139,22 +140,41 @@ export default function WhatPanelPage() {
     endDate: string;
   }) => {
     try {
+      const token = Cookies.get("token"); // o localStorage.getItem("token")
+      if (!token) {
+        console.error("❌ Token no disponible");
+        setStatsSavingStatus("error");
+        return;
+      }
+
       setStatsSavingStatus("saving");
-      await axios.post(`${authUrl}/api/message-stats/all`, {
-        eventName,
-        totalMessagesSent: total,
-        imageUrl,
-        type,
-        status,
-        endDate,
-      });
-      setStatsSavingStatus("saved");
-      localStorage.removeItem("pendingStat");
-    } catch (error) {
-      console.error("❌ Error al guardar estadísticas:", error);
-      setStatsSavingStatus("error");
-    }
-  };
+
+      await axios.post(
+        `${authUrl}/api/message-stats/all`,
+        {
+          eventName,
+          totalMessagesSent: total,
+          imageUrl,
+          type,
+          status,
+          endDate,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+    setStatsSavingStatus("saved");
+    localStorage.removeItem("pendingStat");
+  } catch (error) {
+    console.error("❌ Error al guardar estadísticas:", error);
+    setStatsSavingStatus("error");
+  }
+};
+
 
   useEffect(() => {
     const storedStat = localStorage.getItem("pendingStat");
