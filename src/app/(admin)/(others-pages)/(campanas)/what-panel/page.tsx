@@ -458,7 +458,7 @@ export default function WhatPanelPage() {
 
         <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
           La difusión masiva de mensajes se realiza por medio de un puente entre tu dispositivo y sesión principal de WhatsApp.{" "}
-          <a href="#" className="text-blue-600 underline dark:text-blue-500 hover:no-underline">
+          <a href="/guia-uso" className="text-blue-600 underline dark:text-blue-500 hover:no-underline">
             Visita guía de uso
           </a>
         </p>
