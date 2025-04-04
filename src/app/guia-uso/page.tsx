@@ -16,6 +16,9 @@ export default function GuiaUsoPage() {
               <strong>Vincula tu dispositivo:</strong> Ingresa tu número de teléfono en el panel derecho y solicita tu token de vinculación. Luego, cópialo y pégalo en tu dispositivo autorizado.
             </li>
             <li>
+              <strong>Actualiza la conexion</strong> Despues de evidenciar por mediante tu telefono por la aplicacion de wasap que la conexion se realizo exitosamente deberas actulizar la conexion con el provedor presionando el boton de actualizar despues podras seguir con el proceso de difusion.
+            </li>
+            <li>
               <strong>Redacta tu mensaje:</strong> Escribe el texto que deseas enviar a los contactos. Puedes acompañarlo con un archivo multimedia.
             </li>
             <li>
