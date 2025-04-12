@@ -1,48 +1,24 @@
 "use client";
 
-import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import Label from "@/components/form/Label";
 
-export default function GuiaUsoPage() {
+export default function GuiaUsoModal() {
   return (
-    <>
-      <PageBreadcrumb pageTitle="Guía de Uso" />
-      <div className="min-h-screen rounded-2xl border flex flex-col gap-6 border-gray-200 bg-white px-5 py-7 dark:border-gray-800 dark:bg-white/[0.03] xl:px-10 xl:py-12">
-        <div className="prose dark:prose-invert max-w-full">
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">Cómo usar el panel de difusión</h2>
-
-          <ol className="list-decimal pl-5 space-y-3 text-gray-700 dark:text-gray-300">
-            <li>
-              <strong>Vincula tu dispositivo:</strong> Ingresa tu número de teléfono en el panel derecho y solicita tu token de vinculación. Luego, cópialo y pégalo en tu dispositivo autorizado.
-            </li>
-            <li>
-              <strong>Actualiza la conexion</strong> Despues de evidenciar por mediante tu telefono por la aplicacion de wasap que la conexion se realizo exitosamente deberas actulizar la conexion con el provedor presionando el boton de actualizar despues podras seguir con el proceso de difusion.
-            </li>
-            <li>
-              <strong>Redacta tu mensaje:</strong> Escribe el texto que deseas enviar a los contactos. Puedes acompañarlo con un archivo multimedia.
-            </li>
-            <li>
-              <strong>Selecciona el evento:</strong> Elige el nombre del evento y define su tipo (Informativo o Importante).
-            </li>
-            <li>
-              <strong>Carga el archivo CSV:</strong> Adjunta tu listado de contactos en formato CSV. Este debe contener una columna de números válidos.
-            </li>
-            <li>
-              <strong>Inicia la difusión:</strong> Presiona "Enviar Difusión". El sistema enviará los mensajes uno a uno. Puedes monitorear el total enviado en tiempo real.
-            </li>
-            <li>
-              <strong>Cancelar o Reiniciar:</strong> Puedes cancelar la difusión en cualquier momento o reiniciar el proveedor si necesitas volver a vincular.
-            </li>
-            <li>
-              <strong>Estadísticas:</strong> Al finalizar, se guardan automáticamente las estadísticas del evento, incluyendo la cantidad de mensajes enviados y quién lo realizó.
-            </li>
-          </ol>
-
-          <p className="mt-6 text-gray-600 dark:text-gray-400">
-            Si tienes dudas adicionales, contacta con el soporte o revisa el manual completo.
-          </p>
-        </div>
-      </div>
-    </>
+    <div className="prose dark:prose-invert max-w-full px-4 py-4">
+      <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">Cómo usar el panel de difusión</h2>
+      <ol className="list-decimal pl-5 space-y-3 text-gray-700 dark:text-gray-300">
+        <img src="/images/vincular-dispositivo.png" alt="Paso 1: Vincular dispositivo" className="rounded-lg my-4" />
+        <li><strong>Vincula tu dispositivo:</strong> Ingresa tu número de teléfono en el panel derecho y solicita tu token de vinculación. Luego, cópialo y pégalo en tu dispositivo autorizado.</li>
+        <li><strong>Actualiza la conexión:</strong> Luego de vincular correctamente, presiona el botón de actualizar para continuar con la difusión.</li>
+        <li><strong>Redacta tu mensaje:</strong> Escribe el mensaje que deseas enviar y añade multimedia si lo necesitas.</li>
+        <li><strong>Selecciona el evento:</strong> Elige nombre y tipo del evento.</li>
+        <li><strong>Carga tu CSV:</strong> Adjunta un archivo con los números de contacto.</li>
+        <li><strong>Envia la difusión:</strong> Monitorea los mensajes enviados en tiempo real.</li>
+        <li><strong>Cancelar o Reiniciar:</strong> Cancela o reinicia el proveedor si es necesario.</li>
+        <li><strong>Estadísticas:</strong> Se guardan automáticamente al finalizar la difusión.</li>
+      </ol>
+      <p className="mt-6 text-gray-600 dark:text-gray-400">
+        Si tienes dudas adicionales, contacta soporte o revisa el manual completo.
+      </p>
+    </div>
   );
 }

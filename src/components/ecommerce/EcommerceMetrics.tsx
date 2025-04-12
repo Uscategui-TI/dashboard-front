@@ -16,12 +16,12 @@ export const EcommerceMetrics = () => {
     const fetchData = async () => {
       try {
         // Obtener prospectos
-        const prospectosRes = await axios.get(`${apiUrl}/api/person-form/list`);
-        const prospectosTotal = prospectosRes.data.length;
+        const prospectosRes = await axios.get(`${apiUrl}/api/person-form/count`);
+        const prospectosTotal = prospectosRes.data; // ✅ ya es un número
         setProspects(prospectosTotal);
 
-        // Simular anteriores (aqui puedes cambiar por endpoint real si existe)
-        setPrevProspects(prospectosTotal - 1); // simula que antes eran 30 menos
+        // Simular anteriores
+        setPrevProspects(prospectosTotal - 1); // simula que antes había uno menos
 
         // Obtener total de eventos
         const eventosRes = await axios.get(`${apiUrl}/api/messages/count`);

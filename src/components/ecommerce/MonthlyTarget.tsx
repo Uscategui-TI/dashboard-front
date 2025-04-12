@@ -31,43 +31,22 @@ export default function MonthlyTarget() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await axios.get(`${authUrl}/api/person-form/list`);
+        const res = await axios.get(`${authUrl}/api/person-form/genders/all`);
         const data = res.data;
-
-        // Conteo por género
-        const mujeres = data.filter((p: any) => p.gender?.toLowerCase() === "femenino").length;
-        const hombres = data.filter((p: any) => p.gender?.toLowerCase() === "masculino").length;
-        setSeries([mujeres, hombres]);
-
-        // Fechas actuales
-        const now = new Date();
-        const currentMonth = now.getMonth(); // 0 = enero
-        const currentYear = now.getFullYear();
-        const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1;
-        const previousYear = currentMonth === 0 ? currentYear - 1 : currentYear;
-
-        // Convertir fechas y contar por mes
-        let thisMonthCount = 0;
-        let prevMonthCount = 0;
-
-        data.forEach((p: any) => {
-          const d = new Date(p.date);
-          const m = d.getMonth();
-          const y = d.getFullYear();
-          if (m === currentMonth && y === currentYear) {
-            thisMonthCount++;
-          } else if (m === previousMonth && y === previousYear) {
-            prevMonthCount++;
-          }
-        });
-
-        setActual(thisMonthCount);
-        setMesAnterior(prevMonthCount);
+    
+        // Reordenamos para que coincida con ["Femenino", "Masculino"]
+        const femenino = data.find((g: any) => g.gender.toLowerCase() === "femenino")?.count || 0;
+        const masculino = data.find((g: any) => g.gender.toLowerCase() === "masculino")?.count || 0;
+    
+        setSeries([femenino, masculino]);
+    
+        // Simulamos valores para objetivo, mes anterior y actual
+        setActual(femenino + masculino); // ← o ajústalo si quieres otra lógica
+        setMesAnterior(1000); // ← ponle un valor estático por ahora si no tienes otro endpoint
       } catch (err) {
         console.error("Error al cargar datos:", err);
       }
     };
-
     fetchData();
   }, []);
 

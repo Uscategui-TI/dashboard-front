@@ -9,58 +9,82 @@ const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false })
 export default function StatisticsChart() {
   const [series, setSeries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<"month" | "year">("month");
 
-  const months = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-  ];
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const [categories, setCategories] = useState<string[]>(months);
 
-  const options: ApexOptions = {
+  const getChartOptions = (): ApexOptions => ({
     chart: { type: "area", height: 310, toolbar: { show: false } },
     xaxis: {
-      categories: months,
+      categories,
       axisBorder: { show: false },
       axisTicks: { show: false },
+      labels: {
+        style: { colors: ["#6B7280"] },
+      },
     },
-    yaxis: { labels: { style: { colors: ["#6B7280"] } } },
-    stroke: { curve: "straight", width: [2] },
+    yaxis: {
+      labels: { style: { colors: ["#6B7280"] } },
+    },
+    stroke: {
+      curve: "smooth",
+      width: [2],
+    },
     fill: {
       type: "gradient",
-      gradient: { opacityFrom: 0.55, opacityTo: 0 },
+      gradient: {
+        opacityFrom: 0.55,
+        opacityTo: 0.1,
+      },
     },
     dataLabels: { enabled: false },
     tooltip: { enabled: true },
-    markers: { size: 0 },
+    markers: {
+      size: viewMode === "month" ? 4 : 6,
+    },
     grid: {
       xaxis: { lines: { show: false } },
       yaxis: { lines: { show: true } },
     },
     colors: ["#465FFF"],
-  };
+  });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_AUTH_URL}/api/person-form/list`);
-        const data = res.data;
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_AUTH_URL}/api/person-form/dates/all`);
+        const dates: string[] = res.data;
 
-        // Contar prospectos por mes
-        const countsByMonth = Array(12).fill(0);
-        data.forEach((person: any) => {
-          const date = new Date(person.date);
-          const monthIndex = date.getMonth();
-          countsByMonth[monthIndex]++;
-        });
+        if (viewMode === "month") {
+          const countsByMonth = Array(12).fill(0);
+          dates.forEach((dateStr) => {
+            const date = new Date(dateStr);
+            const month = date.getMonth();
+            countsByMonth[month]++;
+          });
+          setCategories(months);
+          setSeries([{ name: "Prospectos", data: countsByMonth }]);
+        } else {
+          const countsByYear: Record<string, number> = {};
+          dates.forEach((dateStr) => {
+            const year = new Date(dateStr).getFullYear();
+            countsByYear[year] = (countsByYear[year] || 0) + 1;
+          });
+          const years = Object.keys(countsByYear).sort();
+          const counts = years.map((year) => countsByYear[year]);
+          setCategories(years);
+          setSeries([{ name: "Prospectos", data: counts }]);
+        }
 
-        setSeries([{ name: "Prospectos", data: countsByMonth }]);
         setLoading(false);
       } catch (error) {
-        console.error("Error al cargar datos del backend:", error);
+        console.error("Error al cargar fechas de creación:", error);
       }
     };
 
     fetchData();
-  }, []);
+  }, [viewMode]);
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 sm:pt-6">
@@ -73,13 +97,31 @@ export default function StatisticsChart() {
             Trayectoria de vinculación
           </p>
         </div>
+        <div className="space-x-2">
+          <button
+            onClick={() => setViewMode("month")}
+            className={`px-3 py-1 rounded-md border text-sm ${
+              viewMode === "month" ? "bg-blue-600 text-white" : "border-gray-300 dark:text-white"
+            }`}
+          >
+            Mes
+          </button>
+          <button
+            onClick={() => setViewMode("year")}
+            className={`px-3 py-1 rounded-md border text-sm ${
+              viewMode === "year" ? "bg-blue-600 text-white" : "border-gray-300 dark:text-white"
+            }`}
+          >
+            Año
+          </button>
+        </div>
       </div>
 
       <div className="max-w-full overflow-x-auto custom-scrollbar">
         <div className="min-w-[1000px] xl:min-w-full">
           {!loading && (
             <ReactApexChart
-              options={options}
+              options={getChartOptions()}
               series={series}
               type="area"
               height={310}

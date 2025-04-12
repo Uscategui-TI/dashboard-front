@@ -6,7 +6,7 @@ import React from "react";
 
 export const metadata: Metadata = {
   title:
-    "Uscategui Panel",
+    "Uscategui Perfil Usuario",
   description: "Gestiona, organiza y parametriza actividades",
 };
 

@@ -61,10 +61,10 @@ export default function SignInForm() {
         <div>
           <div className="mb-5 sm:mb-8">
             <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
-              Sign In
+              Iniciar Session
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Enter your ID and password to sign in!
+              Ingresa tu documento y Contraseña
             </p>
           </div>
 
@@ -108,20 +108,6 @@ export default function SignInForm() {
                   </span>
                 </div>
               </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Checkbox checked={isChecked} onChange={setIsChecked} />
-                  <span className="block font-normal text-gray-700 text-theme-sm dark:text-gray-400">
-                    Mantener sesión activa
-                  </span>
-                </div>
-                <Link
-                  href="/reset-password"
-                  className="text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400"
-                >
-                  ¿Olvidaste tu contraseña?
-                </Link>
-              </div>
               <div>
                 <Button className="w-full" size="sm" type="submit" disabled={loading}>
                   {loading ? "Cargando..." : "Iniciar sesión"}
@@ -129,18 +115,6 @@ export default function SignInForm() {
               </div>
             </div>
           </form>
-
-          <div className="mt-5">
-            <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
-              ¿No tienes una cuenta?{" "}
-              <Link
-                href="/signup"
-                className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
-              >
-                Regístrate
-              </Link>
-            </p>
-          </div>
         </div>
       </div>
     </div>

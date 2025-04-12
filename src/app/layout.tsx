@@ -16,7 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <link rel="icon" href="images/favicon.ico" />
+      <link rel="icon" href="images/logo/logo-uscate-icon.jpg" />
       <body className={`${outfit.variable} dark:bg-gray-900`}>
         <ThemeProvider>
           <SidebarProvider>{children}</SidebarProvider>
