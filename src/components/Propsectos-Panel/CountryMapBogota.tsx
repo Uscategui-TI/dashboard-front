@@ -1,6 +1,6 @@
 import React from "react";
-import { coMill } from "@react-jvectormap/colombia";
 import dynamic from "next/dynamic";
+import { coMill } from "@react-jvectormap/colombia";
 
 const VectorMap = dynamic(
   () => import("@react-jvectormap/core").then((mod) => mod.VectorMap),
@@ -11,7 +11,7 @@ interface CountryMapProps {
   points: {
     latLng: [number, number];
     name: string;
-    count: number; // 👈 agregamos la cantidad de prospectos
+    count: number;
   }[];
 }
 
@@ -19,9 +19,15 @@ const CountryMap: React.FC<CountryMapProps> = ({ points }) => {
   return (
     <div style={{ width: "100%", height: "100%" }}>
       <VectorMap
-        map={coMill}
+        map={coMill as any}
         backgroundColor="transparent"
         markers={points}
+        focusOn={{
+          x: 0.52,
+          y: 0.52,
+          scale: 9, // Zoom centrado en Bogotá
+          animate: true,
+        }}
         markerStyle={{
           initial: {
             fill: "#465FFF",
@@ -39,9 +45,8 @@ const CountryMap: React.FC<CountryMapProps> = ({ points }) => {
         }}
         zoomOnScroll={true}
         zoomAnimate={true}
-        // 👇 Mostrar nombre y cantidad
-        onMarkerTipShow={function (event, label, index) {
-          const point = points[Number(index)]; // ← Aseguramos que el índice sea tipo número
+        onMarkerTipShow={(event, label, index) => {
+          const point = points[Number(index)];
           (label as any).html(`<strong>${point.name}</strong><br/>${point.count} prospectos`);
         }}
       />

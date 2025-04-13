@@ -64,7 +64,7 @@ const navItems: NavItem[] = [
     roles: ["Admin", "Coordinador"],
     subItems: [
       { name: "Panel Prospectos", path: "/prospect-panel", roles: ["Admin"] },
-      { name: "Listar Prospectos", path: "/form-elements", roles: ["Admin", "Coordinador"] },
+      { name: "Listar Prospectos", path: "/prospect-listar", roles: ["Admin", "Coordinador"] },
     ],
   },
   {
