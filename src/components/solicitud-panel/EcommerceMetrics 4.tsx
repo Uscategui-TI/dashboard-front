@@ -14,9 +14,9 @@ export const Metrics4 = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get(`${apiUrl}/api/prospecto/estadisticas`);
-        const enProcesoCount = response.data.conteoPorEstado.INGRESADAS|| 0; // ✅ Solo EN_PROCESO
+        const enProcesoCount = response.data.conteoPorEstado.PAUSADOS|| 0; 
         setEnProceso(enProcesoCount);
-        setPrevEnProceso(enProcesoCount - 1); // Simulamos un valor anterior
+        setPrevEnProceso(enProcesoCount - 1);
       } catch (error) {
         console.error("Error cargando métricas:", error);
       }
@@ -38,7 +38,7 @@ export const Metrics4 = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-            En Proceso
+            Pausadas
           </h3>
           <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-xl dark:bg-gray-800">
             <GroupIcon className="text-gray-800 size-5 dark:text-white/90" />

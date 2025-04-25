@@ -38,7 +38,7 @@ export const EcommerceMetrics = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-            Prospectos
+          Solicitudes
           </h3>
           <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-xl dark:bg-gray-800">
             <GroupIcon className="text-gray-800 size-5 dark:text-white/90" />
