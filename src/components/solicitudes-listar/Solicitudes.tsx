@@ -170,6 +170,8 @@ export default function RecentOrders() {
                 <option value="EN_PROCESO">En Proceso</option>
                 <option value="RECHAZADA">Rechazada</option>
                 <option value="APROBADO">Aprobado</option>
+                <option value="PAUSADOS">Pausado</option>
+                <option value="FINALIZADOS">Finalizados</option>
               </select>
             </div>
 
