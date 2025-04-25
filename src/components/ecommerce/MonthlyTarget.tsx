@@ -85,7 +85,7 @@ export default function MonthlyTarget() {
             label: "Objetivo",
             value: objetivo,
             compareTo: actual,
-            isInverted: true, // Queremos flecha roja si no se alcanza
+            isInverted: true, 
           },
           {
             label: "Mes anterior",

@@ -25,13 +25,9 @@ export default function Ecommerce() {
       <div className="col-span-12 sm:col-span-6 xl:col-span-4">
         <MonthlyTargetCanales />
       </div>
-
-      {/* Fila 2: Gráfica histórica */}
       <div className="col-span-12">
         <StatisticsChart />
       </div>
-
-      {/* Fila 3: Mapa demográfico */}
       <div className="col-span-12 xl:col-span-6">
         <DemographicCard />
       </div>

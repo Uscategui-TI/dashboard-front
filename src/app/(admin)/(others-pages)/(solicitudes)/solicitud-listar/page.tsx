@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import SolicitudComponent from "@/components/solicitudes/Solicitudes";
+import SolicitudComponent from "@/components/solicitudes-listar/Solicitudes";
 
 export const metadata: Metadata = {
     title:
