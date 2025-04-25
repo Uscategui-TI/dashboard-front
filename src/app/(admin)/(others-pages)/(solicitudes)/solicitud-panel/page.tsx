@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import SolicitudComponent from "@/components/solicitudes-listar/Solicitudes";
 import MonthlyTargetCanales from "@/components/solicitud-panel/MonthlyTargetCanales";
 import TablaProspectosPanel from "@/components/solicitud-panel/TablaProspectosPanel";
+import Solicitudrecent from "@/components/solicitud-panel/Solicitudes";
 import { EcommerceMetrics } from "@/components/solicitud-panel/EcommerceMetrics";
 import { Metrics1} from "@/components/solicitud-panel/EcommerceMetrics 1";
 import { Metrics2} from "@/components/solicitud-panel/EcommerceMetrics 2";
@@ -37,8 +38,11 @@ export const metadata: Metadata = {
             <MonthlyTargetCanales />
           </div>
           <div className="col-span-12">
-            <TablaProspectosPanel />
+            <Solicitudrecent />
           </div>
+{/*           <div className="col-span-12">
+            <TablaProspectosPanel />
+          </div> */}
           
         </div>
       );
