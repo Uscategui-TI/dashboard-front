@@ -6,6 +6,7 @@ import { Metrics1} from "@/components/solicitud-panel/EcommerceMetrics 1";
 import { Metrics2} from "@/components/solicitud-panel/EcommerceMetrics 2";
 import { Metrics3} from "@/components/solicitud-panel/EcommerceMetrics 3";
 import { Metrics4 } from "@/components/solicitud-panel/EcommerceMetrics 4";
+import { Metrics5 } from "@/components/solicitud-panel/EcommerceMetrics 5";
 
 
 export const metadata: Metadata = {
@@ -23,14 +24,18 @@ export const metadata: Metadata = {
           <div className="col-span-12 sm:col-span-6 xl:col-span-4">
             <Metrics1 />
           </div>  
-          <div className="col-span-12 sm:col-span-6 xl:col-span-4">
-            <Metrics4 />
-          </div>         
+                   
           <div className="col-span-12 sm:col-span-6 xl:col-span-4">
             <Metrics2 />
           </div>
           <div className="col-span-12 sm:col-span-6 xl:col-span-4">
             <Metrics3 />
+          </div>
+          <div className="col-span-12 sm:col-span-6 xl:col-span-4">
+            <Metrics4 />
+          </div>
+          <div className="col-span-12 sm:col-span-6 xl:col-span-4">
+            <Metrics5 />
           </div>   
           <div className="col-span-12 sm:col-span-6 xl:col-span-4">
             <MonthlyTargetCanales />

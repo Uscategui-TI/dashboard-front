@@ -6,7 +6,7 @@ import { ArrowDownIcon, ArrowUpIcon, GroupIcon } from "@/icons";
 
 const apiUrl = process.env.NEXT_PUBLIC_AUTH_URL;
 
-export const Metrics4 = () => {
+export const Metrics6 = () => {
   const [enProceso, setEnProceso] = useState(0);
   const [prevEnProceso, setPrevEnProceso] = useState(0);
 
@@ -14,7 +14,7 @@ export const Metrics4 = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get(`${apiUrl}/api/prospecto/estadisticas`);
-        const enProcesoCount = response.data.conteoPorEstado.PAUSADOS|| 0; 
+        const enProcesoCount = response.data.conteoPorEstado.PENDIENTE|| 0; 
         setEnProceso(enProcesoCount);
         setPrevEnProceso(enProcesoCount - 1);
       } catch (error) {
@@ -38,7 +38,7 @@ export const Metrics4 = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-            Pausadas
+            Aprovado
           </h3>
           <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-xl dark:bg-gray-800">
             <GroupIcon className="text-gray-800 size-5 dark:text-white/90" />
@@ -51,7 +51,7 @@ export const Metrics4 = () => {
             {enProceso.toLocaleString()}
           </h4>
           <span className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-            Total en pausados
+            Total en aprovado
           </span>
         </div>
 
