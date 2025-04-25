@@ -1,7 +1,5 @@
 import { Metadata } from "next";
-import SolicitudComponent from "@/components/solicitudes-listar/Solicitudes";
 import MonthlyTargetCanales from "@/components/solicitud-panel/MonthlyTargetCanales";
-import TablaProspectosPanel from "@/components/solicitud-panel/TablaProspectosPanel";
 import Solicitudrecent from "@/components/solicitud-panel/Solicitudes";
 import { EcommerceMetrics } from "@/components/solicitud-panel/EcommerceMetrics";
 import { Metrics1} from "@/components/solicitud-panel/EcommerceMetrics 1";
