@@ -57,6 +57,7 @@ export default function RecentOrders() {
       
     // 5. Columnas configuradas con render personalizado
     const columns = [
+      { key: "codigoSolicitud", header: "Código Solicitud" },
       { key: "asunto", header: "Asunto" },
       {
         key: "Prospecto",
