@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import GenericTable from "../tables/GenericTable";
 import Button from "../ui/button/Button";
+import CrearSolicitudModal from "./FormularioSolicitudModal";
 
 type EventStat = {
   id: string | number;
@@ -20,6 +21,10 @@ type EventStat = {
 export default function RecentOrders() {
   const [data, setData] = useState<EventStat[]>([]);
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
+  const [size] = useState(10);
+  const [totalPages, setTotalPages] = useState(0);
+  const [showCrearModal, setShowCrearModal] = useState(false);
 
   const [selectedSolicitud, setSelectedSolicitud] = useState<EventStat | null>(null);
   const [showModal, setShowModal] = useState(false);
@@ -28,16 +33,18 @@ export default function RecentOrders() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [page, size]);
 
   const fetchData = async () => {
     try {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_AUTH_URL}/api/prospecto/all`
-      );
-      setData(response.data);
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_AUTH_URL}/api/prospecto/all`, {
+        params: { page, size }
+      });
+  
+      setData(response.data.content);   
+      setTotalPages(response.data.totalPages);  
     } catch (error) {
-      console.error("Error al cargar las estadísticas:", error);
+      console.error("Error al cargar las solicitudes:", error);
     }
   };
 
@@ -61,6 +68,7 @@ export default function RecentOrders() {
   };
 
   const columns = [
+    { key: "codigoSolicitud", header: "Código Solicitud" },
     { key: "asunto", header: "Asunto" },
     {
       key: "Prospecto",
@@ -105,10 +113,22 @@ export default function RecentOrders() {
       console.error("Error al guardar la solicitud:", error);
     }
   };
+  const handleDelete = async (id: string | number) => {
+    const confirmacion = window.confirm("¿Estás seguro que deseas eliminar esta solicitud?");
+    if (!confirmacion) return;
+  
+    try {
+      await axios.delete(`${process.env.NEXT_PUBLIC_AUTH_URL}/api/prospecto/${id}/eliminar`);
+      fetchData();
+    } catch (error) {
+      console.error("Error al eliminar la solicitud:", error);
+    }
+  };
+  
   
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
+    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">  
       <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
           Lista de Solicitudes
@@ -128,6 +148,13 @@ export default function RecentOrders() {
           >
             Limpiar
           </button>
+          <Button
+            size="sm"
+            className="bg-blue-600 text-white hover:bg-blue-700"
+            onClick={() => setShowCrearModal(true)}
+          >
+            Crear Solicitud
+          </Button>
         </div>
       </div>
 
@@ -140,84 +167,134 @@ export default function RecentOrders() {
               <Button size="sm" onClick={() => handleEdit(row)}>
                 Editar
               </Button>
-              <Button size="sm" onClick={() => console.log("Eliminar", row.id)}>
+              <Button size="sm" onClick={() => handleDelete(row.id)}>
                 Eliminar
               </Button>
             </div>
           )}
         />
       </div>
+      <div className="flex justify-center mt-4 gap-2 flex-wrap">
+        <button onClick={() => setPage(0)} disabled={page === 0}
+          className="px-3 py-1 border rounded text-sm bg-white text-gray-700 disabled:opacity-50 dark:bg-gray-700 dark:text-white">&laquo;</button>
+        <button onClick={() => setPage(prev => Math.max(prev - 1, 0))} disabled={page === 0}
+          className="px-3 py-1 border rounded text-sm bg-white text-gray-700 disabled:opacity-50 dark:bg-gray-700 dark:text-white">&lt;</button>
+
+        {Array.from({ length: totalPages }).map((_, index) => (
+          <button key={index} onClick={() => setPage(index)}
+            className={`px-3 py-1 border rounded text-sm ${page === index ? "bg-blue-500 text-white" : "bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-200"}`}>
+            {index + 1}
+          </button>
+        ))}
+
+        <button onClick={() => setPage(prev => Math.min(prev + 1, totalPages - 1))} disabled={page === totalPages - 1}
+          className="px-3 py-1 border rounded text-sm bg-white text-gray-700 disabled:opacity-50 dark:bg-gray-700 dark:text-white">&gt;</button>
+        <button onClick={() => setPage(totalPages - 1)} disabled={page === totalPages - 1}
+          className="px-3 py-1 border rounded text-sm bg-white text-gray-700 disabled:opacity-50 dark:bg-gray-700 dark:text-white">&raquo;</button>
+      </div>
+
 
       {/* Modal */}
       {showModal && selectedSolicitud && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg w-full max-w-lg">
-            <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
-              Editar Solicitud
-            </h2>
+        <>
+          
+          <div
+            className="fixed inset-0 bg-black bg-opacity-60 z-40"
+            onClick={() => setShowModal(false)} 
+          />
 
-            {/* SELECT PARA ESTADO */}
-            <div className="mb-4">
-              <label className="block mb-1 text-gray-700 dark:text-gray-300">
-                Estado
-              </label>
-              <select
-                value={nuevoEstado}
-                onChange={(e) => setNuevoEstado(e.target.value)}
-                className="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
-              >
-                <option value="PENDIENTE">Pendiente</option>
-                <option value="EN_PROCESO">En Proceso</option>
-                <option value="RECHAZADA">Rechazada</option>
-                <option value="APROBADO">Aprobado</option>
-                <option value="PAUSADOS">Pausado</option>
-                <option value="FINALIZADOS">Finalizados</option>
-              </select>
-            </div>
+          {/* Modal centrado */}
+          <div className="fixed inset-0 flex items-center justify-center z-50">
+            <div
+              className="bg-white dark:bg-gray-900 p-6 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-lg relative transform transition-all duration-300 scale-95 hover:scale-100"
+              onClick={(e) => e.stopPropagation()} 
+            >
 
-            {/* TEXTAREA PARA NUEVO COMENTARIO */}
-            <div className="mb-4">
-              <label className="block mb-1 text-gray-700 dark:text-gray-300">
-                Nuevo Comentario
-              </label>
-              <textarea
-                value={nuevoComentario}
-                onChange={(e) => setNuevoComentario(e.target.value)}
-                className="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
-                rows={3}
-              />
-            </div>
-
-            {/* HISTORIAL DE COMENTARIOS */}
-            <div className="mb-4">
-              <label className="block mb-1 text-gray-700 dark:text-gray-300">
-                Historial de Comentarios
-              </label>
-              <div className="border rounded p-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 overflow-y-auto max-h-40">
-                {(selectedSolicitud?.comentario || "").split("\n").map((coment, index) => (
-                  <p key={index} className="text-sm">{coment}</p>
-                ))}
-              </div>
-            </div>
-
-            {/* BOTONES DEL MODAL */}
-            <div className="flex justify-end gap-2">
               <button
                 onClick={() => setShowModal(false)}
-                className="px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-white rounded"
+                className="absolute top-3 right-3 text-gray-400 hover:text-red-500 text-xl font-bold"
               >
-                Cancelar
+                ✕
               </button>
-              <button
-                onClick={handleSave}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-              >
-                Guardar
-              </button>
+
+
+              <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
+                Editar Solicitud
+              </h2>
+
+
+              <div className="mb-4">
+                <label className="block mb-1 text-gray-700 dark:text-gray-300">
+                  Estado
+                </label>
+                <select
+                  value={nuevoEstado}
+                  onChange={(e) => setNuevoEstado(e.target.value)}
+                  className="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                >
+                  <option value="PENDIENTE">Pendiente</option>
+                  <option value="EN_PROCESO">En Proceso</option>
+                  <option value="RECHAZADA">Rechazada</option>
+                  <option value="APROBADO">Aprobado</option>
+                  <option value="PAUSADOS">Pausado</option>
+                  <option value="FINALIZADOS">Finalizados</option>
+                </select>
+              </div>
+
+  
+              <div className="mb-4">
+                <label className="block mb-1 text-gray-700 dark:text-gray-300">
+                  Nuevo Comentario
+                </label>
+                <textarea
+                  value={nuevoComentario}
+                  onChange={(e) => setNuevoComentario(e.target.value)}
+                  className="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                  rows={3}
+                />
+              </div>
+
+
+              <div className="mb-4">
+                <label className="block mb-1 text-gray-700 dark:text-gray-300">
+                  Historial de Comentarios
+                </label>
+                <div className="border rounded p-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 overflow-y-auto max-h-40">
+                  {(selectedSolicitud?.comentario || "").split("\n").map((coment, index) => (
+                    <p key={index} className="text-sm">{coment}</p>
+                  ))}
+                </div>
+              </div>
+
+
+              <div className="flex justify-end gap-3 mt-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowModal(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  size="sm"
+                  className="bg-blue-600 text-white hover:bg-blue-700"
+                  onClick={handleSave}
+                >
+                  Guardar
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
+        </>
       )}
+      <CrearSolicitudModal
+        isOpen={showCrearModal}
+        onClose={() => setShowCrearModal(false)}
+        onSuccess={() => {
+          setShowCrearModal(false);
+          fetchData(); 
+        }}
+      />
     </div>
   );
 }

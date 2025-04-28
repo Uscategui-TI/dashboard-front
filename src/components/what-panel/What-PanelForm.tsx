@@ -527,70 +527,101 @@ export default function WhatPanelPage() {
         />
       )}
       {isGuiaVisible && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-60 z-50 flex justify-center items-center"
-          onClick={() => setIsGuiaVisible(false)} // Cierre al hacer clic fuera
-          onKeyDown={(e) => {
-            if (e.key === "Escape") setIsGuiaVisible(false);
-          }}
-          tabIndex={0} // Necesario para detectar teclas
-        >
+        <>
+          {/* Fondo oscuro */}
           <div
-            className="bg-white dark:bg-gray-900 p-6 rounded-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-lg relative transform transition-all duration-300 scale-95 hover:scale-100"
-            onClick={(e) => e.stopPropagation()} // Evita que el click dentro del modal lo cierre
+            className="fixed inset-0 bg-black bg-opacity-60 z-40"
+            onClick={() => setIsGuiaVisible(false)}
+          />
+
+          {/* Modal contenido */}
+          <div
+            className="fixed inset-0 flex items-center justify-center z-50"
+            onClick={() => setIsGuiaVisible(false)} // click afuera también cierra
+            onKeyDown={(e) => e.key === "Escape" && setIsGuiaVisible(false)}
+            tabIndex={0}
           >
-            <button
-              onClick={() => setIsGuiaVisible(false)}
-              className="absolute top-3 right-3 text-gray-400 hover:text-red-500 text-xl font-bold"
+            <div
+              className="bg-white dark:bg-gray-900 p-6 rounded-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-lg relative transform transition-all duration-300 scale-95 hover:scale-100"
+              onClick={(e) => e.stopPropagation()} // prevenir cierre al clickear dentro
             >
-              ✕
-            </button>
-            <GuiaUsoModal />
+              {/* Botón cerrar */}
+              <button
+                onClick={() => setIsGuiaVisible(false)}
+                className="absolute top-3 right-3 text-gray-400 hover:text-red-500 text-xl font-bold"
+              >
+                ✕
+              </button>
+
+              <GuiaUsoModal />
+            </div>
           </div>
-        </div>
+        </>
       )}
       {showCancelModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-sm text-center relative">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              ¿Estás seguro de cancelar la difusión?
-            </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">
-              Esta acción no se puede deshacer.
-            </p>
-            <div className="flex justify-end gap-3">
-              <Button
-                variant="outline"
-                size="sm"
+        <>
+          {/* Fondo oscuro */}
+          <div
+            className="fixed inset-0 bg-black bg-opacity-60 z-40"
+            onClick={() => setShowCancelModal(false)}
+          />
+
+          {/* Modal contenido */}
+          <div
+            className="fixed inset-0 flex items-center justify-center z-50"
+            onClick={() => setShowCancelModal(false)}
+            onKeyDown={(e) => e.key === "Escape" && setShowCancelModal(false)}
+            tabIndex={0}
+          >
+            <div
+              className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-sm text-center relative"
+              onClick={(e) => e.stopPropagation()} // prevenir cierre al clickear dentro
+            >
+              {/* Botón cerrar */}
+              <button
+                className="absolute top-2 right-2 text-gray-400 hover:text-red-500"
                 onClick={() => setShowCancelModal(false)}
               >
-                No, mantener
-              </Button>
-              <Button
-                size="sm"
-                className="bg-red-600 text-white hover:bg-red-700"
-                onClick={async () => {
-                  try {
-                    await axios.post(`${apiWhatsApp}/cancel-broadcast`);
-                    setShowCancelModal(false);
-                    setToastError("📢 Difusión cancelada.");
-                  } catch (error) {
-                    console.error("Error al cancelar difusión:", error);
-                    setToastError("❌ Error al cancelar difusión.");
-                  }
-                }}
-              >
-                Sí, cancelar
-              </Button>
+                ✕
+              </button>
+
+              {/* Contenido del modal */}
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                ¿Estás seguro de cancelar la difusión?
+              </h2>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">
+                Esta acción no se puede deshacer.
+              </p>
+
+              {/* Botones */}
+              <div className="flex justify-end gap-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowCancelModal(false)}
+                >
+                  No, mantener
+                </Button>
+                <Button
+                  size="sm"
+                  className="bg-red-600 text-white hover:bg-red-700"
+                  onClick={async () => {
+                    try {
+                      await axios.post(`${apiWhatsApp}/cancel-broadcast`);
+                      setShowCancelModal(false);
+                      setToastError("📢 Difusión cancelada.");
+                    } catch (error) {
+                      console.error("Error al cancelar difusión:", error);
+                      setToastError("❌ Error al cancelar difusión.");
+                    }
+                  }}
+                >
+                  Sí, cancelar
+                </Button>
+              </div>
             </div>
-            <button
-              className="absolute top-2 right-2 text-gray-400 hover:text-red-500"
-              onClick={() => setShowCancelModal(false)}
-            >
-              ✕
-            </button>
           </div>
-        </div>
+        </>
       )}
     </>
   );

@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Badge from "../ui/badge/Badge";
-import { ArrowDownIcon, ArrowUpIcon, GroupIcon } from "@/icons";
+import { ArrowDownIcon, ArrowUpIcon, InfoIcon } from "@/icons";
 
 const apiUrl = process.env.NEXT_PUBLIC_AUTH_URL;
 
@@ -41,7 +41,7 @@ export const Metrics3 = () => {
             En Proceso
           </h3>
           <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-xl dark:bg-gray-800">
-            <GroupIcon className="text-gray-800 size-5 dark:text-white/90" />
+            <InfoIcon className="text-gray-800 size-5 dark:text-white/90" />
           </div>
         </div>
 

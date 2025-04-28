@@ -7,6 +7,7 @@ import { Metrics2} from "@/components/solicitud-panel/EcommerceMetrics 2";
 import { Metrics3} from "@/components/solicitud-panel/EcommerceMetrics 3";
 import { Metrics4 } from "@/components/solicitud-panel/EcommerceMetrics 4";
 import { Metrics5 } from "@/components/solicitud-panel/EcommerceMetrics 5";
+import { Metrics6 } from "@/components/solicitud-panel/EcommerceMetrics 6";
 
 
 export const metadata: Metadata = {
@@ -17,38 +18,29 @@ export const metadata: Metadata = {
   
   export default function SolicitudListarPage() {
     return (
-        <div className="grid grid-cols-12 gap-6 p-4">
-          <div className="col-span-12 sm:col-span-6 xl:col-span-4">
-            <EcommerceMetrics />
-          </div>
-          <div className="col-span-12 sm:col-span-6 xl:col-span-4">
-            <Metrics1 />
-          </div>  
-                   
-          <div className="col-span-12 sm:col-span-6 xl:col-span-4">
-            <Metrics2 />
-          </div>
-          <div className="col-span-12 sm:col-span-6 xl:col-span-4">
-            <Metrics3 />
-          </div>
-          <div className="col-span-12 sm:col-span-6 xl:col-span-4">
-            <Metrics4 />
-          </div>
-          <div className="col-span-12 sm:col-span-6 xl:col-span-4">
-            <Metrics5 />
-          </div>   
-          <div className="col-span-12 sm:col-span-6 xl:col-span-4">
-            <MonthlyTargetCanales />
-          </div>
-          <div className="col-span-12">
-            <Solicitudrecent />
-          </div>
-{/*           <div className="col-span-12">
-            <TablaProspectosPanel />
-          </div> */}
-          
+      <div className="p-4 space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <EcommerceMetrics />
+          <Metrics1 />
+          <Metrics2 />
         </div>
-      );
-    
-  }
   
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Metrics3 />
+          <Metrics4 />
+          <Metrics5 />
+        </div>
+  
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Metrics6 />
+          <MonthlyTargetCanales />
+        </div>
+  
+        <div className="grid grid-cols-1">
+          <Solicitudrecent />
+        </div>
+      </div>
+    );
+  }

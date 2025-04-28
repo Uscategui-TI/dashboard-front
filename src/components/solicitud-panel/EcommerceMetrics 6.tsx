@@ -33,12 +33,12 @@ export const Metrics6 = () => {
   const cambioEnProceso = calcCambio(prevEnProceso, enProceso);
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] w-full sm:max-w-[380px] flex flex-col justify-between h-[360px]">
+    <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] w-full sm:max-w-[700px] flex flex-col justify-between h-[465px]">
       <div className="flex flex-col justify-between h-full">
         {/* Header */}
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-            Aprovado
+            Pendiente
           </h3>
           <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-xl dark:bg-gray-800">
             <GroupIcon className="text-gray-800 size-5 dark:text-white/90" />
@@ -51,7 +51,7 @@ export const Metrics6 = () => {
             {enProceso.toLocaleString()}
           </h4>
           <span className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-            Total en aprovado
+            Total en Pendientes
           </span>
         </div>
 

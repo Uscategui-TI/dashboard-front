@@ -43,7 +43,7 @@ export default function PersonFormPage() {
 
     try {
       setLoading(true);
-      const response = await axios.post(`http://localhost:8080/api/person-form/upload`, formData, {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_AUTH_URL}/api/person-form/upload`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
