@@ -6,10 +6,9 @@ export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // Rutas públicas permitidas sin token
-  const publicPaths = ["/signin", "/signup", "/reset-password", "/public"];
+  const publicPaths = ["/signin", "/signup", "/reset-password", "/public", "/consulta"];
   const isPublic = publicPaths.some((path) => pathname.startsWith(path));
 
-  // Si no hay token y la ruta no es pública, redirigir al login
   if (!token && !isPublic) {
     return NextResponse.redirect(new URL("/signin", req.url));
   }
@@ -19,10 +18,7 @@ export function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-      Aplica el middleware a todas las rutas excepto recursos estáticos y API.
-      Esto cubre páginas protegidas como /dashboard, /what-panel, etc.
-    */
+    
     "/((?!_next/static|_next/image|favicon.ico|api|images|fonts).*)",
   ],
 };

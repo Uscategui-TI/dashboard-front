@@ -53,6 +53,22 @@ export default function StatisticsChart() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const getTokenFromCookie = () => {
+          const match = document.cookie.match(new RegExp('(^| )token=([^;]+)'));
+          return match ? match[2] : null;
+        };
+  
+        const token = getTokenFromCookie();
+        if (!token) {
+          console.error("Token no encontrado en cookies");
+          return;
+        }
+  
+        const headers = {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        };
+  
         const res = await axios.get(`${process.env.NEXT_PUBLIC_AUTH_URL}/api/person-form/dates/all`);
         const dates: string[] = res.data;
 

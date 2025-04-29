@@ -25,14 +25,35 @@ export default function DemographicCard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Leer token desde cookie
+        const getTokenFromCookie = () => {
+          const match = document.cookie.match(new RegExp('(^| )token=([^;]+)'));
+          return match ? match[2] : null;
+        };
+  
+        const token = getTokenFromCookie();
+        if (!token) {
+          console.error("Token no encontrado en cookies");
+          return;
+        }
+  
+        const headers = {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        };
+  
         // Total de prospectos
-        const totalRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/api/person-form/count`);
+        const totalRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/api/person-form/count`, {
+          headers,
+        });
         const totalData = await totalRes.json();
-
-        // Obtener departamentos desde el endpoint
-        const res = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/api/person-form/departments/all`);
+  
+        // Obtener departamentos
+        const res = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/api/person-form/departments/all`, {
+          headers,
+        });
         const departments = await res.json();
-
+  
         // Agrupar departamentos por ID
         const grouped = departments.reduce((acc: Record<number, any>, dept: any) => {
           if (!acc[dept.id]) {
@@ -46,17 +67,16 @@ export default function DemographicCard() {
           }
           return acc;
         }, {});
-
-        // Convertir a array
+  
         const uniquePoints = Object.values(grouped);
-
+  
         setPoints(uniquePoints);
         setTotal(totalData);
       } catch (error) {
         console.error("Error al cargar datos demográficos:", error);
       }
     };
-
+  
     fetchData();
   }, []);
 
