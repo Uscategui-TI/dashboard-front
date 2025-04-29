@@ -256,13 +256,26 @@ export default function RecentOrders() {
 
 
               <div className="mb-4">
-                <label className="block mb-1 text-gray-700 dark:text-gray-300">
+                <label className="block mb-2 text-gray-700 dark:text-gray-300 font-medium">
                   Historial de Comentarios
                 </label>
-                <div className="border rounded p-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 overflow-y-auto max-h-40">
-                  {(selectedSolicitud?.comentario || "").split("\n").map((coment, index) => (
-                    <p key={index} className="text-sm">{coment}</p>
-                  ))}
+
+                <div className="border rounded p-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 overflow-y-auto max-h-40 space-y-2">
+                  {(selectedSolicitud?.comentario || "")
+                    .split(/\n+/) // divide por saltos de línea
+                    .map((coment, index) => {
+                      const texto = coment.split("]").slice(1).join("]").trim(); // quita timestamp
+                      if (!texto) return null;
+
+                      return (
+                        <div
+                          key={index}
+                          className="px-4 py-2 rounded-xl bg-blue-600 text-white text-sm max-w-xl self-start"
+                        >
+                          {texto}
+                        </div>
+                      );
+                    })}
                 </div>
               </div>
 
