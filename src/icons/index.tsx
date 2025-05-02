@@ -16,6 +16,7 @@ import FileIcon from "./file.svg";
 import DownloadIcon from "./download.svg";
 import ArrowRightIcon from "./arrow-right.svg";
 import GroupIcon from "./group.svg";
+import PodiumIcon from "./podium.svg";
 import BoxIconLine from "./box-line.svg";
 import ShootingStarIcon from "./shooting-star.svg";
 import DollarLineIcon from "./dollar-line.svg";
@@ -52,6 +53,7 @@ import ChatIcon from "./chat.svg";
 import MoreDotIcon from "./more-dot.svg";
 import BellIcon from "./bell.svg";
 import SolicitudIcon from "./solicitud.svg";
+import PolicyIcon from "./policy.svg";
 
 
 export {
@@ -108,5 +110,7 @@ export {
   HorizontaLDots,
   ChevronUpIcon,
   ChatIcon,
-  SolicitudIcon
+  SolicitudIcon,
+  PodiumIcon,
+  PolicyIcon
 };

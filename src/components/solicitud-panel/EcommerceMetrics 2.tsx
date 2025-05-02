@@ -40,8 +40,15 @@ export const Metrics2 = () => {
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
             Rechazados
           </h3>
-          <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-xl dark:bg-gray-800">
-            <InfoIcon className="text-gray-800 size-5 dark:text-white/90" />
+          <div className="relative group flex items-center justify-center w-10 h-10 bg-gray-100 rounded-xl dark:bg-gray-800 cursor-pointer">
+            <InfoIcon className="text-gray-800 size-6 dark:text-white/90" />
+            <div
+              role="tooltip"
+              className="absolute z-10 px-3 py-1.5 text-xs text-gray-800 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 -top-12  left-3/2 -translate-x-2/2 whitespace-nowrap dark:bg-gray-700 dark:text-white dark:border-gray-600"
+            >
+              Calcula el porcentaje de cambio entre un valor anterior y uno actual.
+              
+            </div>
           </div>
         </div>
 

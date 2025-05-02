@@ -15,6 +15,7 @@ import {
   PlugInIcon,
   SolicitudIcon,
   TableIcon,
+  TaskIcon,
   UserCircleIcon,
 } from "../icons/index";
 
@@ -48,7 +49,7 @@ const navItems: NavItem[] = [
     roles: ["Admin", "Coordinador", "Secretario"]
   },
   {
-    icon: <GridIcon />,
+    icon: <TaskIcon />,
     name: "Campañas",
     roles: ["Admin", "Periodista"],
     subItems: [
@@ -66,6 +67,7 @@ const navItems: NavItem[] = [
       { name: "Panel Prospectos", path: "/prospect-panel", roles: ["Admin"] },
       { name: "Listar Prospectos", path: "/prospect-listar", roles: ["Admin", "Coordinador"] },
       { name: "Cargar Prospectos", path: "/upload-prospect", roles: ["Admin", "Coordinador"] },
+      { name: "Cumpleaños Prospectos", path: "/prospect-cumpleanos", roles: ["Admin", "Coordinador"] },
     ],
   },
   {

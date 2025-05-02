@@ -90,7 +90,8 @@ export default function ProspectTable() {
   }, [page, size]);
 
   const filteredData = data.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase())
+    p.name.toLowerCase().includes(search.toLowerCase()) ||
+    p.document.toLowerCase().includes(search.toLowerCase())
   );
 
   const getVisiblePages = () => {
@@ -143,7 +144,7 @@ export default function ProspectTable() {
             <TableRow>
               {["Nombre", "Apellido", "Teléfono", "Email", "Documento", 
                 "Cargo",  "Género", "Departamento", "Municipio",
-                "Comuna", "Localidad", "Evento"].map((header, idx) => (
+                "Comuna", "Localidad"].map((header, idx) => (
                   <TableCell key={idx} isHeader className="py-3 px-2 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
                     {header}
                   </TableCell>
@@ -169,7 +170,7 @@ export default function ProspectTable() {
                 <TableCell className="py-3 px-2 text-gray-500 text-theme-sm dark:text-gray-400">{p.municipality?.name ?? "-"}</TableCell>
                 <TableCell className="py-3 px-2 text-gray-500 text-theme-sm dark:text-gray-400">{p.comune?.nameco ?? "-"}</TableCell>
                 <TableCell className="py-3 px-2 text-gray-500 text-theme-sm dark:text-gray-400">{p.localidad ?? "-"}</TableCell>
-                <TableCell className="py-3 px-2 text-gray-500 text-theme-sm dark:text-gray-400">{p.idEvento}</TableCell>
+                {/* <TableCell className="py-3 px-2 text-gray-500 text-theme-sm dark:text-gray-400">{p.idEvento}</TableCell> */}
               </TableRow>
             ))}
           </TableBody>

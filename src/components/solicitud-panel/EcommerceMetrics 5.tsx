@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Badge from "../ui/badge/Badge";
-import { ArrowDownIcon, ArrowUpIcon, GroupIcon } from "@/icons";
+import { ArrowDownIcon, ArrowUpIcon, InfoIcon } from "@/icons";
 
 const apiUrl = process.env.NEXT_PUBLIC_AUTH_URL;
 
@@ -40,9 +40,16 @@ export const Metrics5 = () => {
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
             Aprovado
           </h3>
-          <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-xl dark:bg-gray-800">
-            <GroupIcon className="text-gray-800 size-5 dark:text-white/90" />
-          </div>
+          <div className="relative group flex items-center justify-center w-10 h-10 bg-gray-100 rounded-xl dark:bg-gray-800 cursor-pointer">
+              <InfoIcon className="text-gray-800 size-6 dark:text-white/90" />
+              <div
+                role="tooltip"
+                className="absolute z-10 px-3 py-1.5 text-xs text-gray-800 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 -top-12  left-3/2 -translate-x-2/2 whitespace-nowrap dark:bg-gray-700 dark:text-white dark:border-gray-600"
+              >
+                Calcula el porcentaje de cambio entre un valor anterior y uno actual.
+                
+              </div>
+            </div>
         </div>
 
         {/* Centro (cifra principal) */}
@@ -51,7 +58,7 @@ export const Metrics5 = () => {
             {enProceso.toLocaleString()}
           </h4>
           <span className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-            Total en aprovado
+            Total en aprobados
           </span>
         </div>
 

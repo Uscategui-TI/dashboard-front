@@ -16,6 +16,7 @@ type EventStat = {
   prospecto?: {
     document: string;
   };
+  codigoSolicitud?: string | number;
 };
 
 export default function RecentOrders() {
@@ -49,7 +50,8 @@ export default function RecentOrders() {
   };
 
   const filteredData = data.filter((event) =>
-    event.asunto.toLowerCase().includes(search.toLowerCase())
+    event.asunto.toLowerCase().includes(search.toLowerCase()) ||
+    event.codigoSolicitud?.toString().toLowerCase().includes(search.toLowerCase())
   );
 
   const getEstadoVariant = (estado: string): "success" | "warning" | "error" => {

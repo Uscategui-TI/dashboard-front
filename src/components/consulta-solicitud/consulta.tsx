@@ -51,6 +51,16 @@ export default function ConsultaSolicitudPage() {
     }
   }, [solicitud]);
 
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError("");
+      }, 4000); // 4 segundos
+  
+      return () => clearTimeout(timer); // Limpia en caso de cambio rápido
+    }
+  }, [error]);
+
   return (
     <div
       className="relative flex flex-col items-center justify-start min-h-screen t">
@@ -82,7 +92,9 @@ export default function ConsultaSolicitudPage() {
         </div>
 
         {error && (
-          <p className="text-red-400 text-sm mb-4 text-center">{error}</p>
+        <div className="bg-blue-100 border border-blue-600 text-black px-4 py-3 rounded relative mb-4 text-sm text-center max-w-md mx-auto">
+            {error}
+        </div>
         )}
 
         {solicitud && (
