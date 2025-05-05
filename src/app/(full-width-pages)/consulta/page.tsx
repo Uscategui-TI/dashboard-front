@@ -1,5 +1,5 @@
 
-import ConsultaSolicitudPage from "@/components/consulta-solicitud/consulta";
+import ConsultaSolicitudPage from "@/components/solicitud/consulta-solicitud/consulta";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

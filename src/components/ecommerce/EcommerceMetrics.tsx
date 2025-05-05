@@ -51,42 +51,37 @@ export const EcommerceMetrics = () => {
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6">
       {/* Prospectos */}
       <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
-        <div className="relative group flex items-center justify-center w-10 h-10 bg-gray-100 rounded-xl dark:bg-gray-800 cursor-pointer">
+        <div className=" flex items-center justify-center w-10 h-10 bg-gray-100 rounded-xl dark:bg-gray-800">
             <GroupIcon className="text-gray-800 size-6 dark:text-white/90" />
-            <div
-              role="tooltip"
-              className="absolute z-10 px-3 py-1.5 text-xs text-gray-800 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 -top-12 left-8/2 -translate-x-1/2 whitespace-nowrap dark:bg-gray-700 dark:text-white dark:border-gray-600"
-            >
-              Calcula el porcentaje de cambio entre un valor anterior y uno actual.
-            </div>
-          </div>
+        </div>
         <div className="flex items-end justify-between mt-5">
           <div>
-            <span className="text-sm text-gray-500 dark:text-gray-400">
-              Prospectos
-            </span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">Prospectos</span>
             <h4 className="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">
               {prospects.toLocaleString()}
             </h4>
           </div>
-          <Badge color={cambioProspectos >= 0 ? "success" : "error"}>
-            {cambioProspectos >= 0 ? <ArrowUpIcon /> : <ArrowDownIcon />}
-            {Math.abs(cambioProspectos)}%
-          </Badge>
+          <div className="relative group cursor-pointer">
+            <div
+              role="tooltip"
+              className="absolute z-10 px-3 py-1.5 text-xs text-center text-gray-800 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 -top-13 left-8 -translate-x-1/2 whitespace-nowrap dark:bg-gray-700 dark:text-white dark:border-gray-600"
+            >
+              Comparación mensual anual: muestra el cambio porcentual <br/>
+              en prospectos frente al mismo mes del año anterior.
+            </div>
+            <Badge  color={cambioProspectos >= 0 ? "success" : "error"}>
+              {cambioProspectos >= 0 ? <ArrowUpIcon /> : <ArrowDownIcon />}
+              {Math.abs(cambioProspectos)}%
+            </Badge>
+          </div>
         </div>
       </div>
 
       {/* Eventos */}
       <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
-        <div className="relative group flex items-center justify-center w-10 h-10 bg-gray-100 rounded-xl dark:bg-gray-800 cursor-pointer">
+        <div className="relative group flex items-center justify-center w-10 h-10 bg-gray-100 rounded-xl dark:bg-gray-800">
           <BoxIconLine className="text-gray-800 dark:text-white/90" />
-            <div
-              role="tooltip"
-              className="absolute z-10 px-3 py-1.5 text-xs text-gray-800 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 -top-12 left-8/2 -translate-x-1/2 whitespace-nowrap dark:bg-gray-700 dark:text-white dark:border-gray-600"
-            >
-              Calcula el porcentaje de cambio entre un valor anterior y uno actual.
-            </div>
-          </div>
+        </div>
         <div className="flex items-end justify-between mt-5">
           <div>
             <span className="text-sm text-gray-500 dark:text-gray-400">
@@ -97,10 +92,19 @@ export const EcommerceMetrics = () => {
             </h4>
           </div>
 
-          <Badge color={cambioEventos >= 0 ? "success" : "error"}>
-            {cambioEventos >= 0 ? <ArrowUpIcon /> : <ArrowDownIcon />}
-            {Math.abs(cambioEventos)}%
-          </Badge>
+          <div className="relative group cursor-pointer">
+            <div
+              role="tooltip"
+              className="absolute z-10 px-3 py-1.5 text-xs text-center text-gray-800 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 -top-13 left-8 -translate-x-1/2 whitespace-nowrap dark:bg-gray-700 dark:text-white dark:border-gray-600"
+            >
+              Comparación mensual anual: muestra el cambio porcentual <br/>
+              en eventos frente al mismo mes del año anterior.
+            </div>
+            <Badge color={cambioEventos >= 0 ? "success" : "error"}>
+              {cambioEventos >= 0 ? <ArrowUpIcon /> : <ArrowDownIcon />}
+              {Math.abs(cambioEventos)}%
+            </Badge>
+          </div>
         </div>
       </div>
     </div>

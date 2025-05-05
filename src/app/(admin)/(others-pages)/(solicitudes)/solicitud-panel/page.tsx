@@ -1,13 +1,13 @@
 import { Metadata } from "next";
-import MonthlyTargetCanales from "@/components/solicitud-panel/MonthlyTargetCanales";
-import Solicitudrecent from "@/components/solicitud-panel/Solicitudes";
-import { EcommerceMetrics } from "@/components/solicitud-panel/EcommerceMetrics";
-import { Metrics1} from "@/components/solicitud-panel/EcommerceMetrics 1";
-import { Metrics2} from "@/components/solicitud-panel/EcommerceMetrics 2";
-import { Metrics3} from "@/components/solicitud-panel/EcommerceMetrics 3";
-import { Metrics4 } from "@/components/solicitud-panel/EcommerceMetrics 4";
-import { Metrics5 } from "@/components/solicitud-panel/EcommerceMetrics 5";
-import { Metrics6 } from "@/components/solicitud-panel/EcommerceMetrics 6";
+import MonthlyTargetCanales from "@/components/solicitud/solicitud-panel/MonthlyTargetCanales";
+import Solicitudrecent from "@/components/solicitud/solicitud-panel/Solicitudes";
+import { EcommerceMetrics } from "@/components/solicitud/solicitud-panel/EcommerceMetrics";
+import { Metrics1} from "@/components/solicitud/solicitud-panel/EcommerceMetrics 1";
+import { Metrics2} from "@/components/solicitud/solicitud-panel/EcommerceMetrics 2";
+import { Metrics3} from "@/components/solicitud/solicitud-panel/EcommerceMetrics 3";
+import { Metrics4 } from "@/components/solicitud/solicitud-panel/EcommerceMetrics 4";
+import { Metrics5 } from "@/components/solicitud/solicitud-panel/EcommerceMetrics 5";
+import { Metrics6 } from "@/components/solicitud/solicitud-panel/EcommerceMetrics 6";
 
 
 export const metadata: Metadata = {

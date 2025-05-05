@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { EcommerceMetrics } from "@/components/Propsectos-Panel/EcommerceMetrics";
-import MonthlyTarget from "@/components/Propsectos-Panel/MonthlyTarget";
-import MonthlyTargetCanales from "@/components/Propsectos-Panel/MonthlyTargetCanales";
+import { EcommerceMetrics } from "@/components/prospect/Propsectos-Panel/EcommerceMetrics";
+import MonthlyTarget from "@/components/prospect/Propsectos-Panel/MonthlyTarget";
+import MonthlyTargetCanales from "@/components/prospect/Propsectos-Panel/MonthlyTargetCanales";
 import StatisticsChart from "@/components/ecommerce/StatisticsChart";
 import DemographicCard from "@/components/ecommerce/DemographicCard";
-import DemographicCardBogota from "@/components/Propsectos-Panel/DemographicCardBogota";
-import TablaProspectosPanel from "@/components/Propsectos-Panel/TablaProspectosPanel";
+import DemographicCardBogota from "@/components/prospect/Propsectos-Panel/DemographicCardBogota";
+import TablaProspectosPanel from "@/components/prospect/Propsectos-Panel/TablaProspectosPanel";
 
 export const metadata: Metadata = {
   title: "Uscategui Panel-Prospectos",

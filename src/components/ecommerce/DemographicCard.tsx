@@ -6,6 +6,7 @@ import { MoreDotIcon } from "@/icons";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import Image from "next/image";
+import { useNavigation } from "@/util";
 
 const CountryMap = dynamic(() => import("./CountryMap"), { ssr: false });
 
@@ -14,13 +15,7 @@ export default function DemographicCard() {
   const [points, setPoints] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
 
-  function toggleDropdown() {
-    setIsOpen(!isOpen);
-  }
-
-  function closeDropdown() {
-    setIsOpen(false);
-  }
+  const { redirectTo } = useNavigation();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -90,11 +85,11 @@ export default function DemographicCard() {
         </div>
 
         <div className="relative inline-block">
-          <button onClick={toggleDropdown} className="dropdown-toggle">
+          <button onClick={() => setIsOpen(!isOpen)} className="dropdown-toggle">
             <MoreDotIcon className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300" />
           </button>
-          <Dropdown isOpen={isOpen} onClose={closeDropdown} className="w-40 p-2">
-            <DropdownItem onItemClick={closeDropdown}>Ver más</DropdownItem>
+          <Dropdown isOpen={isOpen} onClose={() => setIsOpen(false)} className="w-40 p-2">
+            <DropdownItem onItemClick={ () => redirectTo("/prospect-panel") }>Ver más</DropdownItem>
           </Dropdown>
         </div>
       </div>

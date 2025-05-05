@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import Uploadmasiva from "@/components/upload-project/Upload-Masiva";
+import Uploadmasiva from "@/components/prospect/upload-project/Upload-Masiva";
 
 export const metadata: Metadata = {
     title:
@@ -8,7 +8,9 @@ export const metadata: Metadata = {
   };
   
   export default function CargaMasivaPage() {
-    return <Uploadmasiva />;
-    
+    return <>
+
+      <Uploadmasiva />;
+    </> 
   }
   

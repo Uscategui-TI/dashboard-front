@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import ProspectosListar from "@/components/Prospectos-Listar/ProspectosListar";
+import ProspectosListar from "@/components/prospect/Prospectos-Listar/ProspectosListar";
 
 export const metadata: Metadata = {
     title:

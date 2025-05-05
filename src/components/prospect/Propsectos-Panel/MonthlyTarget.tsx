@@ -2,26 +2,31 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
+import { ApexOptions } from "apexcharts";
 import axios from "axios";
-import { Dropdown } from "../ui/dropdown/Dropdown";
-import { DropdownItem } from "../ui/dropdown/DropdownItem";
+import { Dropdown } from "@/components/ui/dropdown/Dropdown";
+import { DropdownItem } from "@/components/ui/dropdown/DropdownItem";
 import { MoreDotIcon } from "@/icons";
-import { getGenderDonutChartOptions, useNavigation } from "@/util";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
 
 export default function MonthlyTarget() {
-  const objetivo = 1000;
-  const options = getGenderDonutChartOptions(["Femenino", "Masculino"], ["#465FFF", "#6F7DFF"]);
-  
-  const { redirectTo } = useNavigation();
-
   const [series, setSeries] = useState<number[]>([0, 0]);
   const [mesAnterior, setMesAnterior] = useState(0);
   const [actual, setActual] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
 
+  const objetivo = 1000;
+
+  const options: ApexOptions = {
+    colors: ["#465FFF", "#6F7DFF"],
+    labels: ["Femenino", "Masculino"],
+    chart: { type: "donut", height: 330 },
+    fill: { type: "solid" },
+    plotOptions: { pie: { donut: { size: "70%" } } },
+    legend: { position: "bottom" },
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -62,7 +67,7 @@ export default function MonthlyTarget() {
               <MoreDotIcon className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300" />
             </button>
             <Dropdown isOpen={isOpen} onClose={() => setIsOpen(false)} className="w-40 p-2">
-              <DropdownItem tag="a" onItemClick={() =>  redirectTo("/prospect-panel") }>
+              <DropdownItem tag="a" onItemClick={() => setIsOpen(false)}>
                 Ver más
               </DropdownItem>
             </Dropdown>
@@ -80,7 +85,7 @@ export default function MonthlyTarget() {
             label: "Objetivo",
             value: objetivo,
             compareTo: actual,
-            isInverted: true, 
+            isInverted: true, // Queremos flecha roja si no se alcanza
           },
           {
             label: "Mes anterior",

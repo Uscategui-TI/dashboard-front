@@ -1,4 +1,4 @@
-import WhatPanelPage from "@/components/what-panel/What-PanelForm";
+import WhatPanelPage from "@/components/campaigns/what-panel/What-PanelForm";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

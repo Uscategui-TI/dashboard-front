@@ -9,7 +9,7 @@ import { useDropzone } from "react-dropzone";
 const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_PRESET;
 interface ImageUploadProps {
   onChange: (value: string) => void;
-  value: string;
+  value?: string;
 }
 
 export const ImageUpload: React.FC<ImageUploadProps> = ({

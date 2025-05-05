@@ -1,4 +1,4 @@
-import ProspectTablecumpleanos from "@/components/prospectos-cumpleaños/TablaProspectosPanel";
+import ProspectTablecumpleanos from "@/components/prospect/prospectos-cumpleaños/TablaProspectosPanel";
 import { Metadata } from "next";
 
 
