@@ -18,6 +18,7 @@ import {
   TaskIcon,
   UserCircleIcon,
 } from "../icons/index";
+import { Table } from "@/components/ui/table";
 
 const storedRoles = typeof window !== 'undefined' ? localStorage.getItem("roles") : null;
 const userRoles: string[] = storedRoles ? JSON.parse(storedRoles) : [];
@@ -77,6 +78,15 @@ const navItems: NavItem[] = [
     subItems: [
       { name: "Panel Solicitudes", path: "/solicitud-panel", roles: ["Admin"] },
       { name: "Seguimiento Solicitudes", path: "/solicitud-listar", roles: ["Admin", "Secretario"] },
+    ],
+  },
+  {
+    name: "Administracion",
+    icon: <TableIcon />,
+    roles: ["Admin", "Secretario"],
+    subItems: [
+      { name: "Usuarios", path: "/usuarios", roles: ["Admin"] },
+      { name: "Formularios", path: "/solicitud-listar", roles: ["Admin", "Secretario"] },
     ],
   },
   {

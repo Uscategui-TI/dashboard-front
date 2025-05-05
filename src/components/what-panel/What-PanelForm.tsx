@@ -7,7 +7,7 @@ import Label from "@/components/form/Label";
 import Select from "@/components/form/Select";
 import { FieldValues, useForm } from "react-hook-form";
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Button from "@/components/ui/button/Button";
 import { useRouter } from "next/navigation";
 import PhoneInput from "@/components/form/group-input/PhoneInput";
@@ -20,6 +20,8 @@ const apiWhatsApp = process.env.NEXT_PUBLIC_WHATSAPP_URL;
 const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
 
 export default function WhatPanelPage() {
+  const hasNotifiedRef = useRef(false);
+  const [toastSuccess, setToastSuccess] = useState<string | null>(null);
   const [isOpenConect, setIsOpenConect] = useState(false);
   const [loading, setLoading] = useState(false);
   const [totalMessagesSent, setTotalMessagesSent] = useState<number | null>(null);
@@ -273,36 +275,41 @@ export default function WhatPanelPage() {
   
     try {
       const response = await axios.post(`${apiWhatsApp}/set-phone-number`, { phoneNumber });
-      if (response.data.token) setLinkToken(response.data.token);
   
-      // 🔒 Desactiva el botón de "Solicitar Token" con contador de 5s
-      setIsRequestDisabled(true);
-      setRequestCountdown(5);
-      const tokenTimer = setInterval(() => {
-        setRequestCountdown((prev) => {
-          if (prev <= 1) {
-            clearInterval(tokenTimer);
-            setIsRequestDisabled(false);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
+      if (response.data.token) {
+        setLinkToken(response.data.token);
+
+        setIsRequestDisabled(true);
+        setRequestCountdown(5);
+        const tokenTimer = setInterval(() => {
+          setRequestCountdown((prev) => {
+            if (prev <= 1) {
+              clearInterval(tokenTimer);
+              setIsRequestDisabled(false);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
   
-      // 🔁 Temporizador de reinicio (30s)
-      setIsRestartDisabled(true);
-      setCountdown(30);
-      const timer = setInterval(() => {
-        setCountdown((prev) => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            setIsRestartDisabled(false);
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    } catch (error) {
-      console.error("Error al enviar el número:", error);
+        setIsRestartDisabled(true);
+        setCountdown(30);
+        const timer = setInterval(() => {
+          setCountdown((prev) => {
+            if (prev <= 1) {
+              clearInterval(timer);
+              setIsRestartDisabled(false);
+            }
+            return prev - 1;
+          });
+        }, 1000);
+      }
+    } catch (error: any) {
+      if (axios.isAxiosError(error) && error.response?.data?.message) {
+        setToastError(error.response.data.message); // ← Mensaje del backend (ej: "❌ Número inválido.")
+      } else {
+        setToastError("❌ Error al conectar con el bot.");
+      }
     }
   };
 
@@ -323,8 +330,32 @@ export default function WhatPanelPage() {
     }
   }, []);
 
+  useEffect(() => {
+    if (toastSuccess) {
+      const timer = setTimeout(() => setToastSuccess(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastSuccess]);
 
-
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      if (hasNotifiedRef.current) return;
+  
+      try {
+        const res = await axios.get("/api/bot-connected-difusion");
+        if (res.data.connected) {
+          setToastSuccess("✅ Bot conectado correctamente. Actualiza el proveedor");
+          hasNotifiedRef.current = true; 
+          clearInterval(interval);
+        }
+      } catch (err) {
+        console.error("❌ Error verificando conexión del bot:", err);
+      }
+    }, 3000);
+  
+    return () => clearInterval(interval);
+  }, []);
+  
   return (
     <>
       {toastError && (
@@ -342,7 +373,21 @@ export default function WhatPanelPage() {
                 </button>
               </div>
             )}
-
+            {toastSuccess && (
+              <div className="bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded relative mb-4">
+                <strong className="font-bold">Éxito: </strong>
+                <span className="block sm:inline">{toastSuccess}</span>
+                <button
+                  onClick={() => setToastSuccess(null)}
+                  className="absolute top-0 bottom-0 right-0 px-4 py-3"
+                >
+                  <svg className="fill-current h-6 w-6 text-green-500" role="button" viewBox="0 0 20 20">
+                    <title>Cerrar</title>
+                    <path d="M14.348 5.652a1 1 0 00-1.414-1.414L10 7.172 7.066 4.238a1 1 0 10-1.414 1.414L8.586 8.586l-2.934 2.934a1 1 0 101.414 1.414L10 10.828l2.934 2.934a1 1 0 001.414-1.414L11.414 8.586l2.934-2.934z"/>
+                  </svg>
+                </button>
+              </div>
+            )}
             {/* ✅ Toast de éxito (ya lo tenías) */}
             {showSuccessMessage && (
               <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
