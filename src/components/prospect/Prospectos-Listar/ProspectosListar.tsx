@@ -5,9 +5,10 @@ import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import { Modal } from "@/components/ui/modal";
 import { useModal } from "@/hooks/useModal";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axios from "@/lib/axiosInstance";
 import Button from "@/components/ui/button/Button";
 import { GenericTable } from "@/components/tables/GenericTable";
+import Pagination from "@/components/tables/Pagination";
 
 const columns = [
   { key: "name", header: "Nombres" },
@@ -117,7 +118,7 @@ export default function ProspectosPanel() {
               columns={columns}
               data={filteredData}
               selectable={true}
-              searchableColumns={["nombre", "cargo"]}
+              searchableColumns={["name", "cargo"]}
               // filterableColumns={["estado"]}
               onSelectionChange={(rows) => {
                 console.log("Registros seleccionados:", rows);
@@ -131,21 +132,8 @@ export default function ProspectosPanel() {
               // )}
             />
         </div>
-  
-        <div className="flex justify-center mt-4 gap-2 flex-wrap">
-          <button onClick={() => setPage(0)} disabled={page === 0}
-            className="px-3 py-1 border rounded text-sm bg-white text-gray-700 disabled:opacity-50 dark:bg-gray-700 dark:text-white">&laquo;</button>
-          <button onClick={() => setPage((prev) => Math.max(prev - 1, 0))} disabled={page === 0}
-            className="px-3 py-1 border rounded text-sm bg-white text-gray-700 disabled:opacity-50 dark:bg-gray-700 dark:text-white">&lt;</button>
-          {getVisiblePages().map((pNum) => (
-            <button key={pNum} onClick={() => setPage(pNum)}
-              className={`px-3 py-1 border rounded text-sm ${pNum === page ? "bg-blue-500 text-white" : "bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-200"}`}>{pNum + 1}</button>
-          ))}
-          <button onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))} disabled={page === totalPages - 1}
-            className="px-3 py-1 border rounded text-sm bg-white text-gray-700 disabled:opacity-50 dark:bg-gray-700 dark:text-white">&gt;</button>
-          <button onClick={() => setPage(totalPages - 1)} disabled={page === totalPages - 1}
-            className="px-3 py-1 border rounded text-sm bg-white text-gray-700 disabled:opacity-50 dark:bg-gray-700 dark:text-white">&raquo;</button>
-        </div>
+        <Pagination key={page} currentPage={page} onPageChange={setPage} totalPages={totalPages}/>
+
 
         <div className="flex justify-center mt-3">
           <span className="text-sm text-gray-500 dark:text-gray-300">

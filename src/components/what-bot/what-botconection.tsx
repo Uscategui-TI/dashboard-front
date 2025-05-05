@@ -112,7 +112,7 @@ export default function BotConnection() {
 
       {isBotConnected && (
         <div className="mb-4 p-3 rounded-lg bg-green-100 text-green-800 text-sm font-semibold border border-green-300 shadow">
-          ✅ Bot conectado exitosamente, Actualiz tu provedor
+          ✅ Bot conectado exitosamente, Actualiza tu provedor
         </div>
       )}
 
@@ -120,7 +120,7 @@ export default function BotConnection() {
       <PhoneInput
         selectPosition="start"
         countries={countries}
-        placeholder="+57 3204084584"
+        placeholder="573200000000"
         onChange={(value) => setPhoneNumber(value)}
       />
 

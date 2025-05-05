@@ -7,7 +7,6 @@ import Button from "@/components/ui/button/Button";
 const ROLES = ["Admin", "Secretario", "Periodista", "Coordinador", "Pasante"];
 
 interface Props {
-  isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -26,7 +25,7 @@ interface RegisterData {
   phone: string;
 }
 
-const CrearUsuarioModal = ({ isOpen, onClose, onSuccess }: Props) => {
+const CrearUsuarioModal = ({ onClose, onSuccess }: Props) => {
   const [registerData, setRegisterData] = useState<RegisterData>({
     email: "",
     password: "",
@@ -76,27 +75,9 @@ const CrearUsuarioModal = ({ isOpen, onClose, onSuccess }: Props) => {
     }
   };
 
-  if (!isOpen) return null;
 
   return (
     <>
-      <div
-        className="fixed inset-0 z-40 backdrop-blur-sm bg-black/30 backdrop-brightness-75"
-        onClick={onClose}
-      />
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div
-          className="relative w-full max-w-full h-145 sm:max-w-2xl"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Botón de cerrar (fijo) */}
-          <button
-            onClick={onClose}
-            className="absolute top-3 right-3 z-50 text-gray-400 hover:text-red-500 text-xl font-bold"
-          >
-            ✕
-          </button>
-
           <div className="bg-white dark:bg-gray-900 p-6 rounded-xl max-h-[90vh] overflow-y-auto shadow-lg">
             <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
               Registrar Usuario
@@ -199,8 +180,6 @@ const CrearUsuarioModal = ({ isOpen, onClose, onSuccess }: Props) => {
               </div>
             </form>
           </div>
-        </div>
-      </div>
     </>
   );
 };

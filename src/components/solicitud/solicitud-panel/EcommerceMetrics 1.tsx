@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import axios from "@/lib/axiosInstance";
 import Badge from "../../ui/badge/Badge";
 import { ArrowDownIcon, ArrowUpIcon, InfoIcon} from "@/icons";
 

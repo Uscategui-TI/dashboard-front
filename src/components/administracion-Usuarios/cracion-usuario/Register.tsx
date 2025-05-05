@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axios from "@/lib/axiosInstance";
 import Button from "@/components/ui/button/Button";
 import EditarUsuarioModal from "./EditarUsuarioModal";
 import ConfirmacionModal from "./ConfirmacionModal";
 import CrearUsuarioModal from "./CrearUsuarioModal";
 import { GenericTable } from "@/components/tables/GenericTable";
+import Pagination from "@/components/tables/Pagination";
+import { Modal } from "@/components/ui/modal";
+
 
 const ROLES = ["Admin", "Secretario", "Periodista", "Coordinador", "Pasante"];
 
@@ -21,6 +24,7 @@ type User = {
   city: string;
   country?: string;
   roles: string[];
+  active: boolean;
 };
 
 export default function UsuariosRegistrados() {
@@ -95,7 +99,17 @@ export default function UsuariosRegistrados() {
     { key: "address", header: "Dirección" },
     { key: "city", header: "Ciudad" },
     { key: "idNumber", header: "Documento" },
-    { key: "active", header: "Estado" },
+    {
+      key: "active",
+      header: "Estado",
+      render: (row: User) => (
+        <span className={`px-2 py-1 rounded-full text-xs font-medium 
+          ${row.active ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" 
+                       : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"}`}>
+          {row.active ? "Activo" : "Inactivo"}
+        </span>
+      ),
+    },
     {
       key: "roles",
       header: "Rol",
@@ -136,59 +150,91 @@ export default function UsuariosRegistrados() {
           actions={(row) => (
             <div className="flex gap-2">
               <Button size="sm" onClick={() => handleEdit(row)}>Editar</Button>
-              <Button size="sm" onClick={() => handleDelete(row)}>bloquear</Button>
+              <Button
+                size="sm"
+                onClick={() => handleDelete(row)}
+                disabled={!row.active}
+                className={`${!row.active ? "opacity-50 cursor-not-allowed" : ""}`}
+              >
+                Bloquear
+              </Button>
             </div>
           )}
         />
       </div>
 
-      <div className="flex justify-center mt-4 gap-2 flex-wrap">
-        <button onClick={() => setPage(0)} disabled={page === 0}
-          className="px-3 py-1 border rounded text-sm bg-white text-gray-700 disabled:opacity-50 dark:bg-gray-700 dark:text-white">&laquo;</button>
-        <button onClick={() => setPage(prev => Math.max(prev - 1, 0))} disabled={page === 0}
-          className="px-3 py-1 border rounded text-sm bg-white text-gray-700 disabled:opacity-50 dark:bg-gray-700 dark:text-white">&lt;</button>
-
-        {Array.from({ length: totalPages }).map((_, index) => (
-          <button key={index} onClick={() => setPage(index)}
-            className={`px-3 py-1 border rounded text-sm ${page === index ? "bg-blue-500 text-white" : "bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-200"}`}>
-            {index + 1}
-          </button>
-        ))}
-
-        <button onClick={() => setPage(prev => Math.min(prev + 1, totalPages - 1))} disabled={page === totalPages - 1}
-          className="px-3 py-1 border rounded text-sm bg-white text-gray-700 disabled:opacity-50 dark:bg-gray-700 dark:text-white">&gt;</button>
-        <button onClick={() => setPage(totalPages - 1)} disabled={page === totalPages - 1}
-          className="px-3 py-1 border rounded text-sm bg-white text-gray-700 disabled:opacity-50 dark:bg-gray-700 dark:text-white">&raquo;</button>
-      </div>
+      <Pagination key={page} currentPage={page} onPageChange={setPage} totalPages={totalPages}/>
 
       {showModal && selectedUser && (
-        <EditarUsuarioModal
-          user={selectedUser}
-          onClose={() => setShowModal(false)}
-          onSuccess={() => {
-            fetchData();
-            setShowModal(false);
-          }}
-        />
-      )}
+          <Modal
+            isOpen={showModal}
+            onClose={() => setShowModal(false)}
+            className="max-w-[1100px] p-6 lg:p-10"
+          >
+            <div className="flex flex-col px-2 overflow-y-auto custom-scrollbar">
+              <div className="mb-3">
+                <h5 className="mb-2 font-semibold text-gray-800 modal-title text-theme-xl dark:text-white/90 lg:text-2xl">
+                  Editar Usuario
+                </h5>
+                <EditarUsuarioModal
+                  user={selectedUser}
+                  onClose={() => setShowModal(false)}
+                  onSuccess={() => {
+                    fetchData();
+                    setShowModal(false);
+                  }}
+                />
+              </div>
+            </div>
+          </Modal>
+        )}
 
-      <ConfirmacionModal
-        isOpen={showConfirmModal}
-        onClose={() => setShowConfirmModal(false)}
-        onConfirm={confirmDelete}
-        message={`¿Estás seguro que deseas bloquear al usuario "${userToDelete?.name} ${userToDelete?.lastName}"? Esto bloqueara el usuario.`}
-      />
+        <Modal
+          isOpen={showConfirmModal}
+          onClose={() => setShowConfirmModal(false)}
+          className="max-w-md p-6 lg:p-8"
+        >
+          <div className="flex flex-col gap-4 text-center">
+            <h5 className="text-lg font-semibold text-gray-800 dark:text-white/90">
+              Confirmar Acción
+            </h5>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              ¿Estás seguro que deseas bloquear al usuario <strong>{userToDelete?.name} {userToDelete?.lastName}</strong>? Esto bloqueará el usuario.
+            </p>
+            <div className="flex justify-center gap-4 mt-4">
+              <Button variant="outline" onClick={() => setShowConfirmModal(false)}>
+                Cancelar
+              </Button>
+              <Button className="bg-red-600 text-white hover:bg-red-700" onClick={confirmDelete}>
+                Bloquear
+              </Button>
+            </div>
+          </div>
+        </Modal>
 
       {showCreateModal && (
+      <Modal
+      isOpen={showCreateModal}
+      onClose={() => setShowCreateModal(false)}
+      className="max-w-[1100px] p-6 lg:p-10"
+      >
+      <div className="flex flex-col px-2 overflow-y-auto custom-scrollbar">
+      <div className="mb-3">
+        <h5 className="mb-2 font-semibold text-gray-800 modal-title text-theme-xl dark:text-white/90 lg:text-2xl">
+          Registro de Usuario
+        </h5>
         <CrearUsuarioModal
-        isOpen={showCreateModal} 
-        onClose={() => setShowCreateModal(false)} 
-        onSuccess={() => {
-          fetchData();
-          setShowCreateModal(false); 
-        }}
-      />
+          onClose={() => setShowCreateModal(false)}
+          onSuccess={() => {
+            fetchData();
+            setShowCreateModal(false);
+          }}
+        />
+      </div>
+      </div>
+      </Modal>
       )}
+
     </div>
   );
 }

@@ -25,8 +25,8 @@ type Props = {
 };
 
 export default function EditarUsuarioModal({ user, onClose, onSuccess }: Props) {
-    const [selectedUser, setSelectedUser] = useState<User>(user);
-    const [emailError, setEmailError] = useState("");
+  const [selectedUser, setSelectedUser] = useState<User>(user);
+  const [emailError, setEmailError] = useState("");
 
   useEffect(() => {
     const parsedDate = user.birthDate
@@ -59,85 +59,74 @@ export default function EditarUsuarioModal({ user, onClose, onSuccess }: Props) 
 
   return (
     <>
-    
-      <div
-        className="fixed inset-0 z-40 backdrop-blur-sm bg-black/30 backdrop-brightness-75"
-        onClick={onClose}
-      />
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div
-          className="bg-white dark:bg-gray-900 p-6 rounded-xl w-full max-w-full sm:max-w-2xl max-h-[90vh] overflow-y-auto shadow-lg relative"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <button
-            onClick={onClose}
-            className="absolute top-3 right-3 text-gray-400 hover:text-red-500 text-xl font-bold"
-          >
-            ✕
-          </button>
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl max-h-[90vh] overflow-y-auto shadow-lg">
+            <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
+              Editar Usuario
+            </h2>
 
-          <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
-            Editar Usuario
-          </h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {[
+                  { label: "Nombre", field: "name" },
+                  { label: "Apellido", field: "lastName" },
+                  { label: "Correo", field: "email" },
+                  { label: "Teléfono", field: "phone" },
+                  { label: "Nacimiento", field: "birthDate", type: "date" },
+                  { label: "Dirección", field: "address" },
+                  { label: "Ciudad", field: "city" },
+                  { label: "País", field: "country" },
+                ].map(({ label, field, type }) => (
+                  <div key={field}>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {label}
+                    </label>
+                    <input
+                      type={type || "text"}
+                      value={selectedUser[field as keyof User] || ""}
+                      onChange={(e) =>
+                        setSelectedUser({ ...selectedUser, [field]: e.target.value })
+                      }
+                      className="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                    />
+                    {field === "email" && emailError && (
+                      <p className="text-red-500 text-sm">{emailError}</p>
+                    )}
+                  </div>
+                ))}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {[
-                { label: "Nombre", field: "name" },
-                { label: "Apellido", field: "lastName" },
-                { label: "Correo", field: "email" },
-                { label: "Teléfono", field: "phone" },
-                { label: "Nacimiento", field: "birthDate", type: "date" },
-                { label: "Dirección", field: "address" },
-                { label: "Ciudad", field: "city" },
-                { label: "País", field: "country" },
-              ].map(({ label, field, type }) => (
-                <div key={field}>
+                <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {label}
+                    Rol
                   </label>
-                  <input
-                    type={type || "text"}
-                    value={selectedUser[field as keyof User] || ""}
+                  <select
+                    value={selectedUser.roles?.[0] || ""}
                     onChange={(e) =>
-                      setSelectedUser({ ...selectedUser, [field]: e.target.value })
+                      setSelectedUser({ ...selectedUser, roles: [e.target.value] })
                     }
                     className="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
-                  />
-                  {field === "email" && emailError && (
-                    <p className="text-red-500 text-sm">{emailError}</p>
-                  )}
+                  >
+                    <option value="" disabled>
+                      Seleccionar rol
+                    </option>
+                    {ROLES.map((rol) => (
+                      <option key={rol} value={rol}>
+                        {rol}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-              ))}
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Rol</label>
-                <select
-                  value={selectedUser.roles?.[0] || ""}
-                  onChange={(e) =>
-                    setSelectedUser({ ...selectedUser, roles: [e.target.value] })
-                  }
-                  className="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
-                >
-                  <option value="" disabled>Seleccionar rol</option>
-                  {ROLES.map((rol) => (
-                    <option key={rol} value={rol}>{rol}</option>
-                  ))}
-                </select>
               </div>
-            </div>
 
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" size="sm" onClick={onClose}>
-                Cancelar
-              </Button>
-              <Button type="submit" size="sm" className="bg-blue-600 text-white hover:bg-blue-700">
-                Guardar
-              </Button>
-            </div>
-          </form>
-        </div>
-      </div>
+              <div className="flex justify-end gap-2 mt-4">
+                <Button type="button" variant="outline" size="sm" onClick={onClose}>
+                  Cancelar
+                </Button>
+                <Button type="submit" size="sm" className="bg-blue-600 text-white hover:bg-blue-700">
+                  Guardar
+                </Button>
+              </div>
+            </form>
+          </div>
     </>
   );
 }

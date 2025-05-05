@@ -10,9 +10,8 @@ type Props = {
   message: string;
 };
 
-export default function ConfirmacionModal({ isOpen, onClose, onConfirm, message }: Props) {
-  if (!isOpen) return null;
-
+export default function ConfirmacionModal({  onClose, onConfirm, message }: Props) {
+  
   return (
     <>
       <div className="fixed inset-0 z-40 backdrop-blur-sm bg-black/30" onClick={onClose} />

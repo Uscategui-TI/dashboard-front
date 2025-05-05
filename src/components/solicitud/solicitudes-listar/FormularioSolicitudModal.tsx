@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import axios from "axios";
+import axios from "@/lib/axiosInstance";
 import Button from "../../ui/button/Button";
 
 const initialForm = {

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axios from "@/lib/axiosInstance";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import Label from "@/components/form/Label";
 

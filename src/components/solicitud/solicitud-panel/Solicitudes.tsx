@@ -2,7 +2,7 @@
 
 import Badge from "../../ui/badge/Badge";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axios from "@/lib/axiosInstance";
 import { GenericTable } from "@/components/tables/GenericTable";
 
 type EventStat = {

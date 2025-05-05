@@ -6,6 +6,7 @@ import StatisticsChart from "@/components/ecommerce/StatisticsChart";
 import DemographicCard from "@/components/ecommerce/DemographicCard";
 import DemographicCardBogota from "@/components/prospect/Propsectos-Panel/DemographicCardBogota";
 import TablaProspectosPanel from "@/components/prospect/Propsectos-Panel/TablaProspectosPanel";
+import ProspectTablecumpleanos from "@/components/prospect/prospectos-cumpleaños/TablaProspectosPanel";
 
 export const metadata: Metadata = {
   title: "Uscategui Panel-Prospectos",
@@ -36,6 +37,9 @@ export default function Ecommerce() {
       </div>
       <div className="col-span-12">
         <TablaProspectosPanel />
+      </div>
+      <div className="col-span-12">
+         <ProspectTablecumpleanos />
       </div>
     </div>
   );

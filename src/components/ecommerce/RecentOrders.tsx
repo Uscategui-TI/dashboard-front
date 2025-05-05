@@ -10,7 +10,7 @@ import {
 import Badge from "../ui/badge/Badge";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axios from "@/lib/axiosInstance";
 
 interface EventStat {
   id: number;

@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "@/lib/axiosInstance";
 import dynamic from "next/dynamic";
 import { ApexOptions } from "apexcharts";
 

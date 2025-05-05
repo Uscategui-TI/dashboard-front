@@ -2,11 +2,12 @@
 
 import Badge from "../../ui/badge/Badge";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axios from "@/lib/axiosInstance";
 import Button from "../../ui/button/Button";
 import CrearSolicitudModal from "./FormularioSolicitudModal";
 import { Modal } from "@/components/ui/modal";
 import { GenericTable } from "@/components/tables/GenericTable";
+import Pagination from "@/components/tables/Pagination";
 
 type EventStat = {
   id: string | number;
@@ -55,18 +56,24 @@ export default function RecentOrders() {
     event.codigoSolicitud?.toString().toLowerCase().includes(search.toLowerCase())
   );
 
-  const getEstadoVariant = (estado: string): "success" | "warning" | "error" => {
-    switch (estado) {
+  const getEstadoVariant = (
+    estado: string
+  ): "success" | "warning" | "info" | "light" | "dark" | "primary" | "error" => {
+    switch (estado.toUpperCase()) {
       case "EN_PROCESO":
-        return "success";
+        return "info"; 
       case "PENDIENTE":
         return "warning";
       case "RECHAZADA":
-        return "error";
+        return "error"; 
       case "APROBADO":
-        return "success";
+        return "success"; 
+      case "PAUSADOS":
+        return "dark"; 
+      case "FINALIZADOS":
+        return "primary"; 
       default:
-        return "error";
+        return "light"; 
     }
   };
 
@@ -177,24 +184,7 @@ export default function RecentOrders() {
           )}
         />
       </div>
-      <div className="flex justify-center mt-4 gap-2 flex-wrap">
-        <button onClick={() => setPage(0)} disabled={page === 0}
-          className="px-3 py-1 border rounded text-sm bg-white text-gray-700 disabled:opacity-50 dark:bg-gray-700 dark:text-white">&laquo;</button>
-        <button onClick={() => setPage(prev => Math.max(prev - 1, 0))} disabled={page === 0}
-          className="px-3 py-1 border rounded text-sm bg-white text-gray-700 disabled:opacity-50 dark:bg-gray-700 dark:text-white">&lt;</button>
-
-        {Array.from({ length: totalPages }).map((_, index) => (
-          <button key={index} onClick={() => setPage(index)}
-            className={`px-3 py-1 border rounded text-sm ${page === index ? "bg-blue-500 text-white" : "bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-200"}`}>
-            {index + 1}
-          </button>
-        ))}
-
-        <button onClick={() => setPage(prev => Math.min(prev + 1, totalPages - 1))} disabled={page === totalPages - 1}
-          className="px-3 py-1 border rounded text-sm bg-white text-gray-700 disabled:opacity-50 dark:bg-gray-700 dark:text-white">&gt;</button>
-        <button onClick={() => setPage(totalPages - 1)} disabled={page === totalPages - 1}
-          className="px-3 py-1 border rounded text-sm bg-white text-gray-700 disabled:opacity-50 dark:bg-gray-700 dark:text-white">&raquo;</button>
-      </div>
+      <Pagination key={page} currentPage={page} onPageChange={setPage} totalPages={totalPages}/>
 
 
       {/* Modal */}

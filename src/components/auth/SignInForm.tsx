@@ -47,7 +47,7 @@ export default function SignInForm() {
       }
     } catch (error: any) {
       console.error("Error en la autenticación:", error);
-      setError(error.response?.data?.message || "Error de conexión con el servidor");
+      setError(error.response?.data?.message || "Credenciales inválidas");
       localStorage.removeItem("authToken");
       localStorage.removeItem("roles");
     } finally {
