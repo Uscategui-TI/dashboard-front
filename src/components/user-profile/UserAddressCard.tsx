@@ -6,7 +6,7 @@ import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
-import axios from "axios";
+import axios from "@/lib/axiosInstance";
 
 const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
 
