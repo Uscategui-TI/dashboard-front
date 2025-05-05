@@ -3,10 +3,10 @@
 import Badge from "../../ui/badge/Badge";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import GenericTable from "../../tables/GenericTable";
 import Button from "../../ui/button/Button";
 import CrearSolicitudModal from "./FormularioSolicitudModal";
 import { Modal } from "@/components/ui/modal";
+import { GenericTable } from "@/components/tables/GenericTable";
 
 type EventStat = {
   id: string | number;

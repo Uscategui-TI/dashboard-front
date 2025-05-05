@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
-import GenericTable from "@/components/tables/GenericTable";
 import Button from "@/components/ui/button/Button";
 import EditarUsuarioModal from "./EditarUsuarioModal";
 import ConfirmacionModal from "./ConfirmacionModal";
 import CrearUsuarioModal from "./CrearUsuarioModal";
+import { GenericTable } from "@/components/tables/GenericTable";
 
 const ROLES = ["Admin", "Secretario", "Periodista", "Coordinador", "Pasante"];
 
