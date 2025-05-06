@@ -1,5 +1,5 @@
-
 import axios from "axios";
+import Cookies from "js-cookie";
 
 const axiosInstance = axios.create({
   withCredentials: true,
@@ -9,13 +9,16 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    // if (error.response?.status === 401) {
-    //   if (typeof window !== "undefined") {
-    //     // Token expirado: redirigir
-    //     window.location.href = "/signin";
-    //   }
-    // }
-    // return Promise.reject(error);
+    if (error.response?.status === 401) {
+      // Borrar token
+      Cookies.remove("token");
+
+      // Redirigir
+      if (typeof window !== "undefined") {
+        window.location.href = "/signin";
+      }
+    }
+    return Promise.reject(error);
   }
 );
 

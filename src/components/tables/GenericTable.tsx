@@ -16,6 +16,7 @@ type GenericTableProps<T> = {
   onSelectionChange?: (selected: T[]) => void;
   searchableColumns?: (keyof T)[];
   filterableColumns?: (keyof T)[];
+  onSearchChange?: (value: string) => void;
 };
 
 export function GenericTable<T extends { id: string | number }>({
@@ -26,24 +27,27 @@ export function GenericTable<T extends { id: string | number }>({
   onSelectionChange,
   searchableColumns,
   filterableColumns,
+  onSearchChange,
 }: GenericTableProps<T>) {
   const [selectedIds, setSelectedIds] = useState<(string | number)[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState<Record<string, string>>({});
 
   // ✅ Mover filteredData arriba para evitar uso previo
-  const filteredData: T[] = data.filter((row) => {
-    const matchesSearch =
-      !searchableColumns || searchableColumns.some((key) =>
-        String(row[key] ?? "").toLowerCase().includes(searchTerm.toLowerCase())
-      );
+  const filteredData: T[] = onSearchChange
+  ? data // si es búsqueda remota, no filtramos nada localmente
+  : data.filter((row) => {
+      const matchesSearch =
+        !searchableColumns || searchableColumns.some((key) =>
+          String(row[key] ?? "").toLowerCase().includes(searchTerm.toLowerCase())
+        );
 
-    const matchesFilters = Object.entries(filters).every(([key, value]) => {
-      return !value || String((row as any)[key]) === value;
+      const matchesFilters = Object.entries(filters).every(([key, value]) => {
+        return !value || String((row as any)[key]) === value;
+      });
+
+      return matchesSearch && matchesFilters;
     });
-
-    return matchesSearch && matchesFilters;
-  });
 
   const isSelected = (id: string | number) => selectedIds.includes(id);
   const isAllSelected = filteredData.length > 0 && selectedIds.length === filteredData.length;
@@ -76,18 +80,38 @@ export function GenericTable<T extends { id: string | number }>({
         { searchableColumns ? (
           <div className="flex items-center gap-3">
             <input
-              type="text"
-              placeholder="Buscar..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 shadow-sm focus:outline-none  dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
-            />
+                type="text"
+                placeholder="Buscar..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    const value = (e.target as HTMLInputElement).value;
+                    if (onSearchChange) {
+                      onSearchChange(value);
+                    }
+                  }
+                }}
+                /* onChange={(e) => {
+                  const value = e.target.value;
+                  setSearchTerm(value);
+                  if (onSearchChange) {
+                    onSearchChange(value); // búsqueda remota
+                  }
+                }} */
+                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 shadow-sm focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
+              />
 
             {searchTerm && (
               <button
-                onClick={() => setSearchTerm("")}
-                className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
-              >
+              onClick={() => {
+                setSearchTerm("");         // limpia el campo visualmente
+                if (onSearchChange) {
+                  onSearchChange("");      // 🔁 recarga los datos completos
+                }
+              }}
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+            >
                 Limpiar
               </button>
             )}

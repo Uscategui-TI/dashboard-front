@@ -51,10 +51,10 @@ export default function ProspectosPanel() {
   } = useModal();
 
   const [data, setData] = useState<any[]>([]);
-  const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [size] = useState(100);
   const [totalPages, setTotalPages] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const [selectedRows, setSelectedRows] = useState<any[]>([]);
 
@@ -66,7 +66,7 @@ export default function ProspectosPanel() {
           await Promise.all([
             axios.get<any>(
               `${process.env.NEXT_PUBLIC_AUTH_URL}/api/person-form/list`,
-              { params: { page, size } }
+              { params: { page, size, search: searchTerm } }
             ),
           ]);
 
@@ -77,13 +77,9 @@ export default function ProspectosPanel() {
       }
     };
     fetchData();
-  }, [page, size]);
+  }, [page, size, searchTerm]);
 
-  const filteredData = data.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase()) ||
-    p.document.toLowerCase().includes(search.toLowerCase())
-  );
-
+  
   const getVisiblePages = () => {
     const delta = 2;
     const range = [];
@@ -118,9 +114,13 @@ export default function ProspectosPanel() {
         <div className="max-w-full overflow-x-auto">
             <GenericTable<any>
               columns={columns}
-              data={filteredData}
+              data={data}
               selectable={true}
-              searchableColumns={["name", "cargo"]}
+              searchableColumns={["name", "cargo","document"]}
+              onSearchChange={(value) => {
+                setPage(0); 
+                setSearchTerm(value); 
+              }}
               // filterableColumns={["estado"]}
               onSelectionChange={(rows) => {
                 console.log("Registros seleccionados:", rows);

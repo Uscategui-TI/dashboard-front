@@ -25,6 +25,7 @@ type User = {
   country?: string;
   roles: string[];
   active: boolean;
+  idNumber: number;
 };
 
 export default function UsuariosRegistrados() {
@@ -34,33 +35,29 @@ export default function UsuariosRegistrados() {
   const [showModal, setShowModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [data, setData] = useState<User[]>([]);
-  const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [size] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
   const [emailError, setEmailError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    fetchData();
-  }, [page, size]);
+    fetchData(searchTerm);
+  }, [page, size, searchTerm]);
 
-  const fetchData = async () => {
+  const fetchData = async (query = "") => {
     try {
       const response = await axios.get(`${process.env.NEXT_PUBLIC_AUTH_URL}/api/auth/users`, {
-        params: { page, size },
+        params: { page, size, search: query },
       });
-      setData((response.data.users ?? []));
+      setData(response.data.users ?? []);
       setTotalPages(response.data.totalPages ?? 1);
     } catch (error) {
       console.error("Error al cargar los usuarios:", error);
     }
   };
 
-  const filteredData = data.filter((user) =>
-    user.name.toLowerCase().includes(search.toLowerCase()) ||
-    user.lastName.toLowerCase().includes(search.toLowerCase()) ||
-    user.email.toLowerCase().includes(search.toLowerCase())
-  );
+  
 
   const handleEdit = (user: User) => {
     const parsedDate = user.birthDate ? new Date(user.birthDate).toISOString().split("T")[0] : "";
@@ -130,13 +127,6 @@ export default function UsuariosRegistrados() {
         <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Usuarios Registrados</h3>
 
         <div className="flex items-center gap-3 flex-wrap">
-          <input
-            type="text"
-            placeholder="Buscar por nombre, apellido o correo"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
-          />
           <Button size="sm" onClick={() => setShowCreateModal(true)} className="bg-blue-500 text-white hover:bg-blue-700">
             Agregar Usuario
           </Button>
@@ -144,24 +134,29 @@ export default function UsuariosRegistrados() {
       </div>
 
       <div className="max-w-full overflow-x-auto">
-        <GenericTable<User>
-          columns={columns}
-          data={filteredData}
-          actions={(row) => (
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={() => handleEdit(row)}>Editar</Button>
-              <Button
-                size="sm"
-                onClick={() => handleDelete(row)}
-                disabled={!row.active}
-                className={`${!row.active ? "opacity-50 cursor-not-allowed" : ""}`}
-                variant="outline"
-              >
-                Bloquear
-              </Button>
-            </div>
-          )}
-        />
+      <GenericTable<User>
+        columns={columns}
+        data={data}
+        searchableColumns={["name", "idNumber", "email"]}
+        onSearchChange={(value) => {
+          setPage(0); // vuelve a la primera página al buscar
+          setSearchTerm(value); // dispara useEffect con nueva búsqueda
+        }}
+        actions={(row) => (
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={() => handleEdit(row)}>Editar</Button>
+            <Button
+              size="sm"
+              onClick={() => handleDelete(row)}
+              disabled={!row.active}
+              className={`${!row.active ? "opacity-50 cursor-not-allowed" : ""}`}
+              variant="outline"
+            >
+              Bloquear
+            </Button>
+          </div>
+        )}
+      />
       </div>
 
       <Pagination key={page} currentPage={page} onPageChange={setPage} totalPages={totalPages}/>

@@ -80,6 +80,8 @@ export default function RecentOrders() {
   const [totalPages, setTotalPages] = useState(0);
   const [showCrearModal, setShowCrearModal] = useState(false);
   const [form, setForm] = useState(initialForm);
+  const [searchTerm, setSearchTerm] = useState("");
+
   
 
   const [selectedSolicitud, setSelectedSolicitud] = useState<EventStat | null>(null);
@@ -89,12 +91,12 @@ export default function RecentOrders() {
 
   useEffect(() => {
     fetchData();
-  }, [page, size]);
+  }, [page, size, searchTerm]);
 
   const fetchData = async () => {
     try {
       const response = await axios.get(`${process.env.NEXT_PUBLIC_AUTH_URL}/api/prospecto/all`, {
-        params: { page, size }
+        params: { page, size, search: searchTerm }
       });
   
       setData(response.data.content);   
@@ -144,6 +146,7 @@ export default function RecentOrders() {
     try {
       await axios.post(`${process.env.NEXT_PUBLIC_AUTH_URL}/api/prospecto/crear-solicitud`, form);
       setForm(initialForm);
+      fetchData();
     } catch (error) {
       console.error("Error creando solicitud:", error);
     } finally {
@@ -179,6 +182,10 @@ export default function RecentOrders() {
           columns={columns}
           data={data}
           searchableColumns={['codigoSolicitud']}
+          onSearchChange={(value) => {
+            setPage(0); 
+            setSearchTerm(value); 
+          }}
           actions={(row) => (
             <div className="flex gap-2">
               <Button size="sm" variant="outline" onClick={() => handleEdit(row)}>
