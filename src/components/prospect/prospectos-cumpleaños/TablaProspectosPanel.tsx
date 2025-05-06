@@ -80,7 +80,7 @@ export default function ProspectTablecumpleanos() {
     for (const prospect of validProspects) {
       try {
         const response = await axios.post(
-          `${process.env.NEXT_PUBLIC_WHATSAPP_URL}/v1/messages`,
+          `${process.env.NEXT_PUBLIC_WHATSAPP_URL}/broadcast-direct`,
           {
             number: `57${prospect.number}`,
             message: mensaje.replace("{nombre}", prospect.name),
