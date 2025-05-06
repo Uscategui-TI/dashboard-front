@@ -72,23 +72,27 @@ export function GenericTable<T extends { id: string | number }>({
   return (
     <div className="w-full">
       {/* Busqueda + Filtros */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 ml-1 py-4 rounded-md">
-        <div className="flex items-center gap-3">
-          <input
-            type="text"
-            placeholder="Buscar..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 shadow-sm focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
-          />
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 py-4 rounded-md">
+        { searchableColumns ? (
+          <div className="flex items-center gap-3">
+            <input
+              type="text"
+              placeholder="Buscar..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 shadow-sm focus:outline-none  dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
+            />
 
-          <button
-            onClick={() => setSearchTerm("")}
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
-          >
-            Limpiar
-          </button> 
-        </div>
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm("")}
+                className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+              >
+                Limpiar
+              </button>
+            )}
+          </div>
+        ) : null}
 
         {filterableColumns?.map((key) => {
           const uniqueValues = Array.from(new Set(data.map((row) => row[key])));

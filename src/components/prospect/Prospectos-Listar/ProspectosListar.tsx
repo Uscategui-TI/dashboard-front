@@ -44,6 +44,12 @@ export default function ProspectosPanel() {
     closeModal: closeCampaingModal
   } = useModal();
 
+  const {
+    isOpen: isDifusionModalOpen,
+    openModal: openDifusionModal,
+    closeModal: closeDifusionModal
+  } = useModal();
+
   const [data, setData] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
@@ -62,10 +68,6 @@ export default function ProspectosPanel() {
               `${process.env.NEXT_PUBLIC_AUTH_URL}/api/person-form/list`,
               { params: { page, size } }
             ),
-            axios.get(`${process.env.NEXT_PUBLIC_AUTH_URL}/gender/all`),
-            axios.get(`${process.env.NEXT_PUBLIC_AUTH_URL}/api/departments/all`),
-            axios.get(`${process.env.NEXT_PUBLIC_AUTH_URL}/api/municipalities/all`),
-            axios.get(`${process.env.NEXT_PUBLIC_AUTH_URL}/api/communes/all`),
           ]);
 
         setData(prospectsRes.data.content);
@@ -96,9 +98,9 @@ export default function ProspectosPanel() {
   return (
     <>
       <PageBreadcrumb pageTitle="Listar Prospectos"/>
-
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
-        <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div></div>
           <div className="flex gap-3">
 
             <Button onClick={() => openModal()}>
@@ -133,15 +135,9 @@ export default function ProspectosPanel() {
             />
         </div>
         <Pagination key={page} currentPage={page} onPageChange={setPage} totalPages={totalPages}/>
-
-
-        <div className="flex justify-center mt-3">
-          <span className="text-sm text-gray-500 dark:text-gray-300">
-            Página {page + 1} de {totalPages}
-          </span>
-        </div>
       </div>
 
+      {/* Modal Crear Prospecto  */}
       <Modal
         isOpen={isOpen}
         onClose={closeModal}
@@ -178,37 +174,108 @@ export default function ProspectosPanel() {
         </div>
       </Modal>
 
+      {/* Modal Elegir Capaña  */}
       <Modal
         isOpen={isCampaingModalOpen} 
         onClose={closeCampaingModal}
         className="max-w-[750px] p-6 lg:p-10"
       >
-        <div className="flex flex-col px-2 overflow-y-auto custom-scrollbar">
-          <div className="mb-3">
-            <h5 className="mb-2 font-semibold text-gray-800 modal-title text-theme-xl dark:text-white/90 lg:text-2xl">
-              Seleciona la Campaña a Difundir
-            </h5>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Puedes selccionar estos proveedores para difundir tus mensajes, inivitaciones, eventos y mucho mas
-            </p>
-          </div>
+       <div className="flex flex-col px-4 py-5 overflow-y-auto custom-scrollbar">
+        <div className="mb-6">
+          <h5 className="mb-2 text-2xl font-bold text-gray-800 dark:text-white">
+            Selecciona la Campaña a Difundir
+          </h5>
+          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+            Puedes seleccionar estos proveedores para difundir tus mensajes, invitaciones, eventos y mucho más.
+          </p>
+        </div>
 
-          <div className="grid grid-cols-4 gap-4 p-4 w-full mt-2 rounded-xl shadow-md">
-            <div className="cursor-pointer flex items-center justify-center h-16 rounded-lg font-semibold text-white bg-yellow-500 hover:bg-yellow-600 transition-colors">
-              SMS
-            </div>
-            <div className="cursor-pointer flex items-center justify-center h-16 rounded-lg font-semibold text-white bg-blue-500 hover:bg-blue-600 transition-colors">
-              Correo
-            </div>
-            <div className="cursor-pointer flex items-center justify-center h-16 rounded-lg font-semibold text-white bg-green-500 hover:bg-green-600 transition-colors">
-              WhatsApp
-            </div>
-            <div className="cursor-pointer flex items-center justify-center h-16 rounded-lg font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors">
-              Telegram
-            </div>
+        <p className="mb-5 text-sm text-gray-700 dark:text-gray-300">
+          Cuentas con <span className="font-semibold">{selectedRows.length}</span> prospectos seleccionados.
+        </p>
+
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 w-full">
+          <button
+            onClick={openDifusionModal}
+            className="flex items-center justify-center h-16 rounded-xl font-semibold text-white bg-yellow-500 hover:bg-yellow-600 shadow-md transition-all duration-200"
+          >
+            SMS
+          </button>
+          <button
+            onClick={openDifusionModal}
+            className="flex items-center justify-center h-16 rounded-xl font-semibold text-white bg-blue-500 hover:bg-blue-600 shadow-md transition-all duration-200"
+          >
+            Correo
+          </button>
+          <button
+            onClick={openDifusionModal}
+            className="flex items-center justify-center h-16 rounded-xl font-semibold text-white bg-green-500 hover:bg-green-600 shadow-md transition-all duration-200"
+          >
+            WhatsApp
+          </button>
+          <button
+            onClick={openDifusionModal}
+            className="flex items-center justify-center h-16 rounded-xl font-semibold text-white bg-indigo-500 hover:bg-indigo-600 shadow-md transition-all duration-200"
+          >
+            Telegram
+          </button>
+        </div>
+      </div>
+      </Modal>
+
+      {/* Modal Difundir campaña */}
+      <Modal
+        isOpen={isDifusionModalOpen} 
+        onClose={closeDifusionModal}
+        className="max-w-[950px] p-6 lg:p-10"
+      >
+       <div className="flex flex-col px-4 py-5 overflow-y-auto custom-scrollbar">
+        <div className="mb-6">
+          <h5 className="mb-2 text-2xl font-bold text-gray-800 dark:text-white">
+            Parametriza tu Campaña
+          </h5>
+          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+            Puedes seleccionar estos proveedores para difundir tus mensajes, invitaciones, eventos y mucho más.
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-4 mt-4">
+          <label className="block text-sm text-gray-600 dark:text-gray-300">Personaliza tu Mensaje</label>
+          <textarea
+            rows={4}
+            // value={customMessage}
+            // onChange={(e) => setCustomMessage(e.target.value)}
+            className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+          />
+
+          <div className="mb-4">
+            <label className="block mb-2 text-sm text-gray-600 dark:text-gray-300">Adjunta tu archivo multimedia (opcional)</label>
+            {/* <ImageUpload onChange={(url) => setImageUrl(url)} value={imageUrl ?? ""} /> */}
           </div>
         </div>
+          
+        <div className="flex items-center gap-3 mt-6 modal-footer sm:justify-end">
+          <button
+            onClick={closeModal}
+            type="button"
+            className="flex w-full justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] sm:w-auto"
+          >
+            Volver
+          </button>
+          <button
+            // onClick={async () => {
+            //   closeModal()
+            //   await handleSendBirthdayMessages(customMessage, imageUrl);
+            // }}
+            type="button"
+            className="btn btn-success btn-update-event flex w-full justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 sm:w-auto"
+          >
+          Enviar Mensajes
+          </button>
+        </div> 
+      </div>
       </Modal>
+
     </>
   );
 }

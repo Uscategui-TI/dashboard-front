@@ -51,10 +51,11 @@ export default function PersonFormPage() {
   const [page, setPage] = useState(0); 
   const [size, setSize] = useState(10);
   const [totalPages, setTotalPages] = useState(0); 
-  const { isOpen, openModal, closeModal } = useModal();
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  
+  const { isOpen, openModal, closeModal } = useModal();
 
   useEffect(() => {
     fetchData();
@@ -81,7 +82,6 @@ export default function PersonFormPage() {
       console.error("Error al cargar las solicitudes:", error);
     }
   };
-    
 
   const handleUploadCsv = async () => {
     
@@ -98,14 +98,17 @@ export default function PersonFormPage() {
         },
       });
 
-      setSuccessMessage(response.data || "Archivo subido exitosamente ✅");
+      setSuccessMessage(response.data || "Prospectos Cargados Exitosamente ✅");
       setFile(null);
+
+      await fetchData(0);
     } catch (error) {
       console.error("Error al subir el archivo:", error);
       setSuccessMessage("❌ Error al subir el archivo");
     } finally {
+      closeModal()
       setLoading(false);
-      setTimeout(() => setSuccessMessage(""), 3000);
+      setTimeout(() => setSuccessMessage(""), 4000);
     }
   };
 
@@ -119,21 +122,9 @@ export default function PersonFormPage() {
       )}
 
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
-        <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <input
-              type="text"
-              placeholder="Buscar por documento"
-              // value={search}
-              // onChange={(e) => setSearch(e.target.value)}
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
-            />
-            <button
-              // onClick={() => setSearch("")}
-              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
-            >
-              Limpiar
-            </button>
+
           </div>
 
           <div>
@@ -147,11 +138,11 @@ export default function PersonFormPage() {
           <GenericTable<IUploadFile>
             columns={columns}
             data={data}
+            searchableColumns={["idUserCreate"]}
           />
+          <Pagination key={page} currentPage={page} onPageChange={setPage} totalPages={totalPages}/>
 
-          <div className="flex justify-between items-center mt-5">
-            <Pagination key={page} currentPage={page} onPageChange={setPage} totalPages={totalPages}/>
-
+          {/* <div className="flex justify-between items-center mt-5">
             <div className="flex items-center justify-between mb-4">
               <label className="text-sm text-gray-700 dark:text-gray-300">
                 Registros por página:
@@ -171,7 +162,7 @@ export default function PersonFormPage() {
                 </select>
               </label>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
 

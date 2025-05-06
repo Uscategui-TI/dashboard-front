@@ -57,6 +57,7 @@ const navItems: NavItem[] = [
       { name: "WhatsApp", path: "/what-panel", roles: ["Admin", "Periodista"] },
       { name: "What Bot", path: "/what-bot", roles: ["Admin"] },
       { name: "Correos", path: "/email-panel", roles: ["Admin"] },
+      { name: "SMS", path: "/sms-panel", roles: ["Admin"] },
       { name: "Telegram", path: "/telegram-panel", roles: ["Admin"] },
     ],
   },
@@ -85,7 +86,7 @@ const navItems: NavItem[] = [
     roles: ["Admin", "Secretario"],
     subItems: [
       { name: "Usuarios", path: "/usuarios", roles: ["Admin"] },
-      { name: "Formularios", path: "/solicitud-listar", roles: ["Admin", "Secretario"] },
+      { name: "Formularios", path: "/formularios", roles: ["Admin", "Secretario"] },
     ],
   },
   {

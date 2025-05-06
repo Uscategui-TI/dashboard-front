@@ -9,13 +9,13 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      if (typeof window !== "undefined") {
-        // Token expirado: redirigir
-        window.location.href = "/signin";
-      }
-    }
-    return Promise.reject(error);
+    // if (error.response?.status === 401) {
+    //   if (typeof window !== "undefined") {
+    //     // Token expirado: redirigir
+    //     window.location.href = "/signin";
+    //   }
+    // }
+    // return Promise.reject(error);
   }
 );
 

@@ -35,10 +35,10 @@ export default function Ecommerce() {
       <div className="col-span-12 xl:col-span-6">
         <DemographicCardBogota />
       </div>
-      <div className="col-span-12">
+      <div className="col-span-8">
         <TablaProspectosPanel />
       </div>
-      <div className="col-span-12">
+      <div className="col-span-4">
          <ProspectTablecumpleanos />
       </div>
     </div>

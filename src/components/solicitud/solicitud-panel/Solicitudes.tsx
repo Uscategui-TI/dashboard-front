@@ -4,8 +4,11 @@ import Badge from "../../ui/badge/Badge";
 import { useEffect, useState } from "react";
 import axios from "@/lib/axiosInstance";
 import { GenericTable } from "@/components/tables/GenericTable";
+import { EcommerceMetrics } from "./EcommerceMetrics";
+import MonthlyTargetCanales from "./MonthlyTargetCanales";
+import { Metrics6 } from "./EcommerceMetrics 6";
 
-type EventStat = {
+  type EventStat = {
     id: string | number;
     asunto: string;
     fechaCreacion: string;
@@ -16,102 +19,154 @@ type EventStat = {
     codigoSolicitud?: string | number;
   };
 
-export default function RecentOrders() {
-    const [data, setData] = useState<EventStat[]>([]);
-    const [search, setSearch] = useState("");
+  type ConteoPorEstado = {
+    [key: string]: number;
+  };
+
+  const getEstadoVariant = (
+    estado: string
+  ): "success" | "warning" | "error"  => {
+    switch (estado) {
+      case "EN_PROCESO":
+        return "success";
+      case "PENDIENTE":
+        return "warning";
+      case "RECHAZADA":
+        return "error";
+      default:
+        return "error";
+    }
+  };
   
-    // 3. Llamada a la API
-    useEffect(() => {
-      const fetchData = async () => {
-        try {
-          const response = await axios.get(
-            `${process.env.NEXT_PUBLIC_AUTH_URL}/api/prospecto/ultimas`
-          );
-          setData(response.data);
-        } catch (error) {
-          console.error("Error al cargar las estadísticas:", error);
-        }
-      };
-      fetchData();
-    }, []);
-  
-    // 4. Filtro por "asunto"
-    const filteredData = data.filter((event) =>
-      event.asunto.toLowerCase().includes(search.toLowerCase()) ||
-      event.codigoSolicitud?.toString().toLowerCase().includes(search.toLowerCase())
-    );
-  
-    const getEstadoVariant = (
-        estado: string
-      ): "success" | "warning" | "error"  => {
-        switch (estado) {
-          case "EN_PROCESO":
-            return "success";
-          case "PENDIENTE":
-            return "warning";
-          case "RECHAZADA":
-            return "error";
-          default:
-            return "error";
-        }
-      };
-      
-    // 5. Columnas configuradas con render personalizado
-    const columns = [
-      { key: "codigoSolicitud", header: "Código Solicitud" },
-      { key: "asunto", header: "Asunto" },
-      {
-        key: "Prospecto",
-        header: "Prospecto",
-        render: (row: EventStat) => row.prospecto?.document || "-",
-      },
-      {
-        key: "fechaCreacion",
-        header: "Fecha",
-        render: (row: EventStat) =>
-          new Date(row.fechaCreacion).toLocaleDateString(),
-      },
-      {
-        key: "estado",
-        header: "Estado",
-        render: (row: EventStat) => (
-          <Badge color={getEstadoVariant(row.estado)}>{row.estado}</Badge>
-        ),
-      },
-    ];
-  
-    // 6. Colores del estado
+  const columns = [
+    { key: "codigoSolicitud", header: "Código Solicitud" },
+    { key: "asunto", header: "Asunto" },
+    {
+      key: "Prospecto",
+      header: "Prospecto",
+      render: (row: EventStat) => row.prospecto?.document || "-",
+    },
+    {
+      key: "fechaCreacion",
+      header: "Fecha",
+      render: (row: EventStat) =>
+        new Date(row.fechaCreacion).toLocaleDateString(),
+    },
+    {
+      key: "estado",
+      header: "Estado",
+      render: (row: EventStat) => (
+        <Badge color={getEstadoVariant(row.estado)}>{row.estado}</Badge>
+      ),
+    },
+  ];
 
   
-    return (
-      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
-        <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-            Lista de Solicitudes
-          </h3>
+export default function RecentOrders() {
+  const [data, setData] = useState<EventStat[]>([]);
+  const [prospects, setProspects] = useState(0);
+  const [prevProspects, setPrevProspects] = useState(0);
+  const [conteoPorEstado, setConteoPorEstado] = useState<ConteoPorEstado>({});
+
+  useEffect(() => {
+    const fetchAllData = async () => {
+      try {
+        // 1. Llamada a `/ultimas`
+        const ultimasResponse = await axios.get(
+          `${process.env.NEXT_PUBLIC_AUTH_URL}/api/prospecto/ultimas`
+        );
+        setData(ultimasResponse.data);
+
+        // 2. Llamada a `/estadisticas`
+        const estadisticasResponse = await axios.get(
+          `${process.env.NEXT_PUBLIC_AUTH_URL}/api/prospecto/estadisticas`
+        );
+        const { totalSolicitudes, conteoPorEstado } = estadisticasResponse.data;
+
+        setProspects(totalSolicitudes);
+        setPrevProspects(totalSolicitudes - 1); // Simulación de valor anterior
+        setConteoPorEstado(conteoPorEstado);
+      } catch (error) {
+        console.error("Error al cargar datos:", error);
+      }
+    };
+
+    fetchAllData();
+  }, []);
   
-          <div className="flex items-center gap-3">
-            <input
-              type="text"
-              placeholder="Buscar por nombre de solicitud"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
-            />
-            <button
-              onClick={() => setSearch("")}
-              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
-            >
-              Limpiar
-            </button>
-          </div>
+    return (
+      <div className="p-4 space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <EcommerceMetrics 
+            title="Solicitudes"
+            text="Total Solicitudes"
+            toltip="Calcula el porcentaje de cambio entre un valor anterior y uno actual."
+            value={prospects}
+            prospects={prospects}
+            prevProspects={prevProspects}
+          />
+            <EcommerceMetrics 
+            title="Finalizados"
+            text="Total Finalizados"
+            toltip="Calcula el porcentaje de cambio entre un valor anterior y uno actual."
+            value={conteoPorEstado?.FINALIZADOS}
+            prospects={prospects}
+            prevProspects={prevProspects}
+          />
+            <EcommerceMetrics 
+            title="Rechazados"
+            text="Total Rechazados"
+            toltip="Calcula el porcentaje de cambio entre un valor anterior y uno actual."
+            value={conteoPorEstado?.RECHAZADA}
+            prospects={prospects}
+            prevProspects={prevProspects}
+          />
         </div>
   
-        <div className="max-w-full overflow-x-auto">
-          <GenericTable<EventStat>
-            columns={columns}
-            data={filteredData}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <EcommerceMetrics 
+            title="En Proceso"
+            text="Total en proceso"
+            toltip="Calcula el porcentaje de cambio entre un valor anterior y uno actual."
+            value={conteoPorEstado?.EN_PROCESO}
+            prospects={prospects}
+            prevProspects={prevProspects}
           />
+          <EcommerceMetrics 
+            title="Pausadas"
+            text="Total en pausados"
+            toltip="Calcula el porcentaje de cambio entre un valor anterior y uno actual."
+            value={conteoPorEstado?.PAUSADOS}
+            prospects={prospects}
+            prevProspects={prevProspects}
+          />
+          <EcommerceMetrics 
+            title="Aprovado"
+            text="Total en aprobados"
+            toltip="Calcula el porcentaje de cambio entre un valor anterior y uno actual."
+            value={conteoPorEstado?.APROBADO}
+            prospects={prospects}
+            prevProspects={prevProspects}
+          />
+        </div>
+  
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Metrics6/>
+          <MonthlyTargetCanales/> 
+        </div>
+
+        <div className="grid grid-cols-1">
+          <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
+              Solicitudes Creadas Recientemente
+            </h3>
+            <div className="max-w-full overflow-x-auto">
+              <GenericTable<EventStat>
+                columns={columns}
+                data={data}
+              />
+            </div>
+          </div>
         </div>
       </div>
     );

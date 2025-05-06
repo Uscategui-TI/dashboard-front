@@ -87,28 +87,17 @@ export default function UsuariosRegistrados() {
   };
 
   const columns = [
+    { key: "idNumber", header: "Documento" },
     { key: "name", header: "Nombre" },
     { key: "lastName", header: "Apellido" },
+    { key: "phone", header: "Teléfono" },
     { key: "email", header: "Correo" },
+    { key: "address", header: "Dirección" },
+    { key: "city", header: "Ciudad" },
     {
       key: "birth_date",
       header: "Nacimiento",
       render: (row: User) => new Date(row.birthDate).toLocaleDateString(),
-    },
-    { key: "phone", header: "Teléfono" },
-    { key: "address", header: "Dirección" },
-    { key: "city", header: "Ciudad" },
-    { key: "idNumber", header: "Documento" },
-    {
-      key: "active",
-      header: "Estado",
-      render: (row: User) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium 
-          ${row.active ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" 
-                       : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"}`}>
-          {row.active ? "Activo" : "Inactivo"}
-        </span>
-      ),
     },
     {
       key: "roles",
@@ -121,6 +110,17 @@ export default function UsuariosRegistrados() {
           </span>
         );
       },
+    },
+    {
+      key: "active",
+      header: "Estado",
+      render: (row: User) => (
+        <span className={`px-2 py-1 rounded-full text-xs font-medium 
+          ${row.active ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" 
+                       : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"}`}>
+          {row.active ? "Activo" : "Inactivo"}
+        </span>
+      ),
     },
   ];
 
@@ -149,12 +149,13 @@ export default function UsuariosRegistrados() {
           data={filteredData}
           actions={(row) => (
             <div className="flex gap-2">
-              <Button size="sm" onClick={() => handleEdit(row)}>Editar</Button>
+              <Button size="sm" variant="outline" onClick={() => handleEdit(row)}>Editar</Button>
               <Button
                 size="sm"
                 onClick={() => handleDelete(row)}
                 disabled={!row.active}
                 className={`${!row.active ? "opacity-50 cursor-not-allowed" : ""}`}
+                variant="outline"
               >
                 Bloquear
               </Button>

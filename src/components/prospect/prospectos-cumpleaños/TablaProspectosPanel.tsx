@@ -1,15 +1,10 @@
 "use client";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { useEffect, useState } from "react";
 import axios from "@/lib/axiosInstance";
 import { ImageUpload } from "@/components/form/form-elements/ImageUpload";
+import { Modal } from "@/components/ui/modal";
+import { useModal } from "@/hooks/useModal";
 
 interface Prospect {
   id: number;
@@ -46,16 +41,16 @@ interface Prospect {
 }
 
 export default function ProspectTablecumpleanos() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [customMessage, setCustomMessage] = useState("🎉 ¡Feliz cumpleaños! Que tengas un día lleno de alegría. 🎂");
   const [imageUrl, setImageUrl] = useState("");
   const [data, setData] = useState<Prospect[]>([]);
-  const [search, setSearch] = useState("");
-  const [selectedDate, setSelectedDate] = useState<string>("");
+
+  const { isOpen, openModal, closeModal } = useModal();
+  
 
   const fetchData = async () => {
     try {
-      const [birthdaysRes, gendersRes, deptRes, muniRes, communesRes] =
+      const [birthdaysRes ] =
         await Promise.all([
           axios.get<Prospect[]>(
             `${process.env.NEXT_PUBLIC_AUTH_URL}/api/person-form/birthdays/today`
@@ -73,7 +68,7 @@ export default function ProspectTablecumpleanos() {
   };
   
   const handleSendBirthdayMessages = async (mensaje: string, image?: string) => {
-    const validProspects = filteredData
+    const validProspects = data
       .map((p) => ({
         name: p.name,
         number: p.phone.replace(/\D/g, ""),
@@ -112,132 +107,111 @@ export default function ProspectTablecumpleanos() {
     fetchData(); // Cargar cumpleaños de hoy por defecto
   }, []);
 
-  const filteredData = data.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase()) ||
-    p.document.toLowerCase().includes(search.toLowerCase())
-  );
 
   return (
-    <div className="w-full overflow-x-auto p-4">
-      {isModalOpen && (
-        <>
-          {/* Fondo oscuro */}
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40"
-            onClick={() => setIsModalOpen(false)}
-          ></div>
+    <>
+      <div className="w-full h-full overflow-x-auto">
+        <div className="max-w-md h-full w-full rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6 shadow-lg space-y-4">
+          <h2 className="text-xl font-bold text-gray-800 dark:text-white">
+            🎉 Cumpleañeros del Día
+          </h2>
 
-          {/* Contenedor del modal */}
-          <div className="fixed inset-0 flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-full max-w-lg shadow-lg relative">
-              <button
-                className="absolute top-2 right-2 text-gray-500 hover:text-red-500"
-                onClick={() => setIsModalOpen(false)}
-              >
-                ✕
-              </button>
-
-              <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
-                🎉 Personaliza tu mensaje
-              </h2>
-
-              <label className="block mb-2 text-sm text-gray-600 dark:text-gray-300">Mensaje</label>
-              <textarea
-                rows={4}
-                value={customMessage}
-                onChange={(e) => setCustomMessage(e.target.value)}
-                className="w-full mb-4 p-2 border rounded bg-gray-50 dark:bg-gray-700 dark:text-white"
-              />
-
-              <div className="mb-4">
-                <label className="block mb-2 text-sm text-gray-600 dark:text-gray-300">Adjunta tu archivo multimedia (opcional)</label>
-                <ImageUpload onChange={(url) => setImageUrl(url)} value={imageUrl ?? ""} />
+          <ul className="divide-y divide-gray-200 dark:divide-gray-700 max-h-49 overflow-y-auto custom-scrollbar">
+            {data.length === 0 ? (
+              <div className="py-6 text-center text-gray-500 dark:text-gray-400">
+                😔 No hay cumpleañeros el día de hoy.
               </div>
+            ) : (
+              data.map((p) => {
+                const birthDate = new Date(p.birthDate);
+                const age = new Date().getFullYear() - birthDate.getFullYear();
+                const formattedDate = birthDate.toISOString().split("T")[0];
 
+                return (
+                  <li key={p.id} className="py-3">
+                    <p className="font-semibold text-gray-900 dark:text-white">
+                      {p.name} {p.lastName}
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">{p.cargo}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      🎂 {formattedDate} · {age} años
+                    </p>
+                  </li>
+                );
+              })
+            )}
+          </ul>
 
-              <button
-                onClick={async () => {
-                  setIsModalOpen(false);
-                  await handleSendBirthdayMessages(customMessage, imageUrl);
-                }}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded"
-              >
-                Enviar mensajes
-              </button>
-            </div>
+          <button
+            onClick={() => openModal()}
+            disabled={data.length === 0}
+            className={`w-full px-4 py-2 mt-2 rounded-lg text-white text-sm font-semibold transition ${
+              data.length === 0
+                ? "bg-gray-300 cursor-not-allowed"
+                : "bg-pink-500 hover:bg-pink-600"
+            }`}
+          >
+            🎈 Felicitar a Todos
+          </button>
+
+          <div className="text-sm text-center text-gray-500 dark:text-gray-400">
+            ¡Hazles saber que los recuerdas!
           </div>
-        </>
-      )}
-      <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-          Cumpleaños de Prospectos
-        </h3>
-        <div className="flex items-center gap-3">
-          <input
-            type="text"
-            placeholder="Buscar por nombre"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
-          />
-          <button
-            onClick={() => setSearch("")}
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
-          >
-            Limpiar
-          </button>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center gap-2 rounded-lg border bg-blue-600 text-white hover:bg-blue-700 border-gray-300  px-4 py-2.5 text-sm font-medium  shadow  hover:text-gray-800 dark:border-blue-700 dark:bg-blue-800 dark:text-white-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
-          >
-            Enviar felicitación de cumpleaños
-          </button>
         </div>
       </div>
+    
+      <Modal
+          isOpen={isOpen}
+          onClose={closeModal}
+          className="max-w-[700px] p-6 lg:p-10"
+        >
+          <div className="flex flex-col px-2 overflow-y-auto custom-scrollbar">
+            <div>
+              <h5 className="mb-2 font-semibold text-gray-800 modal-title text-theme-xl dark:text-white/90 lg:text-2xl">
+                Envia tus Felicitaciones
+              </h5>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Puedes enviar felicitaciones a todos tus prospectos redactales un mensaje
+                y puedes agregar una imagen para este dia especial.
+              </p>
+            </div>
+  
+            <div className="flex flex-col gap-4 mt-4">
+                <label className="block text-sm text-gray-600 dark:text-gray-300">Personaliza tu Mensaje</label>
+                <textarea
+                  rows={4}
+                  value={customMessage}
+                  onChange={(e) => setCustomMessage(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                />
 
-      <div className="min-w-[1000px]">
-        <Table>
-          <TableHeader className="border-gray-100 dark:border-gray-800 border-y">
-            <TableRow>
-              {["Nombre", "Apellido", "Teléfono", "Email", "Documento", 
-                "Cargo", "Fecha Nac.", "Género"].map((header, idx) => (
-                <TableCell
-                  key={idx}
-                  isHeader
-                  className="py-3 px-2 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  {header}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHeader>
-
-          <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
-            {filteredData.length === 0 ? (
-              <TableRow>
-                <td colSpan={8} className="text-center py-4 text-gray-500 dark:text-gray-400">
-                  No hay prospectos que cumplan años en esta fecha.
-                </td>
-              </TableRow>
-            ) : (
-              filteredData.map((p) => (
-                <TableRow key={p.id}>
-                  <TableCell className="py-3 px-2 text-gray-700 text-theme-sm dark:text-white/90">{p.name}</TableCell>
-                  <TableCell className="py-3 px-2 text-gray-700 text-theme-sm dark:text-white/90">{p.lastName}</TableCell>
-                  <TableCell className="py-3 px-2 text-gray-500 text-theme-sm dark:text-gray-400">{p.phone}</TableCell>
-                  <TableCell className="py-3 px-2 text-gray-500 max-w-[200px] text-theme-sm truncate dark:text-gray-400">{p.email}</TableCell>
-                  <TableCell className="py-3 px-2 text-gray-500 text-theme-sm dark:text-gray-400">{p.document}</TableCell>
-                  <TableCell className="py-3 px-2 text-gray-500 text-theme-sm dark:text-gray-400">{p.cargo}</TableCell>
-                  <TableCell className="py-3 px-2 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {p.birthDate ? new Date(p.birthDate).toISOString().split("T")[0] : "-"}
-                  </TableCell>
-                  <TableCell className="py-3 px-2 text-gray-500 text-theme-sm dark:text-gray-400">{p.gender?.name ?? "-"}</TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
-    </div>
+                <div className="mb-4">
+                  <label className="block mb-2 text-sm text-gray-600 dark:text-gray-300">Adjunta tu archivo multimedia (opcional)</label>
+                  <ImageUpload onChange={(url) => setImageUrl(url)} value={imageUrl ?? ""} />
+                </div>
+            </div>
+  
+            <div className="flex items-center gap-3 mt-6 modal-footer sm:justify-end">
+              <button
+                onClick={closeModal}
+                type="button"
+                className="flex w-full justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] sm:w-auto"
+              >
+                Volver
+              </button>
+              <button
+                onClick={async () => {
+                  closeModal()
+                  await handleSendBirthdayMessages(customMessage, imageUrl);
+                }}
+                type="button"
+                className="btn btn-success btn-update-event flex w-full justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 sm:w-auto"
+              >
+              Enviar Mensajes
+              </button>
+            </div> 
+          </div>
+      </Modal>
+    </>
   );
 }

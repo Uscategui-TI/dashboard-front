@@ -33,7 +33,7 @@ export const EcommerceMetrics = () => {
   const cambioProspectos = calcCambio(prevProspects, prospects);
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] w-full sm:max-w-[383.5px] flex flex-col justify-between h-[466px]">
+    <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] w-full flex flex-col justify-between h-[466px]">
       <div className="flex flex-col justify-between h-full">
         {/* Header */}
         <div className="flex items-center justify-between">
