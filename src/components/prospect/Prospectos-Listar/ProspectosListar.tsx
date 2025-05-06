@@ -52,7 +52,7 @@ export default function ProspectosPanel() {
 
   const [data, setData] = useState<any[]>([]);
   const [page, setPage] = useState(0);
-  const [size] = useState(100);
+  const [size] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
 
