@@ -75,32 +75,24 @@ export default function ProspectTablecumpleanos() {
       }))
       .filter((p) => /^3\d{9}$/.test(p.number));
   
-    let enviados = 0;
+    const numbers = validProspects.map((p) => `57${p.number}`);
+    
+    try {
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_WHATSAPP_URL}/broadcast-direct`,
+        {
+          numbers,
+          message: mensaje,
+          urlMedia: image,
+        },
+        { timeout: 30000 } // puede tardar si son muchos
+      );
   
-    for (const prospect of validProspects) {
-      try {
-        const response = await axios.post(
-          `${process.env.NEXT_PUBLIC_WHATSAPP_URL}/broadcast-direct`,
-          {
-            number: `57${prospect.number}`,
-            message: mensaje.replace("{nombre}", prospect.name),
-            ...(image ? { urlMedia: image } : {}),
-          },
-          { timeout: 10000 }
-        );
-  
-        if (response.status === 200) {
-          enviados++;
-          console.log(`✅ Enviado a: 57${prospect.number}`);
-        }
-  
-        await new Promise((r) => setTimeout(r, 3000));
-      } catch (error) {
-        console.error(`❌ Error con 57${prospect.number}:`, error);
-      }
+      alert(`🎉 Difusión completada: ${response.data.total} mensajes enviados`);
+    } catch (error) {
+      console.error("❌ Error al enviar la difusión:", error);
+      alert("Hubo un error al enviar los mensajes.");
     }
-  
-    alert(`🎉 Mensajes enviados: ${enviados}`);
   };
 
   useEffect(() => {
