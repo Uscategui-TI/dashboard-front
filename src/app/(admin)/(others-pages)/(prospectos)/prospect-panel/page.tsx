@@ -3,10 +3,11 @@ import { EcommerceMetrics } from "@/components/prospect/Propsectos-Panel/Ecommer
 import MonthlyTarget from "@/components/prospect/Propsectos-Panel/MonthlyTarget";
 import MonthlyTargetCanales from "@/components/prospect/Propsectos-Panel/MonthlyTargetCanales";
 import StatisticsChart from "@/components/ecommerce/StatisticsChart";
-import DemographicCard from "@/components/ecommerce/DemographicCard";
+
 import DemographicCardBogota from "@/components/prospect/Propsectos-Panel/DemographicCardBogota";
 import TablaProspectosPanel from "@/components/prospect/Propsectos-Panel/TablaProspectosPanel";
 import ProspectTablecumpleanos from "@/components/prospect/prospectos-cumpleaños/TablaProspectosPanel";
+import DemographicCard from "@/components/dashboard/DemographicCard";
 
 export const metadata: Metadata = {
   title: "Uscategui Panel-Prospectos",

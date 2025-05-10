@@ -3,10 +3,8 @@
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import axios from "@/lib/axiosInstance";
-import { Dropdown } from "../ui/dropdown/Dropdown";
-import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { InfoIcon } from "@/icons";
-import { getGenderDonutChartOptions, useNavigation } from "@/util";
+import { getGenderDonutChartOptions } from "@/util";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
@@ -15,13 +13,10 @@ export default function MonthlyTarget() {
   const objetivo = 1000;
   const options = getGenderDonutChartOptions(["Femenino", "Masculino"], ["#465FFF", "#6F7DFF"]);
   
-  const { redirectTo } = useNavigation();
 
-  const [series, setSeries] = useState<number[]>([0, 0]);
+  const [seriesBar, setSeries] = useState<number[]>([0, 0]);
   const [mesAnterior, setMesAnterior] = useState(0);
   const [actual, setActual] = useState(0);
-  const [isOpen, setIsOpen] = useState(false);
-
 
   useEffect(() => {
     const fetchData = async () => {
@@ -71,7 +66,7 @@ export default function MonthlyTarget() {
         </div>
 
         <div className="max-h-[330px]">
-          <ReactApexChart options={options} series={series} type="donut" height={252} />
+          <ReactApexChart options={options} series={seriesBar} type="donut" height={252} />
         </div>
       </div>
 

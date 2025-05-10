@@ -2,13 +2,13 @@
 
 import PersonFormPage from "@/components/prospect/Prospectos-Listar/Prospectos";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import { Modal } from "@/components/ui/modal";
+import { Modal } from "@/components/shared/ui/modal";
 import { useModal } from "@/hooks/useModal";
 import { useEffect, useState } from "react";
 import axios from "@/lib/axiosInstance";
-import Button from "@/components/ui/button/Button";
-import { GenericTable } from "@/components/tables/GenericTable";
-import Pagination from "@/components/tables/Pagination";
+import Button from "@/components/shared/ui/button/Button";
+import { GenericTable } from "@/components/shared/tables/GenericTable";
+import Pagination from "@/components/shared/tables/Pagination";
 import EditProspectForm from "@/components/prospect/Prospectos-Listar/editProspectorm";
 import ConfirmacionModal from "@/components/administracion-Usuarios/cracion-usuario/ConfirmacionModal";
 

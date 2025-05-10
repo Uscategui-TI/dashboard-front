@@ -13,7 +13,7 @@ import {
 import esLocale from "@fullcalendar/core/locales/es";
 import Tippy from "@tippyjs/react";
 import { useModal } from "@/hooks/useModal";
-import { Modal } from "@/components/ui/modal";
+import { Modal } from "@/components/shared/ui/modal";
 import { ImageUpload } from "../form/form-elements/ImageUpload";
 import { FieldValues, useForm } from "react-hook-form";
 import "tippy.js/dist/tippy.css";

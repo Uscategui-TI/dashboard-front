@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Table, TableHeader, TableBody, TableRow, TableCell } from "@/components/ui/table";
-import Checkbox from "../form/input/Checkbox";
+import { Table, TableHeader, TableBody, TableRow, TableCell } from "@/components/shared/ui/table";
+import Checkbox from "../../form/input/Checkbox";
 
 type ColumnConfig<T> = {
   key: keyof T | string;

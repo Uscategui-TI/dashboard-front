@@ -18,7 +18,7 @@ import {
   TaskIcon,
   UserCircleIcon,
 } from "../icons/index";
-import { Table } from "@/components/ui/table";
+import { Table } from "@/components/shared/ui/table";
 
 const storedRoles = typeof window !== 'undefined' ? localStorage.getItem("roles") : null;
 const userRoles: string[] = storedRoles ? JSON.parse(storedRoles) : [];

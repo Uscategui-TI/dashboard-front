@@ -8,7 +8,7 @@ import Select from "@/components/form/Select";
 import { FieldValues, useForm } from "react-hook-form";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import Button from "@/components/ui/button/Button";
+import Button from "@/components/shared/ui/button/Button";
 import { useRouter } from "next/navigation";
 import PhoneInput from "@/components/form/group-input/PhoneInput";
 import CountUp from "react-countup";

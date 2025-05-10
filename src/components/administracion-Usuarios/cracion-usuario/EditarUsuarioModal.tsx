@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Button from "@/components/ui/button/Button";
+import Button from "@/components/shared/ui/button/Button";
 
 const ROLES = ["Admin", "Secretario", "Periodista", "Coordinador", "Pasante"];
 

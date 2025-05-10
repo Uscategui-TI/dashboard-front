@@ -8,13 +8,13 @@ import Select from "@/components/form/Select";
 import { FieldValues, useForm } from "react-hook-form";
 import axios from "axios";
 import React, {useEffect, useState, useRef } from "react";
-import Button from "@/components/ui/button/Button";
+import Button from "@/components/shared/ui/button/Button";
 import { useRouter } from "next/navigation";
 import PhoneInput from "@/components/form/group-input/PhoneInput";
 import CountUp from "react-countup";
 import Cookies from "js-cookie";
 import GuiaUsoModal from "@/app/guia-uso/page";
-import { Modal } from "@/components/ui/modal";
+import { Modal } from "@/components/shared/ui/modal";
 
 
 const apiWhatsApp = process.env.NEXT_PUBLIC_WHATSAPP_URL;

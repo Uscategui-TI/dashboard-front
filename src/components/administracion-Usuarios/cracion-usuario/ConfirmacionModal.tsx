@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode } from "react";
-import Button from "@/components/ui/button/Button";
+import Button from "@/components/shared/ui/button/Button";
 
 type Props = {
   isOpen: boolean;

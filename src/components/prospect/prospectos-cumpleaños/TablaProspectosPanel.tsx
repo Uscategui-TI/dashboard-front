@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { ImageUpload } from "@/components/form/form-elements/ImageUpload";
-import { Modal } from "@/components/ui/modal";
+import { Modal } from "@/components/shared/ui/modal";
 import { useModal } from "@/hooks/useModal";
 
 interface Prospect {

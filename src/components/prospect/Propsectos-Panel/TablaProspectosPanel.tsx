@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import axios from "@/lib/axiosInstance";
-import { GenericTable } from "@/components/tables/GenericTable";
+import { GenericTable } from "@/components/shared/tables/GenericTable";
 
 interface Gender {
   name: string;

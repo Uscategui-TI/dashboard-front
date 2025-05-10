@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 import axios from "@/lib/axiosInstance";
-import Button from "@/components/ui/button/Button";
+import Button from "@/components/shared/ui/button/Button";
 import EditarUsuarioModal from "./EditarUsuarioModal";
 import ConfirmacionModal from "./ConfirmacionModal";
 import CrearUsuarioModal from "./CrearUsuarioModal";
-import { GenericTable } from "@/components/tables/GenericTable";
-import Pagination from "@/components/tables/Pagination";
-import { Modal } from "@/components/ui/modal";
+import { GenericTable } from "@/components/shared/tables/GenericTable";
+import Pagination from "@/components/shared/tables/Pagination";
+import { Modal } from "@/components/shared/ui/modal";
 
 
 const ROLES = ["Admin", "Secretario", "Periodista", "Coordinador", "Pasante"];

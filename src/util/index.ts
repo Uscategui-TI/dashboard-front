@@ -1,2 +1,5 @@
+export { getStatInfo } from "./getStatInfo";
+
 export { useNavigation } from "./navigation";
-export { defaultBarChartOptions, getGenderDonutChartOptions } from "./apexChartOptions";
+export { defaultBarChartOptions, getGenderDonutChartOptions, getChartOptionsLines } from "./apexChartOptions";
+

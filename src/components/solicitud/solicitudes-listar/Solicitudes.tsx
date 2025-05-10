@@ -1,12 +1,12 @@
 "use client";
 
-import Badge from "../../ui/badge/Badge";
+import Badge from "../../shared/ui/badge/Badge";
 import { useEffect, useState } from "react";
 import axios from "@/lib/axiosInstance";
-import Button from "../../ui/button/Button";
-import { Modal } from "@/components/ui/modal";
-import { GenericTable } from "@/components/tables/GenericTable";
-import Pagination from "@/components/tables/Pagination";
+import Button from "../../shared/ui/button/Button";
+import { Modal } from "@/components/shared/ui/modal";
+import { GenericTable } from "@/components/shared/tables/GenericTable";
+import Pagination from "@/components/shared/tables/Pagination";
 
 type EventStat = {
   id: string | number;

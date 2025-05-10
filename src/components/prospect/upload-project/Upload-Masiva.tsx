@@ -6,12 +6,12 @@ import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import Label from "@/components/form/Label";
 
 import { IUploadFile } from "@/interfaces/upload-file.interface";
-import { Modal } from "@/components/ui/modal";
+import { Modal } from "@/components/shared/ui/modal";
 import { useModal } from "@/hooks/useModal";
-import Button from "@/components/ui/button/Button";
+import Button from "@/components/shared/ui/button/Button";
 import DropzoneComponent from "@/components/form/form-elements/DropZone";
-import Pagination from "@/components/tables/Pagination";
-import { GenericTable } from "@/components/tables/GenericTable";
+import Pagination from "@/components/shared/tables/Pagination";
+import { GenericTable } from "@/components/shared/tables/GenericTable";
 
 
 const columns = [

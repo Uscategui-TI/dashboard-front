@@ -4,8 +4,8 @@ import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { ApexOptions } from "apexcharts";
 import axios from "@/lib/axiosInstance";
-import { Dropdown } from "../../ui/dropdown/Dropdown";
-import { DropdownItem } from "../../ui/dropdown/DropdownItem";
+import { Dropdown } from "../../shared/ui/dropdown/Dropdown";
+import { DropdownItem } from "../../shared/ui/dropdown/DropdownItem";
 import { InfoIcon } from "@/icons";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });

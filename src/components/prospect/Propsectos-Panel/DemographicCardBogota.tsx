@@ -3,8 +3,8 @@
 import dynamic from "next/dynamic";
 import { useState, useEffect } from "react";
 import { MoreDotIcon } from "@/icons";
-import { Dropdown } from "@/components/ui/dropdown/Dropdown";
-import { DropdownItem } from "@/components/ui/dropdown/DropdownItem";
+import { Dropdown } from "@/components/shared/ui/dropdown/Dropdown";
+import { DropdownItem } from "@/components/shared/ui/dropdown/DropdownItem";
 import Image from "next/image";
 
 const CountryMap = dynamic(() => import("./CountryMapBogota"), { ssr: false });

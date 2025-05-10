@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import axios from "@/lib/axiosInstance";
-import Badge from "@/components/ui/badge/Badge";
+import Badge from "@/components/shared/ui/badge/Badge";
 import { ArrowDownIcon, ArrowUpIcon, GroupIcon } from "@/icons";
 
 const apiUrl = process.env.NEXT_PUBLIC_AUTH_URL;

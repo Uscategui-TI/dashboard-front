@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import PhoneInput from "@/components/form/group-input/PhoneInput";
-import Button from "@/components/ui/button/Button";
+import Button from "@/components/shared/ui/button/Button";
 import Label from "@/components/form/Label";
 import axios from "axios";
 

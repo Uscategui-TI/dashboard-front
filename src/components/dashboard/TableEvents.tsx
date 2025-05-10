@@ -6,8 +6,8 @@ import {
   TableCell,
   TableHeader,
   TableRow,
-} from "../ui/table";
-import Badge from "../ui/badge/Badge";
+} from "../shared/ui/table";
+import Badge from "../shared/ui/badge/Badge";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import axios from "@/lib/axiosInstance";
@@ -23,7 +23,7 @@ interface EventStat {
   imageUrl: string;
 }
 
-export default function RecentOrders() {
+export default function TableEvents() {
   const [data, setData] = useState<EventStat[]>([]);
   const [search, setSearch] = useState(""); // ← estado para filtro
 

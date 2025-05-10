@@ -6,7 +6,7 @@ import Label from "../Label";
 import Input from "../input/InputField";
 import Select from "../Select";
 import TextArea from "../input/TextArea";
-import Button from "../../ui/button/Button";
+import Button from "../../shared/ui/button/Button";
 import { PaperPlaneIcon } from "../../../icons";
 
 export default function ExampleFormOne() {

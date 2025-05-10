@@ -1,6 +1,6 @@
 "use client";
 import { ThemeToggleButton } from "@/components/common/ThemeToggleButton";
-import UserDropdown from "@/components/header/UserDropdown";
+import UserDropdown from "@/components/shared/layout/header/UserDropdown";
 import { useSidebar } from "@/context/SidebarContext";
 import Image from "next/image";
 import Link from "next/link";

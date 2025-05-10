@@ -9,7 +9,7 @@ import FormSelect from "@/components/form/FormSelect";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/Input";
 import Select from "@/components/form/Select";
-import Button from "@/components/ui/button/Button";
+import Button from "@/components/shared/ui/button/Button";
 
 const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
 

@@ -2,7 +2,7 @@ import { useState } from "react";
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import { EyeIcon, EyeCloseIcon } from "@/icons";
-import Button from "@/components/ui/button/Button";
+import Button from "@/components/shared/ui/button/Button";
 
 const ROLES = ["Admin", "Secretario", "Periodista", "Coordinador", "Pasante"];
 

@@ -1,9 +1,9 @@
 "use client";
 
-import Badge from "../../ui/badge/Badge";
+import Badge from "../../shared/ui/badge/Badge";
 import { useEffect, useState } from "react";
 import axios from "@/lib/axiosInstance";
-import { GenericTable } from "@/components/tables/GenericTable";
+import { GenericTable } from "@/components/shared/tables/GenericTable";
 import { EcommerceMetrics } from "./EcommerceMetrics";
 import { EcommerceMetrics1 } from "./EcommerceMetrics1";
 import MonthlyTargetCanales from "./MonthlyTargetCanales";
