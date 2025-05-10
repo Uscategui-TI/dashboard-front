@@ -4,9 +4,8 @@ import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { ApexOptions } from "apexcharts";
 import axios from "@/lib/axiosInstance";
-import { Dropdown } from "@/components/ui/dropdown/Dropdown";
-import { DropdownItem } from "@/components/ui/dropdown/DropdownItem";
-import { MoreDotIcon } from "@/icons";
+import { InfoIcon } from "@/icons";
+import { dr } from "node_modules/@fullcalendar/core/internal-common";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
@@ -62,15 +61,16 @@ export default function MonthlyTarget() {
               Categorización por género
             </p>
           </div>
-          <div className="relative inline-block">
-            <button onClick={() => setIsOpen(!isOpen)} className="dropdown-toggle">
-              <MoreDotIcon className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300" />
-            </button>
-            <Dropdown isOpen={isOpen} onClose={() => setIsOpen(false)} className="w-40 p-2">
-              <DropdownItem tag="a" onItemClick={() => setIsOpen(false)}>
-                Ver más
-              </DropdownItem>
-            </Dropdown>
+          <div className="relative group flex items-center justify-center w-10 h-10 bg-gray-100 rounded-xl dark:bg-gray-800 cursor-pointer">
+            <InfoIcon className="text-gray-800 size-6 dark:text-white/90" />
+            <div
+              role="tooltip"
+              className="absolute z-10 px-3 py-1.5 text-xs text-gray-800 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 -top-12 left-1/2 -translate-x-1/2 whitespace-nowrap dark:bg-gray-700 dark:text-white dark:border-gray-600"
+            >
+              Los datos representados en el diagrama de torta se<br/>
+              basan en los registros de género de cada prospecto.
+              <div className="absolute w-2 h-2 bg-white border-l border-t border-gray-200 rotate-45 -bottom-1 left-1/2 -translate-x-1/2 dark:bg-gray-700 dark:border-gray-600"></div>
+            </div>
           </div>
         </div>
 

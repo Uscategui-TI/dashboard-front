@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import axios from "@/lib/axiosInstance";
 import { GenericTable } from "@/components/tables/GenericTable";
 import { EcommerceMetrics } from "./EcommerceMetrics";
+import { EcommerceMetrics1 } from "./EcommerceMetrics1";
 import MonthlyTargetCanales from "./MonthlyTargetCanales";
 import { Metrics6 } from "./EcommerceMetrics 6";
 
@@ -100,7 +101,7 @@ export default function RecentOrders() {
           <EcommerceMetrics 
             title="Solicitudes"
             text="Total Solicitudes"
-            toltip="Calcula el porcentaje de cambio entre un valor anterior y uno actual."
+            toltip="El total de solicitudes se calcula a partir de todas las solicitudes registradas."
             value={prospects}
             prospects={prospects}
             prevProspects={prevProspects}
@@ -108,15 +109,15 @@ export default function RecentOrders() {
             <EcommerceMetrics 
             title="Finalizados"
             text="Total Finalizados"
-            toltip="Calcula el porcentaje de cambio entre un valor anterior y uno actual."
+            toltip='El total de solicitudes finalizadas se calcula según el estado actual de cada proceso.'
             value={conteoPorEstado?.FINALIZADOS}
             prospects={prospects}
             prevProspects={prevProspects}
           />
-            <EcommerceMetrics 
+            <EcommerceMetrics1 
             title="Rechazados"
             text="Total Rechazados"
-            toltip="Calcula el porcentaje de cambio entre un valor anterior y uno actual."
+            toltip="El total de solicitudes rechazadas se calcula según el estado actual de cada proceso."
             value={conteoPorEstado?.RECHAZADA}
             prospects={prospects}
             prevProspects={prevProspects}
@@ -127,7 +128,7 @@ export default function RecentOrders() {
           <EcommerceMetrics 
             title="En Proceso"
             text="Total en proceso"
-            toltip="Calcula el porcentaje de cambio entre un valor anterior y uno actual."
+            toltip="El total de solicitudes en proceso se calcula según el estado actual de cada proceso."
             value={conteoPorEstado?.EN_PROCESO}
             prospects={prospects}
             prevProspects={prevProspects}
@@ -135,15 +136,15 @@ export default function RecentOrders() {
           <EcommerceMetrics 
             title="Pausadas"
             text="Total en pausados"
-            toltip="Calcula el porcentaje de cambio entre un valor anterior y uno actual."
+            toltip="El total de solicitudes pausadas se calcula según el estado actual de cada proceso."
             value={conteoPorEstado?.PAUSADOS}
             prospects={prospects}
             prevProspects={prevProspects}
           />
-          <EcommerceMetrics 
+          <EcommerceMetrics1 
             title="Aprovado"
             text="Total en aprobados"
-            toltip="Calcula el porcentaje de cambio entre un valor anterior y uno actual."
+            toltip="El total de solicitudes aprovadas se calcula según el estado actual de cada proceso."
             value={conteoPorEstado?.APROBADO}
             prospects={prospects}
             prevProspects={prevProspects}

@@ -9,6 +9,9 @@ import axios from "@/lib/axiosInstance";
 import Button from "@/components/ui/button/Button";
 import { GenericTable } from "@/components/tables/GenericTable";
 import Pagination from "@/components/tables/Pagination";
+import EditProspectForm from "@/components/prospect/Prospectos-Listar/editProspectorm";
+import ConfirmacionModal from "@/components/administracion-Usuarios/cracion-usuario/ConfirmacionModal";
+
 
 const columns = [
   { key: "name", header: "Nombres" },
@@ -22,16 +25,12 @@ const columns = [
     header: "Genero",
     render: (row: any) => row.gender?.name || "-",
   },
-  {
+/*   {
     key: "department",
     header: "Departamento",
     render: (row: any) => row.department?.name || "-",
-  },
-  {
-    key: "municipality",
-    header: "Municipio",
-    render: (row: any) => row.municipality?.name || "-",
-  },
+  }, */
+  
 ];
 
 export default function ProspectosPanel() {
@@ -55,8 +54,34 @@ export default function ProspectosPanel() {
   const [size] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
+  const [editingProspect, setEditingProspect] = useState<any | null>(null);
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [prospectToDelete, setProspectToDelete] = useState<any | null>(null);
+
 
   const [selectedRows, setSelectedRows] = useState<any[]>([]);
+
+  const handleEdit = (prospect: any) => {
+    setEditingProspect(prospect); // reutiliza modal existente o crea uno nuevo si prefieres
+  };
+  
+  const handleDelete = (prospect: any) => {
+    setProspectToDelete(prospect);
+    setShowConfirmDelete(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!prospectToDelete) return;
+  
+    try {
+      await axios.delete(`${process.env.NEXT_PUBLIC_AUTH_URL}/api/person-form/delete/${prospectToDelete.document}`);
+      setData((prev) => prev.filter((p) => p.document !== prospectToDelete.document));
+      setShowConfirmDelete(false);
+      setProspectToDelete(null);
+    } catch (error) {
+      console.error("Error al eliminar el prospecto:", error);
+    }
+  };
 
 
   useEffect(() => {
@@ -121,12 +146,23 @@ export default function ProspectosPanel() {
                 setPage(0); 
                 setSearchTerm(value); 
               }}
+              actions={(row) => (
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" onClick={() => handleEdit(row)}>
+                    Editar
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => handleDelete(row)}>
+                    Eliminar
+                  </Button>
+                </div>
+              )}
               // filterableColumns={["estado"]}
               onSelectionChange={(rows) => {
                 console.log("Registros seleccionados:", rows);
                 // Aquí puedes ejecutar procesos con los registros seleccionados
                 setSelectedRows(rows); // Asegúrate de guardar el estado si lo necesitas
               }}
+              
               // actions={(row) => (
               //   <button onClick={() => alert(row.id)} className="text-blue-500 hover:underline">
               //     Ver
@@ -173,6 +209,17 @@ export default function ProspectosPanel() {
           </div>  */}
         </div>
       </Modal>
+      {showConfirmDelete && prospectToDelete && (
+        <ConfirmacionModal
+          isOpen={showConfirmDelete}
+          onClose={() => {
+            setShowConfirmDelete(false);
+            setProspectToDelete(null);
+          }}
+          onConfirm={confirmDelete}
+          message={`¿Estás seguro de eliminar este registro"?`}
+        />
+      )}
 
       {/* Modal Elegir Capaña  */}
       <Modal
@@ -222,7 +269,22 @@ export default function ProspectosPanel() {
         </div>
       </div>
       </Modal>
-
+      <Modal
+        isOpen={!!editingProspect}
+        onClose={() => setEditingProspect(null)}
+        className="max-w-[800px] p-6 lg:p-10"
+      >
+        <div className="flex flex-col px-2 overflow-y-auto custom-scrollbar">
+          <h5 className="mb-2 font-semibold text-gray-800 modal-title text-theme-xl dark:text-white/90 lg:text-2xl">Editar Prospecto</h5>
+          {editingProspect && (
+            <EditProspectForm
+              prospect={editingProspect}
+              onClose={() => setEditingProspect(null)}
+              onUpdate={() => setPage(0)} // fuerza recarga de la página
+            />
+          )}
+        </div>
+      </Modal>
       {/* Modal Difundir campaña */}
       <Modal
         isOpen={isDifusionModalOpen} 

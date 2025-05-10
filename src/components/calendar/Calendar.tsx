@@ -61,7 +61,7 @@ const Calendar: React.FC = () => {
   
       const data = await response.json();
   
-      const formattedEvents: CalendarEvent[] = data.map((event: any) => ({
+      const formattedEvents: CalendarEvent[] = data.all.map((event: any) => ({
         id: event.id.toString(),
         title: event.eventName,
         start: event.startDate,
@@ -316,7 +316,12 @@ const Calendar: React.FC = () => {
             Adjunta imagen del evento
           </label>
           <ImageUpload
-            onChange={(value) => setEventData({ ...eventData, urlMedia: value })}
+           onChange={(value) =>
+            setEventData(prev => ({
+              ...prev,
+              urlMedia: value || ""
+            }))
+          }
             value={eventData.urlMedia || undefined}
           />
         </div>

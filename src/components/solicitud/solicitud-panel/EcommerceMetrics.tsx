@@ -55,10 +55,20 @@ export const EcommerceMetrics = ({
 
         {/* Pie de tarjeta */}
         <div className="flex justify-center">
-          <Badge color={cambioProspectos >= 0 ? "success" : "error"}>
+        <div className="relative group cursor-pointer">
+        <div
+          role="tooltip"
+          className="absolute z-10 px-3 py-1.5 text-xs text-gray-800 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 -top-12 left-1/2 -translate-x-1/2 whitespace-nowrap dark:bg-gray-700 dark:text-white dark:border-gray-600"
+        >
+          Con base en los datos registrados del mes anterior,<br/>
+          se calcula el incremento en comparación con el mes actual.
+          <div className="absolute w-2 h-2 bg-white border-l border-t border-gray-200 rotate-45 -bottom-1 left-1/2 -translate-x-1/2 dark:bg-gray-700 dark:border-gray-600"></div>
+        </div>
+        <Badge color={cambioProspectos >= 0 ? "success" : "error"}>
             {cambioProspectos >= 0 ? <ArrowUpIcon /> : <ArrowDownIcon />}
             {Math.abs(cambioProspectos)}%
-          </Badge>
+        </Badge>
+        </div>
         </div>
       </div>
     </div>

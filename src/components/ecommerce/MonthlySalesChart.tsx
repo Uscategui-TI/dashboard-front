@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import axios from "@/lib/axiosInstance";
-import { MoreDotIcon } from "@/icons";
+import { InfoIcon } from "@/icons";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { defaultBarChartOptions, useNavigation } from "@/util";
@@ -55,13 +55,15 @@ export default function MonthlySalesChart() {
         <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
           Histórico de Eventos por Año
         </h3>
-        <div className="relative inline-block">
-          <button onClick={() => setIsOpen(!isOpen)} className="dropdown-toggle">
-            <MoreDotIcon className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300" />
-          </button>
-          <Dropdown isOpen={isOpen} onClose={() => setIsOpen(false)} className="w-40 p-2">
-            <DropdownItem onItemClick={() =>  redirectTo("/calendar") }>Ver mas</DropdownItem>
-          </Dropdown>
+        <div className="relative group flex items-center justify-center w-10 h-10 bg-gray-100 rounded-xl dark:bg-gray-800 cursor-pointer">
+          <InfoIcon className="text-gray-800 size-6 dark:text-white/90" />
+          <div
+            role="tooltip"
+            className="absolute z-10 px-3 py-1.5 text-xs text-gray-800 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 -top-6  left-3/2 -translate-x-2/2 whitespace-nowrap dark:bg-gray-700 dark:text-white dark:border-gray-600"
+          >
+            Esta gráfica de barras presenta un historial general de los eventos realizados por año.
+            <div className="absolute w-2 h-2 bg-white border-l border-t border-gray-200 rotate-45 -bottom-1 left-[438px] -translate-x-1/2 dark:bg-gray-700 dark:border-gray-600"></div>
+          </div>
         </div>
       </div>
 

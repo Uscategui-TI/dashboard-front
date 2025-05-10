@@ -1,14 +1,16 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import axios from "axios";
+import axios from "@/lib/axiosInstance";
 import Cookies from "js-cookie";
-import { isAxiosError } from "axios";
+import { useRouter } from "next/navigation";
+
 
 export function useUserActivityTracker() {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastInteractionRef = useRef<number>(0);
   const isRequesting = useRef(false);
+  const router = useRouter();
 
   useEffect(() => {
     const token = Cookies.get("token");
@@ -34,9 +36,6 @@ export function useUserActivityTracker() {
           Cookies.set("token", res.data.token);
         }
       } catch (err) {
-        if (isAxiosError(err) && err.response?.status === 401) {
-          Cookies.remove("token"); // solo elimina el token
-        }
       } finally {
         isRequesting.current = false;
       }
@@ -69,6 +68,6 @@ export function useUserActivityTracker() {
       window.removeEventListener("keydown", handleActivity);
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, []);
+  }, [router]);
 }
 

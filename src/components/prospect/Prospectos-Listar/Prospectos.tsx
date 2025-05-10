@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import axios from "@/lib/axiosInstance";
 
-import PageBreadcrumb from "@/components/common/PageBreadCrumb";
+import FormInput from "@/components/form/FormInput";
+import FormSelect from "@/components/form/FormSelect";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/Input";
 import Select from "@/components/form/Select";
@@ -73,6 +74,8 @@ export default function PersonFormPage({ closeModal }: any) {
   const [showLocality, setShowLocality] = useState(false);
   const [formResetKey, setFormResetKey] = useState(0);
   const [canales, setCanales] = useState([]);
+  const [errorMessage, setErrorMessage] = useState("");
+
 
   const selectedDepartment = watch("departmentId");
   const selectedMunicipality = watch("municipalityId");
@@ -94,7 +97,7 @@ export default function PersonFormPage({ closeModal }: any) {
       setMunicipalities(muniRes.data);
       setLocalities(localRes.data);
       setCommunes(comRes.data);
-      setEvents(eventsRes.data);
+      setEvents(eventsRes.data.all);
       setCanales(canalesRes.data);
     };
 
@@ -130,6 +133,7 @@ export default function PersonFormPage({ closeModal }: any) {
     console.log("📦 Datos enviados:", data);
     try {
       setLoading(true);
+      setErrorMessage("");
       await axios.post(`${authUrl}/api/person-form/submit`, data);
       setSuccessMessage("Formulario enviado exitosamente ✅");
 
@@ -154,48 +158,66 @@ export default function PersonFormPage({ closeModal }: any) {
       setFilteredMunicipalities([]);
       setShowCommune(false);
       setShowLocality(false);
-    } catch (error) {
+      closeModal();
+    } catch (error: any) {
       console.error("Error al enviar el formulario:", error);
+      if (error.response?.status === 409) {
+        setErrorMessage("Ya existe una persona registrada con este número de documento.");
+      } else {
+        setErrorMessage("Error al enviar el formulario. Intenta nuevamente.");
+      }
+      setTimeout(() => setErrorMessage(""), 5000);
     } finally {
       setLoading(false);
       setTimeout(() => setSuccessMessage(""), 3000);
-      closeModal()
     }
   };
+
+
+  
 
   return (
     <>
       {successMessage && (
         <div className="bg-green-100 text-green-700 px-4 py-3 rounded mb-4">{successMessage}</div>
       )}
+      {errorMessage && (
+        <div className="bg-red-100 text-red-700 px-4 py-3 rounded mb-4">
+          {errorMessage}
+        </div>
+      )}
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-6 gap-6">
-        <div className="col-span-3">
-          <Label>Nombre</Label>
-          <Input {...register("name", { required: true })} />
+      <div className="col-span-3">
+        <FormInput
+          label="Nombre*"
+          registration={register("name", { required: "Este campo es obligatorio" })}
+          error={errors.name}
+        />
         </div>
         <div className="col-span-3">
-          <Label>Apellido</Label>
-          <Input {...register("lastName", { required: true })} />
+          <FormInput
+          label="Apellido*"
+          registration={register("lastName", { required: "Este campo es obligatorio" })}
+          error={errors.lastName}
+        />
         </div>
         <div className="col-span-3">
-          <Label>Género</Label>
-          <Controller
-            name="genderId"
-            control={control}
-            render={({ field }) => (
-              <Select
-                key={formResetKey}
-                options={genders}
-                value={field.value !== null ? String(field.value) : undefined}
-                onChange={(val: string) => field.onChange(Number(val))}
-                placeholder="Selecciona género"
-              />
-            )}
-          />
+        <FormSelect
+          name="genderId"
+          label="Género*"
+          control={control}
+          options={genders}
+          placeholder="Selecciona género"
+          error={errors.genderId}
+          keyReset={formResetKey}
+        />
         </div>
         <div className="col-span-3">
-          <Label>Teléfono</Label>
-          <Input {...register("phone", { required: true })} />
+          <FormInput
+          label="Telefono*"
+          registration={register("phone", { required: "Este campo es obligatorio" })}
+          error={errors.phone}
+        />
         </div>
         <div className="col-span-3">
           <Label>Email</Label>
@@ -238,12 +260,18 @@ export default function PersonFormPage({ closeModal }: any) {
           />
         </div>
         <div className="col-span-3">
-          <Label>Documento</Label>
-          <Input {...register("document", { required: true })} />
+          <FormInput
+          label="Documento"
+          registration={register("document", { required: "Este campo es obligatorio" })}
+          error={errors.document}
+        />
         </div>
         <div className="col-span-3">
-          <Label>Cargo</Label>
-          <Input {...register("cargo", { required: true })} />
+          <FormInput
+          label="Cargo"
+          registration={register("cargo", { required: "Este campo es obligatorio" })}
+          error={errors.cargo}
+        />
         </div>
         <div className="col-span-3">
           <Label>Evento</Label>

@@ -1,0 +1,290 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import axios from "@/lib/axiosInstance";
+
+import FormInput from "@/components/form/FormInput";
+import FormSelect from "@/components/form/FormSelect";
+import Label from "@/components/form/Label";
+import Input from "@/components/form/input/Input";
+import Select from "@/components/form/Select";
+import Button from "@/components/ui/button/Button";
+import { FieldError } from "react-hook-form";
+
+const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
+
+type ProspectForm = {
+  name: string;
+  lastName: string;
+  phone: string;
+  email: string;
+  address: string;
+  document: string;
+  cargo: string;
+  birthDate: string;
+  genderId: number | null;
+  departmentId: number | null;
+  municipalityId: number | null;
+  communeId: number | null;
+  localidad: number | null;
+  idEvento: number | null;
+  canalId: number | null;
+};
+
+export default function EditProspectForm({
+  prospect,
+  onClose,
+  onUpdate,
+}: {
+  prospect: ProspectForm;
+  onClose: () => void;
+  onUpdate: () => void;
+}) {
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    watch,
+    formState: { errors },
+  } = useForm<ProspectForm>({
+    defaultValues: prospect,
+  });
+
+  const [genders, setGenders] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [municipalities, setMunicipalities] = useState<any[]>([]);
+  const [filteredMunicipalities, setFilteredMunicipalities] = useState<any[]>([]);
+  const [communes, setCommunes] = useState([]);
+  const [localities, setLocalities] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [canales, setCanales] = useState([]);
+  const [showCommune, setShowCommune] = useState(false);
+  const [showLocality, setShowLocality] = useState(false);
+
+  const selectedDepartment = watch("departmentId");
+  const selectedMunicipality = watch("municipalityId");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const [
+        genderRes,
+        deptRes,
+        muniRes,
+        localRes,
+        comRes,
+        eventsRes,
+        canalesRes,
+      ] = await Promise.all([
+        axios.get(`${authUrl}/gender/all`),
+        axios.get(`${authUrl}/api/departments/all`),
+        axios.get(`${authUrl}/api/municipalities/all`),
+        axios.get(`${authUrl}/api/localities/all`),
+        axios.get(`${authUrl}/api/communes/all`),
+        axios.get(`${authUrl}/api/messages/events`),
+        axios.get(`${authUrl}/canales/all`),
+      ]);
+
+      setGenders(genderRes.data);
+      setDepartments(deptRes.data);
+      setMunicipalities(muniRes.data);
+      setLocalities(localRes.data);
+      setCommunes(comRes.data);
+      setEvents(eventsRes.data.all);
+      setCanales(canalesRes.data);
+      reset(prospect);
+    };
+
+    fetchData();
+  }, [prospect, reset]);
+
+  useEffect(() => {
+    const departmentId = selectedDepartment ?? prospect.departmentId;
+
+    if (municipalities.length > 0 && departmentId) {
+      const filtered = municipalities.filter(
+        (m) => m.department?.id === departmentId
+      );
+      setFilteredMunicipalities(filtered);
+    }
+  }, [selectedDepartment, municipalities, prospect.departmentId]);
+
+  useEffect(() => {
+    const selected = municipalities.find((m) => m.id === selectedMunicipality);
+    if (selected) {
+      if (selected.name.toLowerCase() === "bogotá") {
+        setShowCommune(false);
+        setShowLocality(true);
+      } else {
+        setShowCommune(true);
+        setShowLocality(false);
+      }
+    } else {
+      setShowCommune(false);
+      setShowLocality(false);
+    }
+  }, [selectedMunicipality, municipalities]);
+
+  const onSubmit = async (formData: ProspectForm) => {
+  const modifiedFields = Object.entries(formData).reduce((acc, [key, value]) => {
+    const typedKey = key as keyof ProspectForm;
+    const originalValue = prospect[typedKey];
+
+    if (
+      value !== null &&
+      value !== "" &&
+      String(value) !== String(originalValue)
+    ) {
+      (acc as any)[typedKey] = value;
+    }
+
+    return acc;
+  }, {} as Partial<ProspectForm>);
+
+  if (Object.keys(modifiedFields).length === 0) {
+    console.log("⛔ Nada fue modificado.");
+    return;
+  }
+
+  try {
+    await axios.put(`${authUrl}/api/person-form/update/${prospect.document}`, modifiedFields);
+    onUpdate();
+    onClose();
+  } catch (error) {
+    console.error("❌ Error actualizando prospecto:", error);
+  }
+};
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-6 gap-6">
+      <div className="col-span-3">
+        <FormInput label="Nombre" registration={register("name")} error={errors.name as FieldError} />
+      </div>
+      <div className="col-span-3">
+        <FormInput label="Apellido" registration={register("lastName")} error={errors.lastName as FieldError} />
+      </div>
+      <div className="col-span-3">
+        <FormSelect name="genderId" label="Género" control={control} options={genders} placeholder="Selecciona género" error={errors.genderId as FieldError} />
+      </div>
+      <div className="col-span-3">
+        <FormInput label="Teléfono" registration={register("phone")} error={errors.phone as FieldError} />
+      </div>
+      <div className="col-span-3">
+        <Label>Email</Label>
+        <Input type="email" {...register("email")} />
+      </div>
+      <div className="col-span-3">
+        <Label>Dirección</Label>
+        <Input {...register("address")} />
+      </div>
+      <div className="col-span-3">
+        <Label>Departamento</Label>
+        <Controller
+          name="departmentId"
+          control={control}
+          render={({ field }) => (
+            <Select
+              options={departments.map((d: any) => ({ value: d.value, label: d.label }))}
+              value={field.value !== null ? String(field.value) : undefined}
+              onChange={(val: string) => field.onChange(Number(val))}
+              placeholder="Selecciona un departamento"
+            />
+          )}
+        />
+      </div>
+      <div className="col-span-3">
+        <Label>Municipio</Label>
+        <Controller
+          name="municipalityId"
+          control={control}
+          render={({ field }) => (
+            <Select
+              options={filteredMunicipalities.map((m: any) => ({ value: m.id, label: m.name }))}
+              value={field.value !== null ? String(field.value) : undefined}
+              onChange={(val: string) => field.onChange(Number(val))}
+              placeholder="Selecciona un municipio"
+            />
+          )}
+        />
+      </div>
+      <div className="col-span-3">
+        <FormInput label="Cargo" registration={register("cargo")} error={errors.cargo as FieldError} />
+      </div>
+      <div className="col-span-3">
+        <Label>Evento</Label>
+        <Controller
+          name="idEvento"
+          control={control}
+          render={({ field }) => (
+            <Select
+              options={events.map((e: any) => ({ value: e.id, label: e.eventName }))}
+              value={field.value !== null ? String(field.value) : undefined}
+              onChange={(val: string) => field.onChange(Number(val))}
+              placeholder="Selecciona un evento"
+            />
+          )}
+        />
+      </div>
+      <div className="col-span-3">
+        <Label>Canal</Label>
+        <Controller
+          name="canalId"
+          control={control}
+          render={({ field }) => (
+            <Select
+              options={canales.map((c: any) => ({ value: c.id, label: c.nombre }))}
+              value={field.value !== null ? String(field.value) : undefined}
+              onChange={(val: string) => field.onChange(Number(val))}
+              placeholder="Selecciona un canal"
+            />
+          )}
+        />
+      </div>
+      <div className="col-span-3">
+        <Label>Fecha de nacimiento</Label>
+        <Input type="date" {...register("birthDate")} />
+      </div>
+      {showCommune && (
+        <div className="col-span-3">
+          <Label>Comuna</Label>
+          <Controller
+            name="communeId"
+            control={control}
+            render={({ field }) => (
+              <Select
+                options={communes.map((c: any) => ({ value: c.id, label: c.nameco }))}
+                value={field.value !== null ? String(field.value) : undefined}
+                onChange={(val: string) => field.onChange(Number(val))}
+                placeholder="Selecciona una comuna"
+              />
+            )}
+          />
+        </div>
+      )}
+      {showLocality && (
+        <div className="col-span-3">
+          <Label>Localidad</Label>
+          <Controller
+            name="localidad"
+            control={control}
+            render={({ field }) => (
+              <Select
+                options={localities.map((l: any) => ({ value: l.id, label: l.name }))}
+                value={field.value !== null ? String(field.value) : undefined}
+                onChange={(val: string | null) => field.onChange(val ? Number(val) : null)}
+                placeholder="Selecciona una localidad"
+              />
+            )}
+          />
+        </div>
+      )}
+      <div className="col-span-6 flex justify-end gap-3">
+        <Button variant="outline" type="button" onClick={onClose}>
+          Cancelar
+        </Button>
+        <Button type="submit">Actualizar</Button>
+      </div>
+    </form>
+  );
+}

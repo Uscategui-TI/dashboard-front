@@ -1,5 +1,5 @@
 
-import BotConnection from "@/components/what-bot/what-botconection";
+import BotConnection from "@/components/campaigns/what-bot/what-botconection";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

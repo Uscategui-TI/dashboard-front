@@ -7,7 +7,7 @@ import Label from "@/components/form/Label";
 import Select from "@/components/form/Select";
 import { FieldValues, useForm } from "react-hook-form";
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState, useRef } from "react";
 import Button from "@/components/ui/button/Button";
 import { useRouter } from "next/navigation";
 import PhoneInput from "@/components/form/group-input/PhoneInput";
@@ -21,6 +21,10 @@ const apiWhatsApp = process.env.NEXT_PUBLIC_WHATSAPP_URL;
 const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
 
 export default function WhatPanelPage() {
+  const [isBotConnected, setIsBotConnected] = useState(false);
+
+  const hasNotifiedRef = useRef(false);
+  const [toastSuccess, setToastSuccess] = useState<string | null>(null);
   const [isOpenConect, setIsOpenConect] = useState(false);
   const [loading, setLoading] = useState(false);
   const [totalMessagesSent, setTotalMessagesSent] = useState<number | null>(null);
@@ -77,6 +81,28 @@ export default function WhatPanelPage() {
     }
   }, [toastError])
   
+
+  const checkBotConnection = async () => {
+    try {
+      const res = await axios.get(`${apiWhatsApp}/bot-status`);
+      if (res.data.connected) {
+        setIsBotConnected(true);
+        setToastSuccess((prev) =>
+          prev ? prev : "✅ Bot conectado correctamente."
+        );
+      } else {
+        setIsBotConnected(false);
+      }
+    } catch (err) {
+      console.error("❌ Error al consultar estado del bot:", err);
+    }
+  };
+
+
+  useEffect(() => {
+    checkBotConnection();
+  }, []);
+
 
   const onSubmitGenreal = async (formData: any) => {
     try {
@@ -178,15 +204,7 @@ export default function WhatPanelPage() {
 };
 
 
-  useEffect(() => {
-    const storedStat = localStorage.getItem("pendingStat");
-    if (storedStat) {
-      const parsed = JSON.parse(storedStat);
-      setPendingStat(parsed);
-      setIsBroadcasting(true);
-      setLoading(true);
-    }
-  }, []);
+
 
   useEffect(() => {
     if (!isBroadcasting) return;
@@ -249,14 +267,19 @@ export default function WhatPanelPage() {
   }, [isBroadcasting, pendingStat]);
 
   const fetchEvents = async () => {
-    try {
-      const response = await axios.get(`${authUrl}/api/messages/events`);
-      const eventsFromDb = response.data.map((e: any) => e.eventName);
-      setEventList(eventsFromDb);
-    } catch (error) {
-      console.error("Error al obtener eventos:", error);
-    }
-  };
+  try {
+    const response = await axios.get(`${authUrl}/api/messages/events`);
+
+  
+    const activeEvents = response.data.active;
+
+    const eventsFromDb = activeEvents.map((e: any) => e.eventName); // asegúrate que sea 'eventName'
+    setEventList(eventsFromDb);
+  } catch (error) {
+    console.error("Error al obtener eventos activos:", error);
+  }
+};
+  
 
   useEffect(() => {
     fetchEvents();
@@ -273,6 +296,18 @@ export default function WhatPanelPage() {
     try {
       const response = await axios.post(`${apiWhatsApp}/set-phone-number`, { phoneNumber });
       if (response.data.token) setLinkToken(response.data.token);
+      const waitUntilConnected = setInterval(async () => {
+        try {
+          const res = await axios.get(`${apiWhatsApp}/bot-status`);
+          if (res.data.connected) {
+            clearInterval(waitUntilConnected);
+            setIsBotConnected(true);
+            setToastSuccess("✅ Bot conectado correctamente.");
+          }
+        } catch (err) {
+          console.error("🔁 Esperando conexión del bot...", err);
+        }
+      }, 3000);
   
       // 🔒 Desactiva el botón de "Solicitar Token" con contador de 5s
       setIsRequestDisabled(true);
@@ -322,6 +357,14 @@ export default function WhatPanelPage() {
     }
   }, []);
 
+  useEffect(() => {
+    if (toastSuccess) {
+      const timer = setTimeout(() => setToastSuccess(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastSuccess]);
+
+
 
 
   return (
@@ -341,7 +384,21 @@ export default function WhatPanelPage() {
                 </button>
               </div>
             )}
-
+             {toastSuccess && (
+              <div className="bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded relative mb-4">
+                <strong className="font-bold">Éxito: </strong>
+                <span className="block sm:inline">{toastSuccess}</span>
+                <button
+                  onClick={() => setToastSuccess(null)}
+                  className="absolute top-0 bottom-0 right-0 px-4 py-3"
+                >
+                  <svg className="fill-current h-6 w-6 text-green-500" role="button" viewBox="0 0 20 20">
+                    <title>Cerrar</title>
+                    <path d="M14.348 5.652a1 1 0 00-1.414-1.414L10 7.172 7.066 4.238a1 1 0 10-1.414 1.414L8.586 8.586l-2.934 2.934a1 1 0 101.414 1.414L10 10.828l2.934 2.934a1 1 0 001.414-1.414L11.414 8.586l2.934-2.934z"/>
+                  </svg>
+                </button>
+              </div>
+            )}
             {/* ✅ Toast de éxito (ya lo tenías) */}
             {showSuccessMessage && (
               <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
@@ -407,9 +464,15 @@ export default function WhatPanelPage() {
 
             <div className="col-span-6 sm:col-full flex flex-col space-y-6">
               <div className="flex space-x-4">
-                <Button size="sm" variant="primary" onClick={() => setIsOpenConect(false)}>
-                  Vincular
-                </Button>
+              <Button
+                size="sm"
+                variant="primary"
+                type="button"
+                disabled={isBotConnected}
+                onClick={() => setIsOpenConect(true)}
+              >
+                {isBotConnected ? "Bot Conectado" : "Vincular"}
+              </Button>
                 <Button
                   size="sm"
                   variant="primary"
@@ -422,9 +485,10 @@ export default function WhatPanelPage() {
                   size="sm"
                   variant="primary"
                   onClick={() => setShowCancelModal(true)}
-                >
+                  disabled={!isBroadcasting} 
+                  >
                   Cancelar Difusión
-                </Button>
+                  </Button>
               </div>
               {totalMessagesSent !== null && (
                 <div className=" bg-brand-500 text-white px-6 py-3 dark:border-gray-800 dark:bg-white/[0.03] rounded-lg shadow-md text-center sm:ml-auto sm:w-fit">
@@ -440,11 +504,11 @@ export default function WhatPanelPage() {
             </div>
           </form>
         </div>
-      <div
-        className={`fixed top-19 right-0 z-40 h-screen p-4 overflow-y-auto transition-transform w-90 bg-white dark:border-gray-200 dark:bg-gray-900 ${
-          isOpenConect ? "translate-x-full" : "-translate-x-0"
-        }`}
-      >
+        <div
+            className={`fixed top-19 right-0 z-40 h-screen p-4 overflow-y-auto transition-transform w-90 bg-white dark:border-gray-200 dark:bg-gray-900 ${
+              isOpenConect ? "-translate-x-0" : "translate-x-full"
+            }`}
+          >
         <h5 className="inline-flex items-center mb-4 text-base font-semibold text-gray-500 dark:text-gray-400">
           <svg className="w-4 h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
             <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
@@ -454,7 +518,7 @@ export default function WhatPanelPage() {
 
         {/* Botón para cerrar el drawer */}
         <button
-          onClick={() => setIsOpenConect(true)}
+          onClick={() => setIsOpenConect(false)}
           className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 absolute top-2.5 end-2.5 flex items-center justify-center dark:hover:bg-gray-600 dark:hover:text-white"
         >
           <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
@@ -519,12 +583,13 @@ export default function WhatPanelPage() {
           </div>
         </div>
       </div>
-      {!isOpenConect && (
+      {isOpenConect && (
         <div
-          className="fixed inset-0 bg-black opacity-50"
-          onClick={() => setIsOpenConect(false)}
+          className="fixed inset-0 bg-black opacity-50 z-30"
+          /* onClick={() => setIsOpenConect(false)} */
         />
       )}
+
       {isGuiaVisible && (
         <>
           {/* Fondo oscuro */}

@@ -154,7 +154,7 @@ export function GenericTable<T extends { id: string | number }>({
                 {col.header}
               </TableCell>
             ))}
-            {actions && <TableCell isHeader className="py-3 font-medium text-gray-500 text-start dark:text-gray-400">Acciones</TableCell>}
+            {actions && <TableCell isHeader className="py-4 px-10 font-medium text-gray-500 text-start dark:text-gray-400">Acciones</TableCell>}
           </TableRow>
         </TableHeader>
 
