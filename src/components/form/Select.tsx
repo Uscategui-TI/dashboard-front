@@ -11,6 +11,7 @@ interface SelectProps {
   onChange: (value: string) => void;
   className?: string;
   value?: string; // Controlado externamente
+  defaultValue?: string;
 }
 
 const Select: React.FC<SelectProps> = ({
@@ -18,7 +19,8 @@ const Select: React.FC<SelectProps> = ({
   placeholder = "Selecciona una opción",
   onChange,
   className = "",
-  value,
+  value, 
+  defaultValue,
 }) => {
   return (
     <select
@@ -29,6 +31,7 @@ const Select: React.FC<SelectProps> = ({
       } ${className}`}
       value={value ?? ""}
       onChange={(e) => onChange(e.target.value)}
+      defaultValue={defaultValue}
     >
       <option value="" disabled>
         {placeholder}
