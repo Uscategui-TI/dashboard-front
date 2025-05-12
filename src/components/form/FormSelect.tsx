@@ -35,7 +35,7 @@ export default function FormSelect({
           <Select
             key={keyReset}
             options={options}
-            value={field.value !== null ? String(field.value) : undefined}
+            value={field.value ? String(field.value) : ""}
             onChange={(val: string) => field.onChange(val ? Number(val) : null)}
             placeholder={placeholder}
             className={error ? "border-red-500" : ""}
