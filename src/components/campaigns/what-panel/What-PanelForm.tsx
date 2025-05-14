@@ -364,6 +364,15 @@ export default function WhatPanelPage() {
     }
   }, [toastSuccess]);
 
+  useEffect(() => {
+    const savedStat = localStorage.getItem("pendingStat");
+    if (savedStat) {
+      const parsedStat = JSON.parse(savedStat);
+      setPendingStat(parsedStat);
+      setIsBroadcasting(true);
+    }
+  }, []);
+
 
 
 
