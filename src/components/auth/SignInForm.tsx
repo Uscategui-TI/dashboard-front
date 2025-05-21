@@ -33,7 +33,7 @@ export default function SignInForm() {
     setLoading(true);
 
     try {
-      const { data } = await axios.post(`${authUrl}/api/auth/login`, loginData, {
+      const { data } = await axios.post(`${authUrl}/api/v1.0/auth/login`, loginData, {
         headers: { "Content-Type": "application/json" },
         withCredentials: true,
       });
@@ -41,7 +41,7 @@ export default function SignInForm() {
       if (data.token && data.roles) {
         Cookies.set("token", data.token);
         localStorage.setItem("roles", JSON.stringify(data.roles));
-        router.push("/what-panel");
+        router.push("/");
       } else {
         throw new Error("No se recibió un token o roles en la respuesta");
       }
