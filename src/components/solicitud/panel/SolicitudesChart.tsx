@@ -26,7 +26,7 @@ export default function SolicitudesChart() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await axios.get(`${authUrl}/api/prospecto/estadisticas`);
+        const res = await axios.get(`${authUrl}/api/v1.0/solicitud/estadisticas`);
         const data = res.data.conteoPorEstado;
     
         const labelsFromApi = Object.keys(data);

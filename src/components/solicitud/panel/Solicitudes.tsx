@@ -72,13 +72,13 @@ export default function RecentOrders() {
       try {
         // 1. Llamada a `/ultimas`
         const ultimasResponse = await axios.get(
-          `${process.env.NEXT_PUBLIC_AUTH_URL}/api/prospecto/ultimas`
+          `${process.env.NEXT_PUBLIC_AUTH_URL}/api/v1.0/solicitud/ultimas`
         );
         setData(ultimasResponse.data);
 
         // 2. Llamada a `/estadisticas`
         const estadisticasResponse = await axios.get(
-          `${process.env.NEXT_PUBLIC_AUTH_URL}/api/prospecto/estadisticas`
+          `${process.env.NEXT_PUBLIC_AUTH_URL}/api/v1.0/solicitud/estadisticas`
         );
         const { totalSolicitudes, conteoPorEstado } = estadisticasResponse.data;
 

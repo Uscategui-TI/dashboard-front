@@ -28,7 +28,7 @@ export default function UserAddressCard() {
       if (!token) return;
 
       try {
-        const response = await axios.get(`${authUrl}/api/auth/me`, {
+        const response = await axios.get(`${authUrl}/api/v1.0/auth/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

@@ -23,7 +23,7 @@ export function useUserActivityTracker() {
 
       try {
         const res = await axios.post(
-          `${process.env.NEXT_PUBLIC_AUTH_URL}/api/auth/activate`,
+          `${process.env.NEXT_PUBLIC_AUTH_URL}/api/v1.0/auth/activate`,
           {},
           {
             headers: {

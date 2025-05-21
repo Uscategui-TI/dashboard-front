@@ -26,7 +26,7 @@ export default function UserDropdown() {
       if (!token) return;
 
       try {
-        const { data } = await axios.get(`${authUrl}/api/auth/me`, {
+        const { data } = await axios.get(`${authUrl}/api/v1.0/auth/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

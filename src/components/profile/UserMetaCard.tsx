@@ -28,7 +28,7 @@ export default function UserMetaCard() {
       if (!token) return;
 
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/api/auth/me`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/api/v1.0/auth/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
