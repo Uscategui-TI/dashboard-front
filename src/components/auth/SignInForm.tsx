@@ -38,9 +38,10 @@ export default function SignInForm() {
         withCredentials: true,
       });
 
-      if (data.token && data.roles) {
+      const resp = data.data
+      if (resp.token && resp.roles) {
         Cookies.set("token", data.token);
-        localStorage.setItem("roles", JSON.stringify(data.roles));
+        localStorage.setItem("roles", JSON.stringify(resp.roles));
         router.push("/");
       } else {
         throw new Error("No se recibió un token o roles en la respuesta");

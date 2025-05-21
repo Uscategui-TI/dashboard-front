@@ -11,6 +11,7 @@ import Badge from "../shared/ui/badge/Badge";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import axios from "@/lib/axiosInstance";
+import { endPointBackend } from "@/api";
 
 interface EventStat {
   id: number;
@@ -28,15 +29,10 @@ export default function TableEvents() {
   const [search, setSearch] = useState(""); // ← estado para filtro
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_AUTH_URL}/api/message-stats/list`);
-        setData(response.data);
-      } catch (error) {
-        console.error("Error al cargar las estadísticas:", error);
-      }
-    };
-    fetchData();
+    endPointBackend({ accionBD: "Recent-Broadcast" })
+    .then((resp) => {
+      setData(resp.data);
+    })   
   }, []);
 
   const filteredData = data.filter((event) =>

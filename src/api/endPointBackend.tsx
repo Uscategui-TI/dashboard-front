@@ -40,6 +40,13 @@ export async function endPointBackend({ accionBD, id, body, params, isFormData }
 
     switch (accionBD) {
         // SERVICIOS USUARIOS
+        case "Login": {
+            method = "POST";
+            Url = `${urlIp}${urlPort}/v1.0/auth/login`;
+            body = JSON.stringify(body);
+            break;
+        }
+
         case "Delete-User": {
             method = "DELETE";
             Url = `${urlIp}${urlPort}/v1.0/auth/delete/${id}`;
