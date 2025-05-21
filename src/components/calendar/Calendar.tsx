@@ -17,6 +17,7 @@ import { Modal } from "@/components/shared/ui/modal";
 import { ImageUpload } from "../form/form-elements/ImageUpload";
 import { FieldValues, useForm } from "react-hook-form";
 import "tippy.js/dist/tippy.css";
+import { endPointBackend } from "@/api";
 
 interface CalendarEvent extends EventInput {
   extendedProps: {
@@ -54,14 +55,13 @@ const Calendar: React.FC = () => {
   
   const urlMedia = watch("urlMedia");
   
-  const fetchEvents = async () => {
-    try {
-      const response = await fetch(`${authUrl}/api/messages/events`);
-      if (!response.ok) throw new Error("Error al cargar eventos");
   
-      const data = await response.json();
-  
-      const formattedEvents: CalendarEvent[] = data.all.map((event: any) => ({
+  useEffect(() => {
+    endPointBackend({ accionBD: "List-Events" })
+    .then((resp) => {
+      const data = resp.data.all;
+
+      const formattedEvents: CalendarEvent[] = data.map((event: any) => ({
         id: event.id.toString(),
         title: event.eventName,
         start: event.startDate,
@@ -72,75 +72,45 @@ const Calendar: React.FC = () => {
           imageUrl: event.imageUrl,
         },
       }));
-  
+
       setEvents(formattedEvents);
-    } catch (error) {
-      console.error("Error al cargar eventos:", error);
-    }
-  };
-  
-  useEffect(() => {
-    fetchEvents();
+    })
   }, []);
   
   const createEvent = async () => {
-    try {
-      const response = await fetch(`${authUrl}/api/messages/create`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+    endPointBackend({ 
+        accionBD: "Create-Events",
+        body: {
           eventName: eventData.title,
           color: eventData.level,
           startDate: eventData.startDate,
           endDate: eventData.endDate,
           imageUrl: eventData.urlMedia,
-        }),
-      });
-  
-      if (!response.ok) throw new Error("Error al guardar el evento");
-  
-      console.log("🌐 URL DE LA IMAGEN:", urlMedia);
-  
-      await fetchEvents();
+        }
+      })
+    .then((resp) => {
       closeModal();
       resetModalFields();
-    } catch (error) {
-      console.error("Error al crear el evento:", error);
-      alert("Hubo un problema al guardar el evento.");
-    }
+    })
   };
   
   const handleAddOrUpdateEvent = async () => {
-
-    console.log(eventData.urlMedia)
-    console.log(urlMedia)
     if (selectedEvent) {
-      try {
-        const response = await fetch(`${authUrl}/api/messages/update/${selectedEvent.id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
+        endPointBackend({ 
+          accionBD: "Update-Events",
+          id: selectedEvent.id,
+          body: {
             eventName: eventData.title,
             color: eventData.level,
             startDate: eventData.startDate,
             endDate: eventData.endDate,
             imageUrl: eventData.urlMedia,
-          }),
-        });
-  
-        if (!response.ok) throw new Error("Error al actualizar el evento");
-  
-        await fetchEvents();
+          }
+        })
+      .then((resp) => {
         closeModal();
         resetModalFields();
-      } catch (error) {
-        console.error("Error al actualizar el evento:", error);
-        alert("Hubo un problema al actualizar el evento.");
-      }
+      })
     } else {
       createEvent();
     }
@@ -181,7 +151,6 @@ const Calendar: React.FC = () => {
     setSelectedEvent(null);
     reset();
   };
-  
 
   const renderEventContent = (eventInfo: EventContentArg) => {
     const calendarType = eventInfo.event.extendedProps.calendar?.toLowerCase() || "primary";

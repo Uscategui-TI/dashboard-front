@@ -12,9 +12,9 @@ type Props = {
 export default function FormInput({ label, registration, error, type = "text" }: Props) {
   return (
     <div className="col-span-3">
-      <Label className={error ? "text-red-600" : ""}>{label}</Label>
-      <Input type={type} {...registration} className={error ? "border-red-500" : ""} />
-      {error && <p className="text-red-600 text-sm">{error.message}</p>}
+      <Label className={error ? "text-red-600 dark:text-red-400" : ""}>{label}</Label>
+      <Input type={type} placeholder={"Digite " + label} {...registration} className={error ? "border-red-500 dark:border-red-400" : ""} />
+      {error && <p className="mt-1 text-sm text-red-500 dark:text-red-400">{error.message}</p>}
     </div>
   );
 }

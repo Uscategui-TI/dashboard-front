@@ -26,7 +26,7 @@ export default function FormSelect({
 }: Props) {
   return (
     <div className="col-span-3">
-      <Label className={error ? "text-red-600" : ""}>{label}</Label>
+      <Label className={error ? "text-red-500 dark:text-red-400" : ""}>{label}</Label>
       <Controller
         name={name}
         control={control}
@@ -36,13 +36,13 @@ export default function FormSelect({
             key={keyReset}
             options={options}
             value={field.value !== null ? String(field.value) : undefined}
-            onChange={(val: string) => field.onChange(val ? Number(val) : null)}
+            onChange={(val) => field.onChange(val ? Number(val) : null)}
             placeholder={placeholder}
-            className={error ? "border-red-500" : ""}
+            className={error ? "border-red-500 dark:border-red-400" : ""}
           />
         )}
       />
-      {error && <p className="text-red-600 text-sm">{error.message}</p>}
+      {error && <p className="mt-1 text-sm text-red-500 dark:text-red-400">{error.message}</p>}
     </div>
   );
 }

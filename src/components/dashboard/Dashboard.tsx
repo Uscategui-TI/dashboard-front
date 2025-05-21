@@ -1,9 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import RecentOrders from "@/components/dashboard/TableEvents";
 import { defaultBarChartOptions, getChartOptionsLines, getGenderDonutChartOptions, useNavigation } from "@/util";
-import axios from "axios";
 import dynamic from "next/dynamic";
 import { BasicCard } from "../shared/ui/cards";
 import Badge from "../shared/ui/badge/Badge";
@@ -13,11 +11,10 @@ import Image from "next/image";
 import { Dropdown } from "../shared/ui/dropdown/Dropdown";
 import { DropdownItem } from "../shared/ui/dropdown/DropdownItem";
 import TableEvents from "@/components/dashboard/TableEvents";
+import { endPointBackend } from "@/api";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 const CountryMap = dynamic(() => import("./CountryMap"), { ssr: false });
-
-const apiUrl = process.env.NEXT_PUBLIC_AUTH_URL;
 
 export const Dashboard = () => {
 
@@ -40,7 +37,6 @@ export const Dashboard = () => {
 
     // CHART PROSPECTS
     const [seriesProspects, setSeriesProspects] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
     const [viewMode, setViewMode] = useState<"month" | "year">("month");
 
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -49,187 +45,59 @@ export const Dashboard = () => {
     // DEMOGRAFICA COLOMBIA
     const [isOpen, setIsOpen] = useState(false);
     const [points, setPoints] = useState<any[]>([]);
-    const [total, setTotal] = useState(0);
     
     useEffect(() => {
-      const fetchData = async () => {
-        try {
-          // Obtener prospectos
-          const prospectosRes = await axios.get(`${apiUrl}/api/person-form/count`);
-          const prospectosTotal = prospectosRes.data; // ✅ ya es un número
-          setProspects(prospectosTotal);
-  
-          // Simular anteriores
-          setPrevProspects(prospectosTotal - 1); // simula que antes había uno menos
-  
-          // Obtener total de eventos
-          const eventosRes = await axios.get(`${apiUrl}/api/messages/count`);
-          const eventosTotal = eventosRes.data;
-          setEvents(eventosTotal);
-  
-          // Simular anteriores
-          setPrevEvents(eventosTotal - 5);
-        } catch (error) {
-          console.error("Error cargando métricas:", error);
-        }
-      };
-  
-      fetchData();
-    }, []);
+
+        endPointBackend({ accionBD: "Total-Prospects" })
+        .then((resp) => {
+            setProspects(resp.data);
+            setPrevProspects(resp.data - 1);
+        })
+        
+        endPointBackend({ accionBD: "Total-Events" })
+        .then((resp) => {
+            setEvents(resp.data);
+            setPrevEvents(resp.data - 5);
+        })  
+        
+        endPointBackend({ accionBD: "Recent-Broadcast" })
+        .then((resp) => {
+                const stats = resp.data;
+                // Agrupar por año
+                const counts: Record<string, number> = {};
+                stats.forEach((stat: any) => {
+                    const year = new Date(stat.createdAt).getFullYear();
+                    counts[year] = (counts[year] || 0) + 1;
+                });
+        
+                const sortedYears = Object.keys(counts).sort();
+                const data = sortedYears.map((year) => counts[year]);
+        
+                setCategories(sortedYears);
+                setSeries([{ name: "Eventos", data }]);
+        })   
+
+        endPointBackend({ accionBD: "Genders-Chart" })
+        .then((resp) => {
+            setSeriesGender([resp.data.femenino, resp.data.masculino]);
+            setActual(resp.data.femenino + resp.data.masculino);
+            setMesAnterior(1000); // valor de ejemplo
+        })  
+
+        endPointBackend({ accionBD: "Prospects-By-Departments" })
+        .then((resp) => {
+            setPoints(resp.data.points)
+        })  
+
+    }, []); 
 
     useEffect(() => {
-        const fetchStats = async () => {
-            try {
-            const res = await axios.get(`${apiUrl}/api/message-stats/list`);
-            const stats = res.data;
-    
-            // Agrupar por año
-            const counts: Record<string, number> = {};
-            stats.forEach((stat: any) => {
-                const year = new Date(stat.createdAt).getFullYear();
-                counts[year] = (counts[year] || 0) + 1;
-            });
-    
-            const sortedYears = Object.keys(counts).sort();
-            const data = sortedYears.map((year) => counts[year]);
-    
-            setCategories(sortedYears);
-            setSeries([{ name: "Eventos", data }]);
-            } catch (err) {
-            console.error("Error fetching stats:", err);
-            }
-        };
-    
-        fetchStats();
-    }, []);
-        
-    useEffect(() => {
-        const fetchData = async () => {
-        try {
-            const res = await axios.get(`${apiUrl}/api/person-form/genders/all`);
-            const data = res.data;
-        
-            // Reordenamos para que coincida con ["Femenino", "Masculino"]
-            const femenino = data.find((g: any) => g.gender.toLowerCase() === "femenino")?.count || 0;
-            const masculino = data.find((g: any) => g.gender.toLowerCase() === "masculino")?.count || 0;
-        
-            setSeriesGender([femenino, masculino]);
-        
-            // Simulamos valores para objetivo, mes anterior y actual
-            setActual(femenino + masculino); // ← o ajústalo si quieres otra lógica
-            setMesAnterior(1000); // ← ponle un valor estático por ahora si no tienes otro endpoint
-        } catch (err) {
-            console.error("Error al cargar datos:", err);
-        }
-    };
-    fetchData();
-    }, []);
-    
-    useEffect(() => {
-        const fetchData = async () => {
-          try {
-            const getTokenFromCookie = () => {
-              const match = document.cookie.match(new RegExp('(^| )token=([^;]+)'));
-              return match ? match[2] : null;
-            };
-      
-            const token = getTokenFromCookie();
-            if (!token) {
-              console.error("Token no encontrado en cookies");
-              return;
-            }
-      
-            const res = await axios.get(`${process.env.NEXT_PUBLIC_AUTH_URL}/api/person-form/dates/all`);
-            const dates: string[] = res.data;
-    
-            if (viewMode === "month") {
-              const countsByMonth = Array(12).fill(0);
-              dates.forEach((dateStr) => {
-                const date = new Date(dateStr);
-                const month = date.getMonth();
-                countsByMonth[month]++;
-              });
-              setCategoriesProspects(months);
-              setSeriesProspects([{ name: "Prospectos", data: countsByMonth }]);
-            } else {
-              const countsByYear: Record<string, number> = {};
-              dates.forEach((dateStr) => {
-                const year = new Date(dateStr).getFullYear();
-                countsByYear[year] = (countsByYear[year] || 0) + 1;
-              });
-              const years = Object.keys(countsByYear).sort();
-              const counts = years.map((year) => countsByYear[year]);
-              setCategoriesProspects(years);
-              setSeriesProspects([{ name: "Prospectos", data: counts }]);
-            }
-    
-            setLoading(false);
-          } catch (error) {
-            console.error("Error al cargar fechas de creación:", error);
-          }
-        };
-    
-        fetchData();
-    }, [viewMode]);
-
-    useEffect(() => {
-        const fetchData = async () => {
-          try {
-            // Leer token desde cookie
-            const getTokenFromCookie = () => {
-              const match = document.cookie.match(new RegExp('(^| )token=([^;]+)'));
-              return match ? match[2] : null;
-            };
-      
-            const token = getTokenFromCookie();
-            if (!token) {
-              console.error("Token no encontrado en cookies");
-              return;
-            }
-      
-            const headers = {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            };
-      
-            // Total de prospectos
-            const totalRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/api/person-form/count`, {
-              headers,
-            });
-            const totalData = await totalRes.json();
-      
-            // Obtener departamentos
-            const res = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/api/person-form/departments/all`, {
-              headers,
-            });
-            const departments = await res.json();
-      
-            // Agrupar departamentos por ID
-            const grouped = departments.reduce((acc: Record<number, any>, dept: any) => {
-              if (!acc[dept.id]) {
-                acc[dept.id] = {
-                  latLng: [parseFloat(dept.latitude), parseFloat(dept.longitude)],
-                  name: dept.name,
-                  count: 1,
-                };
-              } else {
-                acc[dept.id].count++;
-              }
-              return acc;
-            }, {});
-      
-            const uniquePoints = Object.values(grouped);
-      
-            setPoints(uniquePoints);
-            setTotal(totalData);
-          } catch (error) {
-            console.error("Error al cargar datos demográficos:", error);
-          }
-        };
-      
-        fetchData();
-    }, []);
-
+        endPointBackend({ accionBD: "Historico-Prospects-Chart", params: { viewMode: viewMode } })
+        .then((resp) => {
+            setCategoriesProspects( resp.data.categories);
+            setSeriesProspects([{ name: "Prospectos", data: resp.data.series }]);
+        })  
+    }, [viewMode])
 
     const objetivo = 1000;
 
@@ -430,14 +298,12 @@ export const Dashboard = () => {
                     </div>
                     <div className="max-w-full overflow-x-auto custom-scrollbar">
                         <div className="min-w-[1000px] xl:min-w-full">
-                            {!loading && (
-                                <ReactApexChart
-                                options={getChartOptionsLines(categoriesProspects, viewMode)}
-                                series={seriesProspects}
-                                type="area"
-                                height={310}
-                                />
-                            )}
+                            <ReactApexChart
+                            options={getChartOptionsLines(categoriesProspects, viewMode)}
+                            series={seriesProspects}
+                            type="area"
+                            height={310}
+                            />
                         </div>
                     </div>
                 </BasicCard>
@@ -472,7 +338,7 @@ export const Dashboard = () => {
                         />
                         <div>
                             <p className="font-semibold text-gray-800 text-theme-sm dark:text-white/90">Colombia</p>
-                            <span className="block text-gray-500 text-theme-xs dark:text-gray-400">{total} Prospectos</span>
+                            <span className="block text-gray-500 text-theme-xs dark:text-gray-400">{prospects} Prospectos</span>
                         </div>
                     </div>
             

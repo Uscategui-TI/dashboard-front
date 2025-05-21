@@ -5,20 +5,17 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
 import {
-  BoxCubeIcon,
   CalenderIcon,
   ChevronDownIcon,
   GridIcon,
   HorizontaLDots,
   ListIcon,
   PieChartIcon,
-  PlugInIcon,
   SolicitudIcon,
   TableIcon,
   TaskIcon,
   UserCircleIcon,
 } from "../icons/index";
-import { Table } from "@/components/shared/ui/table";
 
 const storedRoles = typeof window !== 'undefined' ? localStorage.getItem("roles") : null;
 const userRoles: string[] = storedRoles ? JSON.parse(storedRoles) : [];

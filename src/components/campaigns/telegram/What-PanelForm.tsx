@@ -251,7 +251,7 @@ export default function WhatPanelPage() {
 
   const fetchEvents = async () => {
     try {
-      const response = await axios.get(`${authUrl}/api/messages/events`);
+      const response = await axios.get(`${authUrl}/api/v1.0/events/events`);
       const eventsFromDb = response.data.map((e: any) => e.eventName);
       setEventList(eventsFromDb);
     } catch (error) {
