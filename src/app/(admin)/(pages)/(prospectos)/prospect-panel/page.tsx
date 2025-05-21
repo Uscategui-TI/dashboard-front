@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "Gestiona, organiza y parametriza actividades",
 };
 
-export default function Ecommerce() {
+export default function PanelProspectosPage() {
   return (
     <PanelProspectComponent/>
   );

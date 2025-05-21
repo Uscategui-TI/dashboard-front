@@ -8,9 +8,9 @@ import FormInput from "@/components/form/FormInput";
 import FormSelect from "@/components/form/FormSelect";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/Input";
-import Select from "@/components/form/Select";
 import Button from "@/components/shared/ui/button/Button";
 import { FieldError } from "react-hook-form";
+import Select from "@/components/form/Select";
 
 const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
 
@@ -26,21 +26,41 @@ type ProspectForm = {
   genderId: number | null;
   departmentId: number | null;
   municipalityId: number | null;
-  communeId: number | null;
+  comuneId: number | null;
   localidad: number | null;
   idEvento: number | null;
   canalId: number | null;
 };
+
+const transformProspect = (p: any): ProspectForm => ({
+  name: p.name,
+  lastName: p.lastName,
+  phone: p.phone,
+  email: p.email,
+  address: p.address,
+  document: p.document,
+  cargo: p.cargo,
+  birthDate: p.birthDate,
+  genderId: p.gender?.id ?? null,
+  departmentId: p.department?.id ?? null,
+  municipalityId: p.municipality?.id ?? null,
+  comuneId: p.comune?.id ?? null,
+  localidad: p.locality?.id ?? null,
+  idEvento: p.idEvento ?? null,
+  canalId: p.canal?.id ?? null,
+});
 
 export default function EditProspectForm({
   prospect,
   onClose,
   onUpdate,
 }: {
-  prospect: ProspectForm;
+  prospect: any;
   onClose: () => void;
   onUpdate: () => void;
 }) {
+  const transformedProspect = transformProspect(prospect);
+
   const {
     register,
     handleSubmit,
@@ -49,7 +69,7 @@ export default function EditProspectForm({
     watch,
     formState: { errors },
   } = useForm<ProspectForm>({
-    defaultValues: prospect,
+    defaultValues: transformedProspect,
   });
 
   const [genders, setGenders] = useState([]);
@@ -93,14 +113,15 @@ export default function EditProspectForm({
       setCommunes(comRes.data);
       setEvents(eventsRes.data.all);
       setCanales(canalesRes.data);
-      reset(prospect);
+
+      reset(transformProspect(prospect));
     };
 
     fetchData();
   }, [prospect, reset]);
 
   useEffect(() => {
-    const departmentId = selectedDepartment ?? prospect.departmentId;
+    const departmentId = selectedDepartment ?? transformedProspect.departmentId;
 
     if (municipalities.length > 0 && departmentId) {
       const filtered = municipalities.filter(
@@ -108,7 +129,7 @@ export default function EditProspectForm({
       );
       setFilteredMunicipalities(filtered);
     }
-  }, [selectedDepartment, municipalities, prospect.departmentId]);
+  }, [selectedDepartment, municipalities, transformedProspect.departmentId]);
 
   useEffect(() => {
     const selected = municipalities.find((m) => m.id === selectedMunicipality);
@@ -127,35 +148,30 @@ export default function EditProspectForm({
   }, [selectedMunicipality, municipalities]);
 
   const onSubmit = async (formData: ProspectForm) => {
-  const modifiedFields = Object.entries(formData).reduce((acc, [key, value]) => {
-    const typedKey = key as keyof ProspectForm;
-    const originalValue = prospect[typedKey];
+    const modifiedFields = Object.entries(formData).reduce((acc, [key, value]) => {
+      const typedKey = key as keyof ProspectForm;
+      const originalValue = transformedProspect[typedKey];
 
-    if (
-      value !== null &&
-      value !== "" &&
-      String(value) !== String(originalValue)
-    ) {
-      (acc as any)[typedKey] = value;
+      if (value !== null && value !== "" && String(value) !== String(originalValue)) {
+        (acc as any)[typedKey] = value;
+      }
+
+      return acc;
+    }, {} as Partial<ProspectForm>);
+
+    if (Object.keys(modifiedFields).length === 0) {
+      console.log("⛔ Nada fue modificado.");
+      return;
     }
 
-    return acc;
-  }, {} as Partial<ProspectForm>);
-
-  if (Object.keys(modifiedFields).length === 0) {
-    console.log("⛔ Nada fue modificado.");
-    return;
-  }
-
-  try {
-    await axios.put(`${authUrl}/api/v1.0/prospects/update/${prospect.document}`, modifiedFields);
-    onUpdate();
-    onClose();
-  } catch (error) {
-    console.error("❌ Error actualizando prospecto:", error);
-  }
-};
-
+    try {
+      await axios.put(`${authUrl}/api/person-form/update/${prospect.document}`, modifiedFields);
+      onUpdate();
+      onClose();
+    } catch (error) {
+      console.error("❌ Error actualizando prospecto:", error);
+    }
+  };
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-6 gap-6">
       <div className="col-span-3">
@@ -187,7 +203,7 @@ export default function EditProspectForm({
             <Select
               options={departments.map((d: any) => ({ value: d.value, label: d.label }))}
               value={field.value !== null ? String(field.value) : undefined}
-              onChange={(val: string) => field.onChange(Number(val))}
+              onChange={(val) => field.onChange(Number(val))}
               placeholder="Selecciona un departamento"
             />
           )}
@@ -202,7 +218,7 @@ export default function EditProspectForm({
             <Select
               options={filteredMunicipalities.map((m: any) => ({ value: m.id, label: m.name }))}
               value={field.value !== null ? String(field.value) : undefined}
-              onChange={(val: string) => field.onChange(Number(val))}
+              onChange={(val) => field.onChange(Number(val))}
               placeholder="Selecciona un municipio"
             />
           )}
@@ -220,7 +236,7 @@ export default function EditProspectForm({
             <Select
               options={events.map((e: any) => ({ value: e.id, label: e.eventName }))}
               value={field.value !== null ? String(field.value) : undefined}
-              onChange={(val: string) => field.onChange(Number(val))}
+              onChange={(val) => field.onChange(Number(val))}
               placeholder="Selecciona un evento"
             />
           )}
@@ -235,7 +251,7 @@ export default function EditProspectForm({
             <Select
               options={canales.map((c: any) => ({ value: c.id, label: c.nombre }))}
               value={field.value !== null ? String(field.value) : undefined}
-              onChange={(val: string) => field.onChange(Number(val))}
+              onChange={(e) => field.onChange(Number(e))}
               placeholder="Selecciona un canal"
             />
           )}
@@ -249,13 +265,13 @@ export default function EditProspectForm({
         <div className="col-span-3">
           <Label>Comuna</Label>
           <Controller
-            name="communeId"
+            name="comuneId"
             control={control}
             render={({ field }) => (
               <Select
-                options={communes.map((c: any) => ({ value: c.id, label: c.nameco }))}
+                options={communes.map((c: any) => ({ value: c.id, label: c.name }))}
                 value={field.value !== null ? String(field.value) : undefined}
-                onChange={(val: string) => field.onChange(Number(val))}
+                onChange={(val) => field.onChange(Number(val))}
                 placeholder="Selecciona una comuna"
               />
             )}
@@ -272,7 +288,7 @@ export default function EditProspectForm({
               <Select
                 options={localities.map((l: any) => ({ value: l.id, label: l.name }))}
                 value={field.value !== null ? String(field.value) : undefined}
-                onChange={(val: string | null) => field.onChange(val ? Number(val) : null)}
+                onChange={(val) => field.onChange(val ? Number(val) : null)}
                 placeholder="Selecciona una localidad"
               />
             )}

@@ -226,7 +226,25 @@ export default function WhatPanelPage() {
   
         if ((status === "finalizada" || status === "cancelada") && pendingStat) {
           // 1. Guardar estadísticas
-          await saveEventStats({ ...pendingStat, total: totalMessagesSent,status: formattedStatus, });
+          let messages = totalMessagesSent;
+
+         
+          let attempts = 0;
+          while ((messages === null || messages === 0) && attempts < 3) {
+            const res = await axios.get(`${apiWhatsApp}/broadcast-status`);
+            messages = res.data.totalMessagesSent;
+            attempts++;
+            await new Promise((r) => setTimeout(r, 1000)); // espera 1s
+          }
+
+          await saveEventStats({
+            ...pendingStat,
+            total: messages || 0,
+            status: formattedStatus,
+          });
+
+
+
           
           localStorage.removeItem("pendingStat");
   
@@ -364,6 +382,15 @@ export default function WhatPanelPage() {
     }
   }, [toastSuccess]);
 
+  useEffect(() => {
+    const savedStat = localStorage.getItem("pendingStat");
+    if (savedStat) {
+      const parsedStat = JSON.parse(savedStat);
+      setPendingStat(parsedStat);
+      setIsBroadcasting(true);
+    }
+  }, []);
+
 
 
 
@@ -431,8 +458,8 @@ export default function WhatPanelPage() {
                 value={selectedEventName || ""}
                 options={eventList.map((e) => ({ value: e, label: e }))}
                 placeholder="Selecciona un evento"
-                onChange={(value: string) => {
-                  setSelectedEventName(value);
+                onChange={(value) => {
+                  // setSelectedEventName(value);
                   setValue("eventName", value);
                 }}
               />
@@ -447,9 +474,9 @@ export default function WhatPanelPage() {
                   { value: "Informativo", label: "Informativo" },
                 ]}
                 placeholder="Selecciona el tipo"
-                onChange={(value: string) => {
+                onChange={(value) => {
                   const option = { value, label: value };
-                  setSelectedEventType(option);
+                  // setSelectedEventType(option);
                   setValue("eventType", value);
                 }}
               />

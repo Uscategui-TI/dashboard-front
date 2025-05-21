@@ -6,7 +6,6 @@ import { GenericTable } from "@/components/shared/tables/GenericTable";
 import { ArrowDownIcon, ArrowUpIcon, GroupIcon } from "@/icons";
 import Badge from "@/components/shared/ui/badge/Badge";
 import { BasicCard } from "@/components/shared/ui/cards";
-import ReactApexChart from "react-apexcharts";
 import { getChartOptionsLines } from "@/util";
 import GenderChart from "./GenderChart";
 import CanalChart from "./CanalChart";
@@ -14,6 +13,7 @@ import Image from "next/image";
 import dynamic from "next/dynamic";
 import CardBirthdays from "@/components/prospect/panel/CardBirthdays";
 
+const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 const CountryMap = dynamic(() => import("@/components/dashboard/CountryMap"), { ssr: false });
 const MapLocalities = dynamic(() => import("./MapBogota"), { ssr: false });

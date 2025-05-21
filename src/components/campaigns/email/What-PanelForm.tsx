@@ -375,8 +375,8 @@ export default function WhatPanelPage() {
                 value={selectedEventName || ""}
                 options={eventList.map((e) => ({ value: e, label: e }))}
                 placeholder="Selecciona un evento"
-                onChange={(value: string) => {
-                  setSelectedEventName(value);
+                onChange={(value) => {
+                  // setSelectedEventName(value);
                   setValue("eventName", value);
                 }}
               />
@@ -391,9 +391,9 @@ export default function WhatPanelPage() {
                   { value: "Informativo", label: "Informativo" },
                 ]}
                 placeholder="Selecciona el tipo"
-                onChange={(value: string) => {
+                onChange={(value) => {
                   const option = { value, label: value };
-                  setSelectedEventType(option);
+                  // setSelectedEventType(option);
                   setValue("eventType", value);
                 }}
               />

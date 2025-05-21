@@ -36,7 +36,7 @@ export default function FormSelect({
             key={keyReset}
             options={options}
             value={field.value !== null ? String(field.value) : undefined}
-            onChange={(val) => field.onChange(val ? Number(val) : null)}
+            onChange={(val: any) => field.onChange(val ? Number(val) : null)}
             placeholder={placeholder}
             className={error ? "border-red-500 dark:border-red-400" : ""}
           />
