@@ -15,8 +15,8 @@ export const Ports: PortsConfig = {
         port:       process.env.NEXT_PUBLIC_BACKEND_PORT
     },
     ProvidersSendService: {
-        url:        process.env.REACT_APP_DOMAIN_SERVER,
-        port:       process.env.REACT_APP_AUTHENTICATION_SERVICE_PORT
+        url:        process.env.NEXT_PUBLIC_PROVIDER_SERVER,
+        port:       process.env.NEXT_PUBLIC_PROVIDER_SERVICE_PORT
     },
     ExternalServices: {
         policies: {
