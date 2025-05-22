@@ -225,17 +225,18 @@ export default function PersonFormPage({ closeModal }: any) {
         <div className="col-span-3">
           <FormInput
           label="Telefono*"
+          type="number"
           registration={register("phone", { required: "Este campo es obligatorio" })}
           error={errors.phone}
         />
         </div>
         <div className="col-span-3">
           <Label>Email</Label>
-          <Input type="email" {...register("email", { required: true })} />
+          <Input type="email" placeholder="Digite Correo" {...register("email", { required: true })} />
         </div>
         <div className="col-span-3">
           <Label>Dirección</Label>
-          <Input {...register("address", { required: true })} />
+          <Input placeholder="Digite Dirección" {...register("address", { required: true })} />
         </div>
         <div className="col-span-3">
           <Label>Departamento</Label>
@@ -271,6 +272,7 @@ export default function PersonFormPage({ closeModal }: any) {
         </div>
         <div className="col-span-3">
           <FormInput
+          type="number"
           label="Documento"
           registration={register("document", { required: "Este campo es obligatorio" })}
           error={errors.document}

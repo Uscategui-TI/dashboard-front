@@ -196,6 +196,7 @@ export default function RecentOrders() {
           break
         }
         case 400: { 
+          setForm(initialForm);
           setErrorMessage(resp.message)
           errorModal.openModal()
           break
@@ -213,7 +214,7 @@ export default function RecentOrders() {
   };
 
   const filteredOptions = useMemo(() => {
-  return nuevoEstado === "EN_PROCESO" || "PENDIENTE"
+  return nuevoEstado === "PENDIENTE"
     ? StatusSolicitudes.filter(opt => opt.value !== "FINALIZADOS")
     : StatusSolicitudes;
 }, [nuevoEstado]);

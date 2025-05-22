@@ -1,7 +1,11 @@
 "use client";
 
 import { endPointBackend } from "@/api";
+import Avatar from "@/components/shared/ui/avatar/Avatar";
 import { useEffect, useRef, useState } from "react";
+import { FaYoutube, FaFacebookF, FaWhatsapp, FaGlobe } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
+
 
 const getEstadoColor = (estado: string) => {
   switch (estado) {
@@ -18,55 +22,46 @@ const getEstadoColor = (estado: string) => {
   }
 };
 
-const formatearComentarios = (comentario: string) => {
-  if (!comentario) return "";
+type ComentarioItem = {
+  fecha: Date;
+  fechaFormateada: string;
+  texto: string;
+};
 
-  const bloques = comentario
-    .split(/\[(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?)\]/)
-    .filter(Boolean);
+export const formatearComentarios = (comentario: string): ComentarioItem[] => {
+  if (!comentario) return [];
 
-  type ComentarioItem = {
-    fecha: Date;
-    fechaFormateada: string;
-    texto: string;
-  };
+  // Este regex extrae bloques como: [fecha] texto
+const regex = /\[(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?)\]([^\[]*)/g;
 
   const resultado: ComentarioItem[] = [];
+  let match;
 
-  for (let i = 0; i < bloques.length; i += 2) {
-    const fechaISO = bloques[i + 1];
-    const texto = bloques[i];
+  while ((match = regex.exec(comentario)) !== null) {
+    const fechaStr = match[1];
+    const texto = match[2].trim();
 
-    if (fechaISO && texto) {
-      const fechaRecortada = fechaISO.replace(/\.(\d{3})\d+/, ".$1");
-      const fechaObj = new Date(fechaRecortada);
+    const fechaRecortada = fechaStr.replace(/\.(\d{3})\d+/, ".$1");
+    const fechaObj = new Date(fechaRecortada);
 
-      if (!isNaN(fechaObj.getTime())) {
-        const fechaFormateada = fechaObj.toLocaleString("es-ES", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        });
+    if (!isNaN(fechaObj.getTime())) {
+      const fechaFormateada = fechaObj.toLocaleString("es-ES", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
 
-        resultado.push({
-          fecha: fechaObj,
-          fechaFormateada,
-          texto: texto.trim(),
-        });
-      }
+      resultado.push({
+        fecha: fechaObj,
+        fechaFormateada,
+        texto,
+      });
     }
   }
 
-  const ordenado = resultado.toSorted((a, b) => b.fecha.getTime() - a.fecha.getTime());
-
-  return ordenado.map((item, index) => (
-    <div key={index} className="my-2">
-      <p className="font-semibold text-gray-700">[{item.fechaFormateada}]</p>
-      <p className="whitespace-pre-line text-gray-600">{item.texto}</p>
-    </div>
-  ));
+  return resultado;
 };
 
 export default function ConsultaSolicitudPage() {
@@ -108,7 +103,7 @@ export default function ConsultaSolicitudPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-3xl bg-white rounded-2xl shadow-2xl p-8 space-y-6 animate-fade-in">
+      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl p-8 space-y-6 animate-fade-in">
         <h1 className="text-3xl font-bold text-center text-gray-800">
           Consulta tu Solicitud
         </h1>
@@ -121,7 +116,7 @@ export default function ConsultaSolicitudPage() {
             type="text"
             value={codigo}
             onChange={(e) => setCodigo(e.target.value)}
-            placeholder="Ej: ABC123"
+            placeholder="Ej: USCA00000"
             className="flex-1 border rounded-lg px-4 py-2 text-gray-700 shadow-sm focus:ring-2 focus:ring-indigo-400"
           />
           <button
@@ -155,7 +150,12 @@ export default function ConsultaSolicitudPage() {
               </p>
               <p><span className="font-medium">Categoria :</span> {solicitud.categoria} </p>
               <p><span className="font-medium">Fecha Radicación:</span> {new Date(solicitud.fechaCreacion).toLocaleDateString("es-ES")} </p>
-              <p><span className="font-medium">Ultima Actualización:</span> {new Date(solicitud.fechaActualizacion).toLocaleDateString("es-ES")} </p>
+              {solicitud.fechaActualizacion && (
+                <p>
+                  <span className="font-medium">Última Actualización:</span>{" "}
+                  {new Date(solicitud.fechaActualizacion).toLocaleDateString("es-ES")}
+                </p>
+              )}
               <p><span className="font-medium">Asignado a:</span> -------- </p>
             </div>
 
@@ -172,12 +172,88 @@ export default function ConsultaSolicitudPage() {
             <div className="text-sm text-gray-700">
               <p className="font-medium mb-2">Observaciones:</p>
               <div className="max-h-64 overflow-y-auto pr-2">
-                {formatearComentarios(solicitud.comentario)}
+                {formatearComentarios(solicitud.comentario)
+                .sort((a, b) => b.fecha.getTime() - a.fecha.getTime())
+                .map((comentario, index) => (
+                  <div key={index} className="flex items-start space-x-3 my-4">
+                    {/* Avatar */}
+                    <Avatar src="/images/user/user-01.jpg" size="small" status="online"/>
+                    {/* Comentario */}
+                    <div>
+                      <p className="text-xs text-gray-500">
+                        <span className="font-medium">Fecha:</span> {comentario.fechaFormateada}
+                      </p>
+                      <p className="text-sm text-gray-700 whitespace-pre-line">
+                        {comentario.texto}
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         )}
       </div>
+
+      {/* Botones de redes sociales */}
+      <div className="fixed bottom-5 right-5 flex flex-col space-y-4 z-50">
+        {/* YouTube */}
+        <a
+          href="https://youtube.com/tu_canal"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-red-600 hover:bg-red-700 text-white p-3 rounded-full shadow-lg flex items-center justify-center"
+          aria-label="YouTube"
+        >
+          <FaYoutube size={24} />
+        </a>
+
+        {/* Facebook */}
+        <a
+          href="https://facebook.com/tu_pagina"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-blue-700 hover:bg-blue-800 text-white p-3 rounded-full shadow-lg flex items-center justify-center"
+          aria-label="Facebook"
+        >
+          <FaFacebookF size={24} />
+        </a>
+
+        {/* X (antes Twitter) */}
+        <a
+          href="https://x.com/tu_usuario"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="X"
+          className="w-12 h-12 flex items-center justify-center rounded-full bg-black text-white text-2xl font-bold hover:bg-gray-900 transition"
+          style={{ fontFamily: "Arial, sans-serif", letterSpacing: "-0.1em" }}
+        >
+          <FaXTwitter size={24} />
+        </a>
+
+        {/* WhatsApp */}
+        <a
+          href="https://wa.me/1234567890"  // Cambia por tu número en formato internacional sin signos
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-green-500 hover:bg-green-600 text-white p-3 rounded-full shadow-lg flex items-center justify-center"
+          aria-label="WhatsApp"
+        >
+          <FaWhatsapp size={24} />
+        </a>
+
+        {/* Página web */}
+        <a
+          href="https://tusitio.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-gray-800 hover:bg-gray-900 text-white p-3 rounded-full shadow-lg flex items-center justify-center"
+          aria-label="Página web"
+        >
+          <FaGlobe size={24} />
+        </a>
+      </div>
+
     </div>
   );
 }

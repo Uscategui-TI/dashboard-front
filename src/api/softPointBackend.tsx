@@ -40,7 +40,7 @@ export async function softPointBackend({ accionBD, id, body, params, isFormData 
 
     switch (accionBD) {
         // SERVICIOS CORREOS
-        case "send-email": {
+        case "Send-Email": {
             method = "POST";
             Url = `${urlIp}${urlPort}/email/send-bulk`;
             break;

@@ -40,7 +40,7 @@ export default function SignInForm() {
 
       const resp = data.data
       if (resp.token && resp.roles) {
-        Cookies.set("token", data.token);
+        Cookies.set("token", resp.token);
         localStorage.setItem("roles", JSON.stringify(resp.roles));
         router.push("/");
       } else {

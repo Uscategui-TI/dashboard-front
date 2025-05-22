@@ -2,14 +2,11 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useForm, FieldValues } from "react-hook-form";
-import axios from "axios";
 import Button from "@/components/shared/ui/button/Button";
 import FileInput from "@/components/form/input/FileInput";
 import Label from "@/components/form/Label";
-import Select from "@/components/form/Select";
 import { ImageUpload } from "@/components/form/form-elements/ImageUpload";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import Cookies from "js-cookie";
 import CountUp from "react-countup";
 import { softPointBackend } from "@/api";
 
@@ -90,7 +87,7 @@ export default function EmailBroadcastPage() {
     };
 
     const response = await softPointBackend({
-      accionBD: "send-email",
+      accionBD: "Send-Email",
       body,
     });
 
