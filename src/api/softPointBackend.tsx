@@ -45,6 +45,11 @@ export async function softPointBackend({ accionBD, id, body, params, isFormData 
             Url = `${urlIp}${urlPort}/email/send-bulk`;
             break;
         }
+        case "Send-Sms": {
+            method = "POST";
+            Url = `${urlIp}${urlPort}/sms/bulk`;
+            break;
+        }
 
         default:
             let response = {

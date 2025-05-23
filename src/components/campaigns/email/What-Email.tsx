@@ -7,12 +7,13 @@ import FileInput from "@/components/form/input/FileInput";
 import Label from "@/components/form/Label";
 import { ImageUpload } from "@/components/form/form-elements/ImageUpload";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
+import Input from "@/components/form/input/InputField";
+import TextAreaValidate from "@/components/form/input/TextAreaValidate";
 import CountUp from "react-countup";
 import { softPointBackend } from "@/api";
 
 import { EmailTemplate } from "@/components/campaigns/email/EmailTempleate"; // Ajusta la ruta según tu estructura
 
-const apiEmailSendBulk = process.env.NEXT_APP_PROVIDER_SERVER; // tu endpoint para enviar email bulk
 
 
 export default function EmailBroadcastPage() {
@@ -47,14 +48,6 @@ export default function EmailBroadcastPage() {
       setToastError("❌ Por favor selecciona un archivo CSV.");
       return;
     }
-    if (!formData.subject || formData.subject.trim() === "") {
-      setToastError("❌ Por favor ingresa el asunto del correo.");
-      return;
-    }
-    if (!formData.content || formData.content.trim() === "") {
-      setToastError("❌ Por favor ingresa el contenido del correo.");
-      return;
-    }
 
     setLoading(true);
     setIsSending(true);
@@ -62,7 +55,7 @@ export default function EmailBroadcastPage() {
 
     try {
     const htmlBody = EmailTemplate({
-      content: formData.content,
+      content: formData.message,
       imageUrl: formData.urlMedia,
     });
 
@@ -110,34 +103,30 @@ export default function EmailBroadcastPage() {
 
   return (
     <>
-      <PageBreadcrumb pageTitle="Envío Masivo de Emails" />
+    <PageBreadcrumb pageTitle="Envío Masivo de Emails" />
       <div className="min-h-screen rounded-2xl border flex flex-col gap-6 border-gray-200 bg-white px-5 py-7 dark:border-gray-800 dark:bg-white/[0.03] xl:px-10 xl:py-12">
         <form onSubmit={handleSubmit(onSubmit)} encType="multipart/form-data">
           <div className="grid grid-cols-6 gap-6">
             <div className="col-span-6 sm:col-span-6">
               <Label>Asunto del correo</Label>
-              <input
+              <Input
                 type="text"
-                {...register("subject", { required: true })}
-                className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:text-white"
                 placeholder="Asunto del correo"
+                {...register("subject", { required: true })}
+                error={!!errors.subject}
+                hint={errors.subject ? "El asunto es obligatorio" : undefined}
               />
-              {errors.subject && (
-                <p className="text-red-600 mt-1 text-sm">El asunto es obligatorio</p>
-              )}
             </div>
-
             <div className="col-span-6 sm:col-span-6">
-              <Label>Contenido del correo (HTML permitido)</Label>
-              <textarea
-                rows={12}
-                {...register("content", { required: true })}
-                className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:text-white"
+              <Label>Contenido del correo </Label>
+              <TextAreaValidate
+                name="message"
+                rows={6}
                 placeholder="Escribe el contenido que aparecerá en el correo"
+                error={!!errors.message}
+                hint={typeof errors.message?.message === "string" ? errors.message.message : undefined}
+                register={register("message", { required: "El contenido es obligatorio" })}
               />
-              {errors.content && (
-                <p className="text-red-600 mt-1 text-sm">El contenido es obligatorio</p>
-              )}
             </div>
 
             <div className="col-span-6 sm:col-span-6">
@@ -147,12 +136,10 @@ export default function EmailBroadcastPage() {
                 value={urlMedia || undefined}
               />
             </div>
-
             <div className="col-span-6 sm:col-span-6">
               <Label>Archivo CSV con correos</Label>
               <FileInput ref={csvFileRef} />
             </div>
-
             <div className="col-span-6 sm:col-span-6 flex space-x-4">
               <Button
                 type="submit"

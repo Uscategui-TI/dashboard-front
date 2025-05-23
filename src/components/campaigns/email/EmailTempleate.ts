@@ -13,73 +13,66 @@ export function EmailTemplate({
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Correo Personalizado</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Correo para las personas del cambio</title>
+  <style>
+    body { margin: 0; padding: 0; background-color: #f4f6f8; font-family: Arial, sans-serif; }
+    table { border-collapse: collapse; }
+    a { color: #ffffff; text-decoration: none; }
+  </style>
 </head>
 <body style="margin:0; padding:0; background-color:#f4f6f8; font-family: Arial, sans-serif;">
-  <!-- Preheader text (oculto, para mejorar entrega) -->
-  <div style="display:none; max-height:0px; overflow:hidden; font-size:1px; color:#fff; line-height:1px; max-width:0px; opacity:0;">
-    Este es un resumen del contenido del correo para vista previa.
+  <!-- Preheader -->
+  <div style="display:none; font-size:1px; color:#f4f6f8; line-height:1px; max-height:0px; max-width:0px; opacity:0; overflow:hidden;">
+     Información relevante sobre las iniciativas legislativas del representante José Jaime Uscátegui.
   </div>
 
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f4f6f8" style="padding: 20px 0;">
+  <table width="100%" bgcolor="#f4f6f8" cellpadding="0" cellspacing="0">
     <tr>
-      <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="border-radius:8px; box-shadow: 0 0 10px rgba(0,0,0,0.05);">
+      <td align="center" style="padding: 20px;">
+        <table width="600" bgcolor="#ffffff" style="border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.05);">
           <!-- Header -->
           <tr>
-            <td align="center" bgcolor="#007BFF" style="padding: 20px; border-radius: 8px 8px 0 0; color: #ffffff; font-size: 24px; font-weight: bold;">
+            <td align="center" bgcolor="#4A90E2" style="padding: 20px 40px; color: #ffffff; font-size: 24px; font-weight: bold; border-radius: 8px 8px 0 0;">
               ¡Hola!
             </td>
           </tr>
 
-          <!-- Content -->
+          <!-- Main content -->
           <tr>
-            <td style="padding: 20px; color: #333333; font-size: 16px; line-height: 1.5;">
+            <td style="padding: 30px 40px; font-size: 16px; color: #333; line-height: 1.6;">
               ${content}
             </td>
           </tr>
 
-          <!-- Imagen responsive -->
+          <!-- Image (optional) -->
           ${
             imageUrl
               ? `
-              <tr>
-                <td align="center" style="padding: 0 20px 20px 20px;">
-                  <img src="${imageUrl}" alt="Imagen" width="100%" style="max-width: 560px; height: auto; border-radius: 4px; display: block;" />
-                </td>
-              </tr>
-            `
+          <tr>
+            <td align="center" style="padding: 0 40px 30px 40px;">
+              <img src="${imageUrl}" alt="Imagen ilustrativa" style="max-width: 100%; border-radius: 4px;">
+            </td>
+          </tr>`
               : ""
           }
 
-          <!-- Botón CTA -->
+          <!-- CTA button -->
           <tr>
-            <td align="center" style="padding: 0 20px 30px 20px;">
-              <a href="${buttonUrl || "#"}" 
-                 style="
-                   background-color: #007BFF;
-                   color: white;
-                   padding: 12px 24px;
-                   border-radius: 5px;
-                   text-decoration: none;
-                   font-weight: bold;
-                   display: inline-block;
-                 "
-                 target="_blank" 
-                 rel="noopener noreferrer"
-              >
-                Ver más detalles
+            <td align="center" style="padding: 0 40px 40px 40px;">
+              <a href="${buttonUrl || 'https://www.camara.gov.co/representantes/jose-jaime-uscategui-pastrana' }" target="_blank" rel="noopener noreferrer"
+                 style="background-color: #4A90E2; color: #ffffff; padding: 12px 24px; border-radius: 5px; font-weight: bold; display: inline-block;">
+                Ir al sitio
               </a>
             </td>
           </tr>
 
           <!-- Footer -->
           <tr>
-            <td align="center" style="font-size: 12px; color: #777777; padding: 20px 20px 30px 20px;">
-              Gracias por ser parte de nuestra comunidad.<br />
-              © 2025 TuEmpresa. Todos los derechos reservados.
+            <td align="center" style="font-size: 12px; color: #888888; padding: 20px 40px 30px 40px; border-top: 1px solid #e0e0e0;">
+              Este correo fue enviado por USCATEGUI · Bogotá, Colombia<br />
+              <a href="#" style="color:#888; text-decoration:underline;">Darse de baja</a> | <a href="#" style="color:#888; text-decoration:underline;">Política de privacidad</a>
             </td>
           </tr>
         </table>

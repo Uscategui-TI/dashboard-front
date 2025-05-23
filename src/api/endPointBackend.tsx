@@ -72,6 +72,7 @@ export async function endPointBackend({ accionBD, id, body, params, isFormData }
             body = JSON.stringify(body);
             break;
         }
+        
 
         // SERVICIOS PROSPECTOS
         case "Upload-Prospects": {  
