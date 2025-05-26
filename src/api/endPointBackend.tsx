@@ -68,7 +68,7 @@ export async function endPointBackend({ accionBD, id, body, params, isFormData }
 
         case "Create-User": {
             method = "POST";
-            Url = `${urlIp}${urlPort}/v1.0/auth/create/${id}`;
+            Url = `${urlIp}${urlPort}/v1.0/auth/create`;
             body = JSON.stringify(body);
             break;
         }

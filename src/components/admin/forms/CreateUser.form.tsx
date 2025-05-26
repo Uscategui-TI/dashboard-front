@@ -81,6 +81,10 @@ export const CreateUserForm = ({ onClose, onSuccess }: Props) => {
           setMessage(null);
         }, 1000);
     })
+    .catch((error) => {
+      const errorMsg = error?.response?.data?.error || error?.message || "Error al registrar usuario";
+      setMessage({ text: errorMsg, type: "error" });
+    });
     // setMessage({ text: "Error al registrar usuario", type: "error" });
     
   };

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import axios from "@/lib/axiosInstance";
-
+import { endPointBackend } from "@/api";
 import FormInput from "@/components/form/FormInput";
 import FormSelect from "@/components/form/FormSelect";
 import Label from "@/components/form/Label";
@@ -87,37 +87,41 @@ export default function EditProspectForm({
   const selectedMunicipality = watch("municipalityId");
 
   useEffect(() => {
-    const fetchData = async () => {
-      const [
-        genderRes,
-        deptRes,
-        muniRes,
-        localRes,
-        comRes,
-        eventsRes,
-        canalesRes,
-      ] = await Promise.all([
-        axios.get(`${authUrl}/api/v1.0/catalogs/genders`),
-        axios.get(`${authUrl}/api/v1.0/catalogs/departments`),
-        axios.get(`${authUrl}/api/v1.0/catalogs/municipalities`),
-        axios.get(`${authUrl}/api/v1.0/catalogs/localities`),
-        axios.get(`${authUrl}/api/v1.0/catalogs/communes/all`),
-        axios.get(`${authUrl}/api/v1.0/events/events`),
-        axios.get(`${authUrl}/api/v1.0/catalogs/canales-comunication`),
-      ]);
+endPointBackend({ accionBD: "List-Genders" })
+    .then((resp) => {
+      setGenders(resp.data);
+    })
 
-      setGenders(genderRes.data);
-      setDepartments(deptRes.data);
-      setMunicipalities(muniRes.data);
-      setLocalities(localRes.data);
-      setCommunes(comRes.data);
-      setEvents(eventsRes.data.all);
-      setCanales(canalesRes.data);
+    endPointBackend({ accionBD: "List-Departments" })
+    .then((resp) => {
+      setDepartments(resp.data);
+    })
+    
+    endPointBackend({ accionBD: "List-Municipalities" })
+    .then((resp) => {
+      setMunicipalities(resp.data);
+    })
 
-      reset(transformProspect(prospect));
-    };
+    endPointBackend({ accionBD: "List-Comunness" })
+    .then((resp) => {
+      setCommunes(resp.data);
+    })
 
-    fetchData();
+    endPointBackend({ accionBD: "List-Caneles-Comunication" })
+    .then((resp) => {
+      setCanales(resp.data);
+    })
+
+    endPointBackend({ accionBD: "List-Localities" })
+    .then((resp) => {
+      setLocalities(resp.data);
+    })
+
+    endPointBackend({ accionBD: "List-Events" })
+    .then((resp) => {
+      setEvents(resp.data.active);
+    })
+
   }, [prospect, reset]);
 
   useEffect(() => {
@@ -201,7 +205,7 @@ export default function EditProspectForm({
           control={control}
           render={({ field }) => (
             <Select
-              options={departments.map((d: any) => ({ value: d.value, label: d.label }))}
+              options={departments.map((d: any) => ({ value: d.id, label: d.name }))}
               value={field.value !== null ? String(field.value) : undefined}
               onChange={(val) => field.onChange(Number(val))}
               placeholder="Selecciona un departamento"
