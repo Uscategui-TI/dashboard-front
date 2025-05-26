@@ -72,13 +72,8 @@ export default function SmsBroadcastPage() {
 
       const result = await response.json?.();
 
-      if (!result || result.status !== "1x000") {
-        const errorMessage = result?.error || "El envío de SMS no fue exitoso.";
-        setToastError(errorMessage);
-        return;
-      }
 
-      setResponseMessage(result?.message || "Sin mensaje");
+      setResponseMessage(result?.message || "sin novedades");
       setShowSuccessMessage(true);
       reset();
       if (csvFileRef.current) csvFileRef.current.value = "";

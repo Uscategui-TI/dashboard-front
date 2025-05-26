@@ -67,7 +67,7 @@ export default function SignUpForm() {
         roles: [registerData.roles], // backend espera Set<Role>
       };
 
-      const response = await fetch(`${authUrl}/api/auth/register`, {
+      const response = await fetch(`${authUrl}/api/v1.0/auth/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(mappedData),
