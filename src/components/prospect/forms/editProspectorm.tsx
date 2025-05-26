@@ -97,13 +97,13 @@ export default function EditProspectForm({
         eventsRes,
         canalesRes,
       ] = await Promise.all([
-        axios.get(`${authUrl}/gender/all`),
-        axios.get(`${authUrl}/api/departments/all`),
-        axios.get(`${authUrl}/api/municipalities/all`),
-        axios.get(`${authUrl}/api/localities/all`),
-        axios.get(`${authUrl}/api/communes/all`),
+        axios.get(`${authUrl}/api/v1.0/catalogs/genders`),
+        axios.get(`${authUrl}/api/v1.0/catalogs/departments`),
+        axios.get(`${authUrl}/api/v1.0/catalogs/municipalities`),
+        axios.get(`${authUrl}/api/v1.0/catalogs/localities`),
+        axios.get(`${authUrl}/api/v1.0/catalogs/communes/all`),
         axios.get(`${authUrl}/api/v1.0/events/events`),
-        axios.get(`${authUrl}/canales/all`),
+        axios.get(`${authUrl}/api/v1.0/catalogs/canales-comunication`),
       ]);
 
       setGenders(genderRes.data);
