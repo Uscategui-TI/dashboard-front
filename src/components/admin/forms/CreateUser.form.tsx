@@ -75,7 +75,7 @@ export const CreateUserForm = ({ onClose, onSuccess }: Props) => {
     e.preventDefault();
     endPointBackend({ accionBD: "Create-User", body: { ...form, roles: [form.roles] } })
     .then((resp) => {
-        setMessage({ text: "Usuario registrado exitosamente", type: "success" });
+       /*  setMessage({ text: "Usuario registrado exitosamente", type: "success" }); */
         setTimeout(() => {
           onSuccess();
           setMessage(null);

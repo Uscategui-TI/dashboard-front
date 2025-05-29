@@ -55,7 +55,7 @@ export default function UserInfoCard() {
     if (!formData || !token) return;
   
     try {
-      await axios.put(`${authUrl}/api/auth/update/${formData.id}`, formData, {
+      await axios.put(`${authUrl}/api/v1.0/auth/update/${formData.id}`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",

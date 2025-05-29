@@ -185,6 +185,8 @@ export async function endPointBackend({ accionBD, id, body, params, isFormData }
             break;
         }
 
+
+
         // SERVICIOS SOLICITUDES
         case "List-Solictudes": {  
             method = "GET";

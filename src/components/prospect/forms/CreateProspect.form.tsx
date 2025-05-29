@@ -10,6 +10,9 @@ import Input from "@/components/form/input/Input";
 import Select from "@/components/form/Select";
 import Button from "@/components/shared/ui/button/Button";
 import { endPointBackend } from "@/api";
+import Flatpickr from "react-flatpickr";
+import "flatpickr/dist/themes/light.css";
+import { CalenderIcon } from "@/icons";
 
 type ProspectForm = {
   name: string;
@@ -319,16 +322,33 @@ export default function PersonFormPage({ closeModal }: any) {
         </div>
         <div className="col-span-3">
           <Label>Fecha de Nacimiento</Label>
-          <Input
-            type="date"
-            {...register("birthDate", {
-              required: true,
-              validate: (value) => {
-                const year = new Date(value).getFullYear();
-                return year > 1900 && year < 2100 || "Año inválido";
-              }
-            })}
-/>
+          <div className="relative">
+            <Controller
+              name="birthDate"
+              control={control}
+              rules={{
+                required: "La fecha es obligatoria",
+                validate: (value) => {
+                  const year = new Date(value).getFullYear();
+                  return year > 1900 && year < 2100 || "Año inválido";
+                }
+              }}
+              render={({ field }) => (
+                <Flatpickr
+                  value={field.value ? new Date(field.value) : undefined}
+                  onChange={(date) => {
+                    field.onChange(date[0]?.toISOString()); // convierte la primera fecha a string ISO
+                  }}
+                  options={{ dateFormat: "Y-m-d" }}
+                  className="w-full py-2 pl-3 pr-10 text-sm border border-gray-300 rounded-md h-11 focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:text-white dark:bg-gray-900"
+                  placeholder="Selecciona una fecha"
+                />
+              )}
+            />
+            <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">
+              <CalenderIcon size={18} />
+            </span>
+          </div>
         </div>
         {showCommune && (
           <div className="col-span-3">

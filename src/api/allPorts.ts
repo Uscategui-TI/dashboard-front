@@ -18,6 +18,10 @@ export const Ports: PortsConfig = {
         url:        process.env.NEXT_PUBLIC_PROVIDER_SERVER,
         port:       process.env.NEXT_PUBLIC_PROVIDER_SERVICE_PORT
     },
+    providerBotService: {
+        url:        process.env.NEXT_PUBLIC_WHATSAPP_URL,
+        port:       process.env.NEXT_PUBLIC_WHATSAPP_PORT
+    },
     ExternalServices: {
         policies: {
             MECIC: process.env.REACT_APP_DOMAIN_SERVER_API_POLICIES_MECIC,

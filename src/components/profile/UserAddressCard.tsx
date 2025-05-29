@@ -56,12 +56,21 @@ export default function UserAddressCard() {
     if (!formData || !token) return;
   
     try {
-      const { data } = await axios.put(`${authUrl}/api/auth/update/${formData.id}`, formData, {
+      await axios.put(`${authUrl}/api/v1.0/auth/update/${formData.id}`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
+
+      const { data } = await axios.get(`${authUrl}/api/v1.0/auth/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const { id, country, city, address } = data;
+    const updatedUser = { id, country, city, address };
   
       // ✅ Usar los datos que devuelve el backend
       setUser(data);

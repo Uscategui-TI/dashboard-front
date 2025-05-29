@@ -15,6 +15,7 @@ import CountUp from "react-countup";
 import Cookies from "js-cookie";
 import GuiaUsoModal from "@/app/guia-uso/page";
 import { Modal } from "@/components/shared/ui/modal";
+import { endPointBackend } from "@/api";
 
 
 const apiWhatsApp = process.env.NEXT_PUBLIC_WHATSAPP_URL;
@@ -29,13 +30,13 @@ export default function WhatPanelPage() {
   const [loading, setLoading] = useState(false);
   const [totalMessagesSent, setTotalMessagesSent] = useState<number | null>(null);
   const [isBroadcasting, setIsBroadcasting] = useState(false);
-  const [eventList, setEventList] = useState<string[]>([]);
-  const [selectedEventName, setSelectedEventName] = useState<string | null>(null);
+  const [events, setEvents] = useState([]);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [linkToken, setLinkToken] = useState("");
   const [isRestartDisabled, setIsRestartDisabled] = useState(true);
   const [countdown, setCountdown] = useState(30);
-  const [selectedEventType, setSelectedEventType] = useState<{ value: string; label: string } | null>(null);
+  const [selectedEventName, setSelectedEventName] = useState<string | number | null>(null);
+  const [selectedEventType, setSelectedEventType] = useState<string | null>(null);
   const [selectedEventStatus, setSelectedEventStatus] = useState<{ value: string; label: string } | null>(null);
   const [statsSavingStatus, setStatsSavingStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
@@ -84,6 +85,10 @@ export default function WhatPanelPage() {
 
   const checkBotConnection = async () => {
     try {
+      endPointBackend({ accionBD: "List-Events" })
+      .then((resp) => {
+        setEvents(resp.data.active);
+      })
       const res = await axios.get(`${apiWhatsApp}/bot-status`);
       if (res.data.connected) {
         setIsBotConnected(true);
@@ -133,11 +138,11 @@ export default function WhatPanelPage() {
 
       const today = new Date().toISOString().split("T")[0];
       const newPendingStat = {
-        eventName: formData.eventName || selectedEventName || "",
+        eventName: String(formData.eventName || selectedEventName || ""),
         total: null,
-        imageUrl: formData.urlMedia,
-        type: formData.eventType,
-        status: formData.eventStatus,
+        imageUrl: String(formData.urlMedia || ""),
+        type: String(formData.eventType || ""),
+        status: String(formData.eventStatus || ""),
         endDate: today,
       };
 
@@ -178,7 +183,7 @@ export default function WhatPanelPage() {
       setStatsSavingStatus("saving");
 
       await axios.post(
-        `${authUrl}/api/message-stats/all`,
+        `${authUrl}/api/v1.0/broadcasts/all`,
         {
           eventName,
           totalMessagesSent: total,
@@ -208,7 +213,6 @@ export default function WhatPanelPage() {
 
   useEffect(() => {
     if (!isBroadcasting) return;
-  
     const fetchStatusAndMessages = async () => {
       try {
         const res = await axios.get(`${apiWhatsApp}/broadcast-status`);
@@ -286,13 +290,10 @@ export default function WhatPanelPage() {
 
   const fetchEvents = async () => {
   try {
-    const response = await axios.get(`${authUrl}/api/v1.0/events/events`);
-
-  
-    const activeEvents = response.data.active;
-
-    const eventsFromDb = activeEvents.map((e: any) => e.eventName); // asegúrate que sea 'eventName'
-    setEventList(eventsFromDb);
+    endPointBackend({ accionBD: "List-Events" })
+    .then((resp) => {
+      setEvents(resp.data.active);
+    })
   } catch (error) {
     console.error("Error al obtener eventos activos:", error);
   }
@@ -456,10 +457,11 @@ export default function WhatPanelPage() {
               <Label>Selecciona tu evento</Label>
               <Select
                 value={selectedEventName || ""}
-                options={eventList.map((e) => ({ value: e, label: e }))}
+                options={events.map((e: any) => ({ value: e.eventName, label: e.eventName }))}
                 placeholder="Selecciona un evento"
-                onChange={(value) => {
-                  // setSelectedEventName(value);
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                  const value = e.target.value;
+                  setSelectedEventName(value);
                   setValue("eventName", value);
                 }}
               />
@@ -468,18 +470,18 @@ export default function WhatPanelPage() {
             <div className="col-span-6 sm:col-span-3">
               <Label>Tipo de evento</Label>
               <Select
-                value={selectedEventType?.value || ""}
-                options={[
-                  { value: "Importante", label: "Importante" },
-                  { value: "Informativo", label: "Informativo" },
-                ]}
-                placeholder="Selecciona el tipo"
-                onChange={(value) => {
-                  const option = { value, label: value };
-                  // setSelectedEventType(option);
-                  setValue("eventType", value);
-                }}
-              />
+                  value={selectedEventType || ""}
+                  options={[
+                    { value: "Importante", label: "Importante" },
+                    { value: "Informativo", label: "Informativo" },
+                  ]}
+                  placeholder="Selecciona el tipo"
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                    const value = e.target.value;
+                    setSelectedEventType(value);
+                    setValue("eventType", value);
+                  }}
+                />
             </div>
             <div className="col-span-6 sm:col-span-3">
               <Label>Adjunta tu listado de difusión</Label>

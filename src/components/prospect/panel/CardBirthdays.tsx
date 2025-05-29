@@ -45,6 +45,8 @@ export default function CardBirthdays() {
   const [customMessage, setCustomMessage] = useState("🎉 ¡Feliz cumpleaños! Que tengas un día lleno de alegría. 🎂");
   const [imageUrl, setImageUrl] = useState("");
   const [data, setData] = useState<Prospect[]>([]);
+  const [resultMessage, setResultMessage] = useState<string | null>(null);
+
 
   const { isOpen, openModal, closeModal } = useModal();
   
@@ -70,7 +72,7 @@ export default function CardBirthdays() {
         { timeout: 30000 } // puede tardar si son muchos
       );
   
-      alert(`🎉 Difusión completada: ${response.data.total} mensajes enviados`);
+      setResultMessage(`🎉 Difusión completada: ${response.data.total} mensajes enviados`);
     } catch (error) {
       console.error("❌ Error al enviar la difusión:", error);
       alert("Hubo un error al enviar los mensajes.");
@@ -85,6 +87,7 @@ export default function CardBirthdays() {
     })
 
   }, []);
+  
 
 
   return (
@@ -190,6 +193,28 @@ export default function CardBirthdays() {
               </button>
             </div> 
           </div>
+      </Modal>
+      <Modal isOpen={!!resultMessage} onClose={() => setResultMessage(null)} className="w-full max-w-md mx-auto" showCloseButton={true}>
+        <div className="bg-gray-900 text-white rounded-xl shadow-xl p-6">
+          <div className="flex justify-between items-start">
+            <h3 className="text-lg font-semibold text-white">
+              Resultado de la Difusión
+            </h3>
+          </div>
+
+          <p className="mt-4 text-sm text-gray-300">
+            {resultMessage}
+          </p>
+
+          <div className="mt-6 flex justify-end">
+            <button
+              onClick={() => setResultMessage(null)}
+              className="rounded-lg bg-brand-500 px-4 py-2 text-sm text-white hover:bg-brand-600"
+            >
+              Aceptar
+            </button>
+          </div>
+        </div>
       </Modal>
     </>
   );
