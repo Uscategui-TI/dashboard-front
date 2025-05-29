@@ -24,7 +24,7 @@ const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
 export default function WhatPanelPage() {
   const [isBotConnected, setIsBotConnected] = useState(false);
 
-  const hasNotifiedRef = useRef(false);
+  const [resultMessage, setResultMessage] = useState<string | null>(null);
   const [toastSuccess, setToastSuccess] = useState<string | null>(null);
   const [isOpenConect, setIsOpenConect] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -362,9 +362,10 @@ export default function WhatPanelPage() {
   const handleRestart = async () => {
     try {
       await axios.post(`${apiWhatsApp}/restart-bot`);
-      alert("El bot se está reiniciando...");
+      setResultMessage("El bot se está reiniciando...");
     } catch (error) {
       console.error("Error al reiniciar el bot:", error);
+      setResultMessage("Ocurrió un error al intentar reiniciar el bot.");
     }
   };
 
@@ -593,14 +594,14 @@ export default function WhatPanelPage() {
 
           {/* Botones */}
           <div className="grid grid-cols-2 gap-4">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleRequestToken}
-            disabled={isRequestDisabled}
-          >
-            {isRequestDisabled ? `Espera ${requestCountdown}s...` : "Solicitar Token"}
-          </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleRequestToken}
+              disabled={isRequestDisabled}
+            >
+              {isRequestDisabled ? `Espera ${requestCountdown}s...` : "Solicitar Token"}
+            </Button>
             <Button
               size="sm"
               variant="primary"
@@ -611,6 +612,7 @@ export default function WhatPanelPage() {
             </Button>
           </div>
         </div>
+        
       </div>
       {isOpenConect && (
         <div
@@ -695,6 +697,28 @@ export default function WhatPanelPage() {
               </button>
             </div> 
           </div>
+      </Modal>
+      <Modal
+        isOpen={!!resultMessage}
+        onClose={() => setResultMessage(null)}
+        className="w-full max-w-md mx-auto"
+        showCloseButton={true}
+      >
+        <div className="bg-gray-900 text-white rounded-xl shadow-xl p-6">
+          <div className="flex justify-between items-start">
+            <p className="mt-4 text-sm text-gray-300">
+              {resultMessage}
+            </p>
+          </div>
+          <div className="mt-6 flex justify-end">
+            <button
+              onClick={() => setResultMessage(null)}
+              className="rounded-lg bg-brand-500 px-4 py-2 text-sm text-white hover:bg-brand-600"
+            >
+              Aceptar
+            </button>
+          </div>
+        </div>
       </Modal>
     </>
   );
