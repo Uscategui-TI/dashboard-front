@@ -30,7 +30,11 @@ export default function SolicitudesChart() {
         const data = res.data.conteoPorEstado;
     
         const labelsFromApi = Object.keys(data);
-        const seriesFromApi = Object.values(data) as number[]; // 👈 casteo correcto aquí
+        const seriesFromApi = Object.values(data) as number[];
+        
+        setTimeout(() => {
+          window.dispatchEvent(new Event("resize"));
+        }, 100);
     
         setLabels(labelsFromApi);
         setSeries(seriesFromApi);
