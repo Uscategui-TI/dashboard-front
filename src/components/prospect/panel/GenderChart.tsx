@@ -31,6 +31,11 @@ export default function GenderChart() {
         setSeries([resp.data.femenino, resp.data.masculino]);
         setActual(resp.data.femenino + resp.data.masculino);
         setMesAnterior(1000); // valor de ejemplo
+
+        setTimeout(() => {
+          window.dispatchEvent(new Event("resize"));
+        }, 100); // Pequeña demora para asegurar el render
+      
     })  
 
   }, []);

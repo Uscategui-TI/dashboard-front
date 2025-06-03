@@ -33,6 +33,11 @@ export default function AgeCardChart() {
         setLabels(labels);
         setSeries(totals);
         setTotal(data.total);
+        
+        setTimeout(() => {
+          window.dispatchEvent(new Event("resize"));
+        }, 100); 
+
       });
   }, []);
   
