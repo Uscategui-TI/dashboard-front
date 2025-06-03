@@ -1,5 +1,6 @@
 import ApiAxios from "./apiAxios";
 import { Ports } from "./allPorts";
+import Cookies from "js-cookie";
 
 interface SessionData {
     txToken?: string;
@@ -31,11 +32,17 @@ export async function endPointBackend({ accionBD, id, body, params, isFormData }
     let headers = {};
     let method: HttpMethod = "";
 
-    const sessionData: SessionData = JSON.parse(localStorage.getItem("sessionData") || "{}");
+    /* const sessionData: SessionData = JSON.parse(localStorage.getItem("sessionData") || "{}"); */
+    const token = Cookies.get("token");
 
-    headers = {
+    /* headers = {
         "Content-Type": isFormData ? "multipart/form-data" : "application/json",
         "authorization": `${sessionData?.txToken || ''}`
+    }; */
+
+    headers = {
+    "Content-Type": isFormData ? "multipart/form-data" : "application/json",
+    ...(token && { "Authorization": `Bearer ${token}` })
     };
 
     switch (accionBD) {
@@ -72,6 +79,14 @@ export async function endPointBackend({ accionBD, id, body, params, isFormData }
             body = JSON.stringify(body);
             break;
         }
+
+        case "List-Usuarios": {
+            method = "GET";
+            Url = `${urlIp}${urlPort}/v1.0/auth/asignables`;
+            body = JSON.stringify(body);
+            break;
+        }
+        
         
 
         // SERVICIOS PROSPECTOS
@@ -150,6 +165,12 @@ export async function endPointBackend({ accionBD, id, body, params, isFormData }
             break;
         }
         
+        case "Range-Age": {
+            method = "GET";
+            Url = `${urlIp}${urlPort}/v1.0/prospects/age-ranges`;
+            break;
+        }
+
 
         // SERVICIOS EVENTOS
         case "Total-Events": {  

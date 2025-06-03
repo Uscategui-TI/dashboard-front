@@ -12,6 +12,7 @@ import CanalChart from "./CanalChart";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import CardBirthdays from "@/components/prospect/panel/CardBirthdays";
+import AgeCardChart from "./AgeCardChart";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
@@ -149,10 +150,15 @@ return (
             <CanalChart />
         </div>
 
+        {/* SECTION: CHART EDADES */}
+        <div className="col-span-12 sm:col-span-6 xl:col-span-4">
+            <AgeCardChart/>
+        </div>
+
         {/* SECTION: CHART HISTORICO PROSPECTOS */}
-        <div className="col-span-12">
+        <div className=" col-span-12  sm:col-span-8">
             <BasicCard>
-                <div className="flex justify-between mb-6">
+                <div className="flex justify-between mb-14">
                     <div>
                         <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Histórico Prospectos</h3>
                         <p className="mt-1 text-gray-500 text-theme-sm dark:text-gray-400">Trayectoria de vinculación</p>
@@ -220,7 +226,7 @@ return (
         
         {/* SECTION: CHART DEMOGRAFICA BOGOTA */}
         <div className="col-span-12 xl:col-span-6">
-            <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
+            <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] sm:p-3">
                 <div className="flex justify-between">
                     <div>
                         <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Datos demográficos de los prospectos en Bogotá</h3>
@@ -252,7 +258,7 @@ return (
         </div>
 
         {/* SECTION: TABLA PROSPECTOS RECIENTES */}
-        <div className="col-span-8">
+        <div className="col-span-12 sm:col-span-8">
             <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Prospectos Registrados Recientemente</h3>
@@ -264,7 +270,7 @@ return (
         </div>
 
         {/* SECTION: CARD CUMPLEAÑOS */}
-        <div className="col-span-4">
+        <div className="col-span-12 sm:col-span-4">
             <CardBirthdays/>
         </div>
     </div>

@@ -15,6 +15,7 @@ import AlertModal from "@/components/shared/ui/modal/AlertModal";
 import { useModal } from "@/hooks/useModal";
 import PersonFormPage from "@/components/prospect/forms/CreateProspect.form";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
+import ConfirmModal from "@/components/shared/ui/modal/ConfirmModal";
 
 type EventStat = {
   id: string | number;
@@ -26,6 +27,12 @@ type EventStat = {
     document: string;
   };
   codigoSolicitud?: string | number;
+  usuarioAsignadoId?: string; 
+  usuarioAsignado?: {
+    id: string;
+    name: string;
+    roles:string;
+  }; 
 };
 
 const initialForm = {
@@ -35,6 +42,7 @@ const initialForm = {
   categoria: "",
   prioridad: "PENDIENTE",
   comentario: "",
+  usuarioAsignadoId: '',
 };
 
 const getEstadoVariant = (
@@ -79,6 +87,15 @@ const columns = [
       <Badge color={getEstadoVariant(row.estado)}>{row.estado}</Badge>
     ),
   },
+  {
+    key: "usuarioAsignado",
+    header: "Asignado A",
+    render: (row: EventStat) =>
+    row.usuarioAsignado
+      ? `${row.usuarioAsignado.name} (${row.usuarioAsignado.roles?.[0] || 'Sin rol'})`
+      : "No asignado",
+  }
+  
 ];
 
 const CategorySolicitudes = [
@@ -95,7 +112,6 @@ const PrioritySolicitudes = [
 ];
 
 const StatusSolicitudes = [
-    { value: "", label: "Seleccione" },
     { value: "EN_PROCESO", label: "En Proceso" },
     { value: "RECHAZADA", label: "Rechazada" },
     { value: "PAUSADOS", label: "Pausada" },
@@ -109,6 +125,11 @@ export default function RecentOrders() {
   const [totalPages, setTotalPages] = useState(0);
   const [form, setForm] = useState(initialForm);
   const [searchTerm, setSearchTerm] = useState("");
+  const [usuarios, setUsuarios] = useState<{ value: string; label: string }[]>([]);
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [idToDelete, setIdToDelete] = useState<string | number | null>(null);
+
+
 
   const [selectedSolicitud, setSelectedSolicitud] = useState<EventStat | null>(null);
   const [nuevoComentario, setNuevoComentario] = useState("");
@@ -124,7 +145,6 @@ export default function RecentOrders() {
   // MENSAJES ALERTS
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
-
 
   useEffect(() => {
     endPointBackend({ accionBD: "List-Solictudes", params: { page, size, search: searchTerm } })
@@ -150,12 +170,14 @@ export default function RecentOrders() {
       body: {
         estado: nuevoEstado,
         comentario: nuevoComentario,
+        usuarioAsignadoId: selectedSolicitud.usuarioAsignadoId,
       } 
     })
     .then((resp) => {
       updateSolicitudModal.closeModal()
       setSuccessMessage(resp.message)
       successModal.openModal()
+      window.location.reload();
       setData(prevData => 
         prevData.map(item => 
           item.id === selectedSolicitud.id 
@@ -168,20 +190,25 @@ export default function RecentOrders() {
   };
 
   const handleDelete = async (id: string | number) => {
-    const confirmacion = window.confirm("¿Estás seguro que deseas eliminar esta solicitud?");
-    if (!confirmacion) return;
-    
-    endPointBackend({ accionBD: "Delete-Solicitud", id: id })
-    .then((resp) => {
-      setSuccessMessage(resp.message)
-      successModal.openModal()
+    setIdToDelete(id);
+    setConfirmModalOpen(true);
+  };
 
-      setData(prevData => prevData.filter(item => item.id !== id));
-    })
-    .catch((resp) => {
-      setErrorMessage(resp.message)
-      errorModal.openModal()
-    })
+  const confirmDelete = async () => {
+    if (!idToDelete) return;
+
+    try {
+      const resp = await endPointBackend({ accionBD: "Delete-Solicitud", id: idToDelete });
+      setSuccessMessage(resp.message);
+      successModal.openModal();
+      setData(prevData => prevData.filter(item => item.id !== idToDelete));
+    } catch (resp: any) {
+      setErrorMessage(resp.message);
+      errorModal.openModal();
+    } finally {
+      setConfirmModalOpen(false);
+      setIdToDelete(null);
+    }
   };
   
   const handleCreate = async () => {
@@ -214,10 +241,28 @@ export default function RecentOrders() {
   };
 
   const filteredOptions = useMemo(() => {
-  return nuevoEstado === "PENDIENTE"
-    ? StatusSolicitudes.filter(opt => opt.value !== "FINALIZADOS")
-    : StatusSolicitudes;
-}, [nuevoEstado]);
+    return nuevoEstado === "PENDIENTE"
+      ? StatusSolicitudes.filter(opt => opt.value !== "FINALIZADOS")
+      : StatusSolicitudes;
+  }, [nuevoEstado]);
+
+  useEffect(() => {
+    endPointBackend({ accionBD: "List-Usuarios" }).then((resp) => {
+
+      const usersArray = Object.keys(resp)
+        .filter(key => !isNaN(Number(key))) 
+        .sort((a, b) => Number(a) - Number(b))
+        .map(key => resp[key]);
+
+      const options = usersArray.map((user: any) => ({
+        value: String(user.id), 
+        label: `${user.nombreCompleto} (${user.roles?.[0] || 'Sin rol'})`,
+      }));
+
+      setUsuarios(options);
+    });
+  }, []);
+
 
 
   return (
@@ -302,7 +347,15 @@ export default function RecentOrders() {
                 <Select name="prioridad" options={PrioritySolicitudes} value={form.prioridad} onChange={handleChange}/>
               </div>
             </div>
-
+            <div>
+              <Label className="block mb-1 text-gray-700 dark:text-gray-300">Asignar Usuario</Label>
+              <Select
+                name="usuarioAsignadoId"
+                options={usuarios}
+                value={form.usuarioAsignadoId}
+                onChange={handleChange}
+              />
+            </div>
             <div className="flex items-center gap-3 mt-6 modal-footer sm:justify-end">
               <button
                 onClick={createSolicitudModal.closeModal}
@@ -351,8 +404,19 @@ export default function RecentOrders() {
                   hint="El texto no debe ser mayor a 400 caracteres"
                 />
               </div>
-
-
+              <div className="mb-4">
+                <Label className="block mb-1 text-gray-700 dark:text-gray-300">Reasignar Usuario</Label>
+                <Select
+                  name="usuarioAsignadoId"
+                  options={usuarios}
+                  value={selectedSolicitud?.usuarioAsignadoId || ""}
+                  onChange={(e) =>
+                    setSelectedSolicitud((prev) =>
+                      prev ? { ...prev, usuarioAsignadoId: e.target.value } : null
+                    )
+                  }
+                />
+              </div>
               <div className="mb-4">
                 <Label className="block mb-2 text-gray-700 dark:text-gray-300 font-medium">Historial de Comentarios</Label>
                 <div className="appearance-none rounded-lg border border-gray-300  px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 flex flex-col gap-5 max-h-[230px] overflow-y-auto">
@@ -427,6 +491,16 @@ export default function RecentOrders() {
         description={errorMessage}
         colorClass="error"
         time={4000}
+      />
+
+      <ConfirmModal
+        isOpen={confirmModalOpen}
+        onClose={() => {
+          setConfirmModalOpen(false);
+          setIdToDelete(null);
+        }}
+        onConfirm={confirmDelete}
+        message="¿Estás seguro que deseas eliminar esta solicitud?"
       />
     </>
   );
