@@ -156,7 +156,7 @@ export default function ConsultaSolicitudPage() {
                   {new Date(solicitud.fechaActualizacion).toLocaleDateString("es-ES")}
                 </p>
               )}
-              <p><span className="font-medium">Asignado a:</span> -------- </p>
+              <p><span className="font-medium">Asignado a: </span>{ solicitud.usuarioAsignado.name} {solicitud.usuarioAsignado.lastName}</p>
             </div>
 
             <div className="text-sm text-gray-700">
