@@ -16,6 +16,8 @@ import { endPointBackend } from "@/api";
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 const CountryMap = dynamic(() => import("./CountryMap"), { ssr: false });
 
+
+
 export const Dashboard = () => {
 
     const { redirectTo } = useNavigation();
