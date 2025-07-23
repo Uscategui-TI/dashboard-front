@@ -32,13 +32,13 @@ export async function endPointBackend({ accionBD, id, body, params, isFormData }
     let headers = {};
     let method: HttpMethod = "";
 
-    /* const sessionData: SessionData = JSON.parse(localStorage.getItem("sessionData") || "{}"); */
+    const sessionData: SessionData = JSON.parse(localStorage.getItem("sessionData") || "{}");
     const token = Cookies.get("token");
 
-    /* headers = {
+    headers = {
         "Content-Type": isFormData ? "multipart/form-data" : "application/json",
         "authorization": `${sessionData?.txToken || ''}`
-    }; */
+    };
 
     headers = {
     "Content-Type": isFormData ? "multipart/form-data" : "application/json",
