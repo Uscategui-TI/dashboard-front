@@ -1,5 +1,5 @@
 
-import WhatBotMeta from "@/components/campaigns/what-bot-meta/what-enviar";
+import WhatBotMeta from "@/components/campaigns/what-bot-meta/what-listar";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

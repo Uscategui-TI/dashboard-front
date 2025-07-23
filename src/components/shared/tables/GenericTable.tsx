@@ -183,3 +183,5 @@ export function GenericTable<T extends { id: string | number }>({
     </div>
   );
 }
+
+export default GenericTable;
