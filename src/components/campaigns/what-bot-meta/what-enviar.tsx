@@ -49,7 +49,7 @@ const BroadcastUploaderModal = ({
       setLoading(true);
       setError(null);
 
-      const res = await axios.post("http://localhost:8086/upload", formData, {
+      const res = await axios.post("https://bot-meta-qa.up.railway.app/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
