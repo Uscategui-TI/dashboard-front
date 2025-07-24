@@ -19,11 +19,7 @@ const columns = [
   { key: "email", header: "Correo" },
   { key: "document", header: "Documento" },
   { key: "cargo", header: "Cargo / Ocupación" },
-  {
-    key: "gender",
-    header: "Genero",
-    render: (row: any) => row.gender?.name || "-",
-  },
+  { key: "database", header: "Base de datos"},
 ];
 
 export default function ProspectosPanel() {

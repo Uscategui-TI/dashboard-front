@@ -16,6 +16,7 @@ import { useModal } from "@/hooks/useModal";
 import PersonFormPage from "@/components/prospect/forms/CreateProspect.form";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import ConfirmModal from "@/components/shared/ui/modal/ConfirmModal";
+import { useNavigation } from "@/util";
 
 type EventStat = {
   id: string | number;
@@ -26,7 +27,8 @@ type EventStat = {
   prospecto?: {
     document: string;
   };
-  codigoSolicitud?: string | number;
+  publicCode?: string | number;
+  privateCode?: string | number;
   usuarioAsignadoId?: string; 
   usuarioAsignado?: {
     id: string;
@@ -67,7 +69,7 @@ const getEstadoVariant = (
 };
 
 const columns = [
-  { key: "codigoSolicitud", header: "Código Solicitud" },
+  { key: "publicCode", header: "Código Solicitud" },
   { key: "asunto", header: "Asunto" },
   {
     key: "Prospecto",
@@ -111,13 +113,6 @@ const PrioritySolicitudes = [
   { value: "BAJA", label: "Baja" },
 ];
 
-const StatusSolicitudes = [
-    { value: "EN_PROCESO", label: "En Proceso" },
-    { value: "RECHAZADA", label: "Rechazada" },
-    { value: "PAUSADOS", label: "Pausada" },
-    { value: "FINALIZADOS", label: "Finalizada" },
-];
-
 export default function RecentOrders() {
   const [data, setData] = useState<EventStat[]>([]);
   const [page, setPage] = useState(0);
@@ -130,17 +125,12 @@ export default function RecentOrders() {
   const [idToDelete, setIdToDelete] = useState<string | number | null>(null);
 
 
-
-  const [selectedSolicitud, setSelectedSolicitud] = useState<EventStat | null>(null);
-  const [nuevoComentario, setNuevoComentario] = useState("");
-  const [nuevoEstado, setNuevoEstado] = useState("");
-
+  const { redirectTo } = useNavigation();
   // MODALES
   const successModal = useModal();
   const errorModal = useModal();
   const prospectModal = useModal();
   const createSolicitudModal = useModal();
-  const updateSolicitudModal = useModal();
 
   // MENSAJES ALERTS
   const [successMessage, setSuccessMessage] = useState<string>('');
@@ -153,41 +143,6 @@ export default function RecentOrders() {
         setTotalPages(resp.data.totalPages);
     })
   }, [page, size, searchTerm]);
-
-  const handleEdit = (row: EventStat) => {
-    setSelectedSolicitud(row);
-    setNuevoEstado(row.estado);
-    setNuevoComentario("");
-    updateSolicitudModal.openModal()
-  };
-
-  const handleUpdate = async () => {
-    if (!selectedSolicitud) return;
-
-    endPointBackend({ 
-      accionBD: "Update-Solicitud", 
-      id: selectedSolicitud.id, 
-      body: {
-        estado: nuevoEstado,
-        comentario: nuevoComentario,
-        usuarioAsignadoId: selectedSolicitud.usuarioAsignadoId,
-      } 
-    })
-    .then((resp) => {
-      updateSolicitudModal.closeModal()
-      setSuccessMessage(resp.message)
-      successModal.openModal()
-      window.location.reload();
-      setData(prevData => 
-        prevData.map(item => 
-          item.id === selectedSolicitud.id 
-            ? { ...item, estado: nuevoEstado, comentario: nuevoComentario } 
-            : item
-        )
-      );
-      setSelectedSolicitud(null);
-    })
-  };
 
   const handleDelete = async (id: string | number) => {
     setIdToDelete(id);
@@ -240,11 +195,6 @@ export default function RecentOrders() {
     setForm((prev: any) => ({ ...prev, [name]: value }));
   };
 
-  const filteredOptions = useMemo(() => {
-    return nuevoEstado === "PENDIENTE"
-      ? StatusSolicitudes.filter(opt => opt.value !== "FINALIZADOS")
-      : StatusSolicitudes;
-  }, [nuevoEstado]);
 
   useEffect(() => {
     endPointBackend({ accionBD: "List-Usuarios" }).then((resp) => {
@@ -268,6 +218,7 @@ export default function RecentOrders() {
   return (
     <>
       <PageBreadcrumb pageTitle="Listar Solicitudes"/>
+
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">  
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div></div>
@@ -286,14 +237,14 @@ export default function RecentOrders() {
           <GenericTable<EventStat>
             columns={columns}
             data={data}
-            searchableColumns={['codigoSolicitud']}
+            searchableColumns={['publicCode']}
             onSearchChange={(value) => {
               setPage(0); 
               setSearchTerm(value); 
             }}
             actions={(row) => (
               <div className="flex gap-2">
-                <Button size="sm" variant="outline" onClick={() => handleEdit(row)}>Editar</Button>
+                <Button size="sm" variant="outline" onClick={() => redirectTo(`/solicitud/${row.privateCode}`)}>Administrar</Button>
                 <Button size="sm" variant="outline" onClick={() => handleDelete(row.id)}>Eliminar</Button>
               </div>
             )}
@@ -346,15 +297,16 @@ export default function RecentOrders() {
                 <Label className="block mb-1 text-gray-700 dark:text-gray-300">Prioridad</Label>
                 <Select name="prioridad" options={PrioritySolicitudes} value={form.prioridad} onChange={handleChange}/>
               </div>
-            </div>
-            <div>
-              <Label className="block mb-1 text-gray-700 dark:text-gray-300">Asignar Usuario</Label>
-              <Select
-                name="usuarioAsignadoId"
-                options={usuarios}
-                value={form.usuarioAsignadoId}
-                onChange={handleChange}
-              />
+              
+              <div>
+                <Label className="block mb-1 text-gray-700 dark:text-gray-300">Asignar Usuario</Label>
+                <Select
+                  name="usuarioAsignadoId"
+                  options={usuarios}
+                  value={form.usuarioAsignadoId}
+                  onChange={handleChange}
+                />
+              </div>
             </div>
             <div className="flex items-center gap-3 mt-6 modal-footer sm:justify-end">
               <button
@@ -375,89 +327,6 @@ export default function RecentOrders() {
           </div>
         </Modal>
 
-        {/* MODAL ACTUALIZAR SOLICITUD */}
-        <Modal isOpen={updateSolicitudModal.isOpen} onClose={updateSolicitudModal.closeModal} className="max-w-[700px] p-6 lg:p-10">
-          <div className="flex flex-col px-2 overflow-y-auto custom-scrollbar">
-            <div>
-              <h5 className="mb-2 font-semibold text-gray-800 modal-title text-theme-xl dark:text-white/90 lg:text-2xl">
-                Editar Solicitud
-              </h5>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                Actualiza la información de la solicitud para llevar la tazabilidad de los prospectos
-              </p>
-            </div>
-
-            <div>
-              <div className="mb-4">
-                <Label className="block mb-1 text-gray-700 dark:text-gray-300">Estado</Label>
-                <Select options={filteredOptions} value={nuevoEstado} onChange={(e) => setNuevoEstado(e.target.value)}/>
-              </div>
-
-              <div className="mb-4">
-                <Label className="block mb-1 text-gray-700 dark:text-gray-300">Nuevo Comentario</Label>
-                <TextArea
-                  value={nuevoComentario}
-                  onChange={(e) => setNuevoComentario(e.target.value)}
-                  rows={4}
-                  error
-                  placeholder="Descripción detallada"
-                  hint="El texto no debe ser mayor a 400 caracteres"
-                />
-              </div>
-              <div className="mb-4">
-                <Label className="block mb-1 text-gray-700 dark:text-gray-300">Reasignar Usuario</Label>
-                <Select
-                  name="usuarioAsignadoId"
-                  options={usuarios}
-                  value={selectedSolicitud?.usuarioAsignadoId || ""}
-                  onChange={(e) =>
-                    setSelectedSolicitud((prev) =>
-                      prev ? { ...prev, usuarioAsignadoId: e.target.value } : null
-                    )
-                  }
-                />
-              </div>
-              <div className="mb-4">
-                <Label className="block mb-2 text-gray-700 dark:text-gray-300 font-medium">Historial de Comentarios</Label>
-                <div className="appearance-none rounded-lg border border-gray-300  px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 flex flex-col gap-5 max-h-[230px] overflow-y-auto">
-                  {(selectedSolicitud?.comentario || "")
-                    .split(/\n+/) // divide por saltos de línea
-                    .map((coment, index) => {
-                      const texto = coment.split("]").slice(1).join("]").trim(); // quita timestamp
-                      if (!texto) return null;
-
-                      return (
-                        <div
-                          key={index}
-                          className="px-4 py-2 rounded-xl bg-blue-600 text-white text-sm max-w-xl self-start"
-                        >
-                          {texto}
-                        </div>
-                      );
-                    })}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 mt-6 modal-footer sm:justify-end">
-              <button
-                onClick={updateSolicitudModal.closeModal}
-                type="button"
-                className="flex w-full justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] sm:w-auto"
-              >
-                Volver
-              </button>
-              <button
-                onClick={handleUpdate}
-                type="button"
-                className="btn btn-success btn-update-event flex w-full justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 sm:w-auto"
-              >
-                Guardar
-              </button>
-            </div> 
-          </div>
-        </Modal>
-            
         {/* MODAL CREAR PROSPECTO  */}
         <Modal isOpen={prospectModal.isOpen} onClose={prospectModal.closeModal} className="max-w-[1100px] p-6 lg:p-10">
           <div className="flex flex-col px-2 overflow-y-auto custom-scrollbar">

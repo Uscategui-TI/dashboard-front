@@ -140,7 +140,7 @@ export default function ConsultaSolicitudPage() {
             </h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-700">
-              <p><span className="font-medium">Código:</span> {solicitud.codigoSolicitud}</p>
+              <p><span className="font-medium">Código:</span> {solicitud.publicCode}</p>
               <p><span className="font-medium">Solicitante: </span>{solicitud.prospecto?.name} {solicitud.prospecto?.lastName}</p>
               <p>
                 <span className="font-medium">Estado:</span>{" "}

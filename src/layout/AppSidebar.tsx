@@ -51,12 +51,12 @@ const navItems: NavItem[] = [
     name: "Campañas",
     roles: ["Admin", "Periodista"],
     subItems: [
-      { name: "WhatsApp", path: "/what-panel", roles: ["Admin", "Periodista"] },
-      { name: "What Bot", path: "/what-bot", roles: ["Admin"] },
-      { name: "What Bot Meta", path:"/what-bot-meta", roles: ["Admin", "Periodista"]},
+      { name: "WhatsApp Verificado", path:"/what-bot-meta", roles: ["Admin", "Periodista"]},
+      { name: "ChatBot WhatsApp", path: "/what-bot", roles: ["Admin"] },
+      { name: "WhatsApp Legacy", path: "/what-panel", roles: ["Admin", "Periodista"] },
+      { name: "Telegram", path: "/telegram-panel", roles: ["Admin"] },
       { name: "Correos", path: "/what-email", roles: ["Admin"] },
       { name: "SMS", path: "/what-sms", roles: ["Admin"] },
-      { name: "Telegram", path: "/telegram-panel", roles: ["Admin"] },
     ],
   },
   {

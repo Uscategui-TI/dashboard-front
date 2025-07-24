@@ -38,13 +38,14 @@ import SolicitudesChart from "./SolicitudesChart";
   };
   
   const columns = [
-    { key: "codigoSolicitud", header: "Código Solicitud" },
+    { key: "publicCode", header: "Código Solicitud" },
     { key: "asunto", header: "Asunto" },
     {
       key: "Prospecto",
       header: "Prospecto",
       render: (row: EventStat) => row.prospecto?.document || "-",
     },
+    { key: "categoria", header: "Categoria" },
     {
       key: "fechaCreacion",
       header: "Fecha",
@@ -95,7 +96,8 @@ export default function RecentOrders() {
   
     return (
       <div className="p-4 space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <SolicitudesChart/>
           <EcommerceMetrics 
             title="Solicitudes"
             text="Todas las Solicitudes"
@@ -112,22 +114,23 @@ export default function RecentOrders() {
             prospects={prospects}
             prevProspects={prevProspects}
           />
+
+        </div>
+  
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {/* <EcommerceMetrics
+            title="Rechazados"
+            text="Total Rechazadas"
+            toltip="El total de solicitudes rechazadas se calcula según el estado actual de cada proceso."
+            value={conteoPorEstado?.RECHAZADA}
+            prospects={prospects}
+            prevProspects={prevProspects}
+          /> */}
           <EcommerceMetrics 
             title="En Proceso"
             text="Total en proceso"
             toltip="El total de solicitudes en proceso se calcula según el estado actual de cada proceso."
             value={conteoPorEstado?.EN_PROCESO}
-            prospects={prospects}
-            prevProspects={prevProspects}
-          />
-        </div>
-  
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <EcommerceMetrics
-            title="Rechazados"
-            text="Total Rechazadas"
-            toltip="El total de solicitudes rechazadas se calcula según el estado actual de cada proceso."
-            value={conteoPorEstado?.RECHAZADA}
             prospects={prospects}
             prevProspects={prevProspects}
           />
@@ -140,7 +143,7 @@ export default function RecentOrders() {
             prevProspects={prevProspects}
           />
           <EcommerceMetrics 
-            title="Finalizados"
+            title="Finalizadas"
             text="Total Finalizadas"
             toltip='El total de solicitudes finalizadas se calcula según el estado actual de cada proceso.'
             value={conteoPorEstado?.FINALIZADOS}
@@ -149,9 +152,8 @@ export default function RecentOrders() {
           />
         </div>
   
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <SolicitudesChart/>
-          <div className="sm:col-span-2 overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
+        <div className="gap-4">
+          <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Solicitudes Creadas Recientemente</h3>
             <div className="max-w-full overflow-x-auto">
               <GenericTable<EventStat>

@@ -15,6 +15,7 @@ interface SelectProps {
   value?: string | number | null; // <-- Agregado para hacerlo controlable externamente
   error?: string;
   isInvalid?: boolean;
+  disabled?: boolean;
 }
 
 const   Select: React.FC<SelectProps> = ({
@@ -26,7 +27,8 @@ const   Select: React.FC<SelectProps> = ({
   defaultValue = "",
   value,
   error,
-  isInvalid
+  isInvalid,
+  disabled
 }) => {
   // Manage the selected value
   const [internalValue, setInternalValue] = useState<string>(defaultValue);
@@ -50,6 +52,7 @@ const   Select: React.FC<SelectProps> = ({
         name={name}
         value={selectedValue !== null ? String(selectedValue) : ""}
         onChange={handleChange}
+        disabled={disabled}
       >
         {/* Placeholder option */}
         <option
