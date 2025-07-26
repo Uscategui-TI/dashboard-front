@@ -169,7 +169,7 @@ endPointBackend({ accionBD: "List-Genders" })
     }
 
     try {
-      await axios.put(`${authUrl}/api/person-form/update/${prospect.document}`, modifiedFields);
+      await axios.put(`${authUrl}/api/v1.0/prospect/update/${prospect.document}`, modifiedFields);
       onUpdate();
       onClose();
     } catch (error) {

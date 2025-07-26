@@ -61,7 +61,7 @@ export function EmailTemplate({
           <!-- CTA button -->
           <tr>
             <td align="center" style="padding: 0 40px 40px 40px;">
-              <a href="${buttonUrl || 'https://www.camara.gov.co/representantes/jose-jaime-uscategui-pastrana' }" target="_blank" rel="noopener noreferrer"
+              <a href="${buttonUrl || 'https://forms.gle/q6NPE1uebUEnaT828' }" target="_blank" rel="noopener noreferrer"
                  style="background-color: #4A90E2; color: #ffffff; padding: 12px 24px; border-radius: 5px; font-weight: bold; display: inline-block;">
                 Ir al sitio
               </a>

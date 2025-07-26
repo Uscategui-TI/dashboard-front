@@ -2,6 +2,9 @@
 
 import React, { useState } from "react";
 import axios from "axios";
+import { ImageUpload } from "@/components/form/form-elements/ImageUpload";
+import AlertModal from "@/components/shared/ui/modal/AlertModal";
+
 
 type Props = {
   onClose: () => void;
@@ -15,14 +18,19 @@ const BroadcastUploaderModal = ({
   mediaUrl = "",
 }: Props) => {
   const [csvFile, setCsvFile] = useState<File | null>(null);
+  const [imageUrl, setImageUrl] = useState<string>("");
   const [messageTemplate, setMessageTemplate] = useState(templateName || "");
-  const [mediaUrlInput, setMediaUrlInput] = useState(mediaUrl);
   const [response, setResponse] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showErrorAlert, setShowErrorAlert] = useState(false);
+
+
+  
 
   const resetForm = () => {
     setCsvFile(null);
+    setImageUrl("");
     setResponse(null);
     setError(null);
   };
@@ -39,28 +47,26 @@ const BroadcastUploaderModal = ({
       setError("⚠️ El archivo debe ser un CSV válido (.csv).");
       return;
     }
-
-    const formData = new FormData();
-    formData.append("csvFile", csvFile);
-    formData.append("messageTemplate", messageTemplate);
-    formData.append("mediaUrl", mediaUrlInput);
+    
 
     try {
       setLoading(true);
       setError(null);
 
-      const res = await axios.post("https://bot-meta-qa.up.railway.app/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const formData = new FormData();
+      formData.append("csvFile", csvFile);
+      formData.append("messageTemplate", messageTemplate);
+      formData.append("mediaUrl", imageUrl); // URL ya subida desde Cloudinary
+
+      const res = await axios.post("https://bot-meta-qa.up.railway.app/upload", formData);
 
       setResponse(res.data);
 
-      // Cerrar el modal automáticamente después de 2 segundos si fue exitoso
       if (res.data.success) {
-        setTimeout(() => {
-          resetForm();
-          onClose();
-        }, 2000);
+        // setTimeout(() => {
+        //   resetForm();
+        //   onClose();
+        // }, 2000);
       }
     } catch (err) {
       const message =
@@ -69,6 +75,7 @@ const BroadcastUploaderModal = ({
           : "❌ Ocurrió un error inesperado al enviar.";
       setResponse(null);
       setError(message);
+      setShowErrorAlert(true);
     } finally {
       setLoading(false);
     }
@@ -101,16 +108,10 @@ const BroadcastUploaderModal = ({
           />
         </div>
 
-        {mediaUrlInput && (
-          <div>
-            <label className="block text-sm font-medium mb-1">🖼️ Imagen detectada</label>
-            <img
-              src={mediaUrlInput}
-              alt="Media"
-              className="w-48 h-auto rounded shadow"
-            />
-          </div>
-        )}
+        <div>
+          <label className="block text-sm font-medium mb-1">🖼️ Adjuntar imagen (opcional)</label>
+          <ImageUpload onChange={(url) => setImageUrl(url)} value={imageUrl} />
+        </div>
 
         <button
           type="submit"
@@ -120,27 +121,20 @@ const BroadcastUploaderModal = ({
           {loading ? "Enviando..." : "Enviar mensajes"}
         </button>
       </form>
-
-      {error && (
-        <div className="mt-4 text-red-600 bg-red-100 p-2 rounded">
-          ⚠️ {error}
+      {response?.results && (
+        <div className="mt-6 bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-100 p-4 rounded-lg text-center">
+          ✅ Se enviaron correctamente <strong>{response.results.length}</strong> mensajes.
         </div>
       )}
-
-      {response?.results && (
-        <div className="mt-6">
-          <h3 className="font-semibold text-gray-800 dark:text-white">
-            📊 Resultados:
-          </h3>
-          <ul className="bg-gray-100 dark:bg-gray-800 p-3 mt-2 rounded text-sm space-y-1 max-h-64 overflow-auto">
-            {response.results.map((r: any, index: number) => (
-              <li key={index}>
-                <span className="font-medium text-green-600">{r.number}</span> —{" "}
-                <span>{r.status}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+      {showErrorAlert && (
+        <AlertModal
+          isOpen={showErrorAlert}
+          onClose={() => setShowErrorAlert(false)}
+          title="❌ Error al enviar"
+          description={error || "Ocurrió un error inesperado."}
+          colorClass="error"
+          buttonText="Cerrar"
+        />
       )}
     </div>
   );

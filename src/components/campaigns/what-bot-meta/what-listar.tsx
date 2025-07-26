@@ -118,16 +118,18 @@ export default function ListarPlantillas() {
                 <Button size="sm" variant="primary" onClick={() => handleEdit(row)}>
                   Editar
                 </Button>  
-                <Button
+                <span title={row.status === "PENDING" ? "La plantilla aún está pendiente de aprobación" : ""}>
+                  <Button
                     variant="outline"
+                    disabled={row.status === "PENDING"}
                     onClick={() => {
-                        setSelectedBroadcastTemplate(row);
-                        setIsBroadcastOpen(true);
+                      setSelectedBroadcastTemplate(row);
+                      setIsBroadcastOpen(true);
                     }}
-                    >
+                  >
                     📤 Envío Masivo
-                    </Button>
-
+                  </Button>
+                </span>
               </div>
             )}
           />

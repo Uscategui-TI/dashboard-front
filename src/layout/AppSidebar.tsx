@@ -17,14 +17,6 @@ import {
   UserCircleIcon,
 } from "../icons/index";
 
-const storedRoles = typeof window !== 'undefined' ? localStorage.getItem("roles") : null;
-const userRoles: string[] = storedRoles ? JSON.parse(storedRoles) : [];
-
-const hasAccess = (roles?: string[]) => {
-  if (!roles) return true;
-  return roles.some(role => userRoles.includes(role));
-};
-
 type NavItem = {
   name: string;
   icon: React.ReactNode;
@@ -38,13 +30,13 @@ const navItems: NavItem[] = [
     icon: <GridIcon />,
     name: "Dashboard",
     path: "/",
-    roles: ["Admin", "Coordinador"]
+    roles: ["Admin", "Coordinador"],
   },
   {
     icon: <CalenderIcon />,
     name: "Calendario",
     path: "/calendar",
-    roles: ["Admin", "Coordinador", "Secretario"]
+    roles: ["Admin", "Coordinador", "Secretario"],
   },
   {
     icon: <TaskIcon />,
@@ -72,10 +64,10 @@ const navItems: NavItem[] = [
   {
     name: "Solicitudes",
     icon: <SolicitudIcon />,
-    roles: ["Admin", "Secretario","Pasante","Periodista"],
+    roles: ["Admin", "Secretario", "Pasante", "Periodista"],
     subItems: [
-      { name: "Panel Solicitudes", path: "/solicitud-panel", roles: ["Admin","Secretario","Pasante","Periodista"] },
-      { name: "Seguimiento Solicitudes", path: "/solicitud-listar", roles: ["Admin", "Secretario", "Pasante","Periodista"] },
+      { name: "Panel Solicitudes", path: "/solicitud-panel", roles: ["Admin", "Secretario", "Pasante", "Periodista"] },
+      { name: "Seguimiento Solicitudes", path: "/solicitud-listar", roles: ["Admin", "Secretario", "Pasante", "Periodista"] },
     ],
   },
   {
@@ -91,7 +83,7 @@ const navItems: NavItem[] = [
     icon: <UserCircleIcon />,
     name: "Perfil de Usuario",
     path: "/profile",
-    roles: ["Admin", "Coordinador", "Secretario", "Periodista", "Pasante"]
+    roles: ["Admin", "Coordinador", "Secretario", "Periodista", "Pasante"],
   },
 ];
 
@@ -100,20 +92,37 @@ const othersItems: NavItem[] = [
     icon: <PieChartIcon />,
     name: "Soporte",
     path: "/",
-    roles: ["Admin"]
-  }
+    roles: ["Admin"],
+  },
 ];
 
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const pathname = usePathname();
 
-  const [openSubmenu, setOpenSubmenu] = useState<{
-    type: "main" | "others";
-    index: number;
-  } | null>(null);
+  const [userRoles, setUserRoles] = useState<string[]>([]);
+  const [openSubmenu, setOpenSubmenu] = useState<{ type: "main" | "others"; index: number } | null>(null);
   const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>({});
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  useEffect(() => {
+    const storedRoles = localStorage.getItem("roles");
+    if (storedRoles) {
+      try {
+        setUserRoles(JSON.parse(storedRoles));
+      } catch {
+        setUserRoles([]);
+      }
+    }
+  }, []);
+
+  const hasAccess = useCallback(
+    (roles?: string[]) => {
+      if (!roles) return true;
+      return roles.some((role) => userRoles.includes(role));
+    },
+    [userRoles]
+  );
 
   const isActive = useCallback((path: string) => path === pathname, [pathname]);
 
@@ -126,22 +135,31 @@ const AppSidebar: React.FC = () => {
 
   const renderMenuItems = (items: NavItem[], type: "main" | "others") => (
     <ul className="flex flex-col gap-4">
-      {items.map((nav, index) => (
-        hasAccess(nav.roles) && (
+      {items.map((nav, index) =>
+        hasAccess(nav.roles) ? (
           <li key={nav.name}>
             {nav.subItems ? (
               <>
-                <button onClick={() => handleSubmenuToggle(index, type)} className={`menu-item group ${openSubmenu?.type === type && openSubmenu?.index === index ? "menu-item-active" : "menu-item-inactive"} cursor-pointer ${!isExpanded && !isHovered ? "lg:justify-center" : "lg:justify-start"}`}>
+                <button
+                  onClick={() => handleSubmenuToggle(index, type)}
+                  className={`menu-item group ${openSubmenu?.type === type && openSubmenu?.index === index ? "menu-item-active" : "menu-item-inactive"} cursor-pointer ${!isExpanded && !isHovered ? "lg:justify-center" : "lg:justify-start"}`}
+                >
                   <span className={`${openSubmenu?.type === type && openSubmenu?.index === index ? "menu-item-icon-active" : "menu-item-icon-inactive"}`}>{nav.icon}</span>
-                  {(isExpanded || isHovered || isMobileOpen) && <span className={`menu-item-text`}>{nav.name}</span>}
+                  {(isExpanded || isHovered || isMobileOpen) && <span className="menu-item-text">{nav.name}</span>}
                   {(isExpanded || isHovered || isMobileOpen) && (
                     <ChevronDownIcon className={`ml-auto w-5 h-5 transition-transform duration-200 ${openSubmenu?.type === type && openSubmenu?.index === index ? "rotate-180 text-brand-500" : ""}`} />
                   )}
                 </button>
                 {(isExpanded || isHovered || isMobileOpen) && (
-                  <div ref={(el) => { subMenuRefs.current[`${type}-${index}`] = el; }} className="overflow-hidden transition-all duration-300" style={{ height: openSubmenu?.type === type && openSubmenu?.index === index ? `${subMenuHeight[`${type}-${index}`]}px` : "0px" }}>
+                  <div
+                    ref={(el) => {
+                      subMenuRefs.current[`${type}-${index}`] = el;
+                    }}
+                    className="overflow-hidden transition-all duration-300"
+                    style={{ height: openSubmenu?.type === type && openSubmenu?.index === index ? `${subMenuHeight[`${type}-${index}`]}px` : "0px" }}
+                  >
                     <ul className="mt-2 space-y-1 ml-9">
-                      {nav.subItems.filter(sub => hasAccess(sub.roles)).map((sub) => (
+                      {nav.subItems.filter((sub) => hasAccess(sub.roles)).map((sub) => (
                         <li key={sub.name}>
                           <Link href={sub.path} className={`menu-dropdown-item ${isActive(sub.path) ? "menu-dropdown-item-active" : "menu-dropdown-item-inactive"}`}>{sub.name}</Link>
                         </li>
@@ -154,13 +172,13 @@ const AppSidebar: React.FC = () => {
               nav.path && (
                 <Link href={nav.path} className={`menu-item group ${isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"}`}>
                   <span className={`${isActive(nav.path) ? "menu-item-icon-active" : "menu-item-icon-inactive"}`}>{nav.icon}</span>
-                  {(isExpanded || isHovered || isMobileOpen) && <span className={`menu-item-text`}>{nav.name}</span>}
+                  {(isExpanded || isHovered || isMobileOpen) && <span className="menu-item-text">{nav.name}</span>}
                 </Link>
               )
             )}
           </li>
-        )
-      ))}
+        ) : null
+      )}
     </ul>
   );
 
@@ -193,8 +211,13 @@ const AppSidebar: React.FC = () => {
   }, [openSubmenu]);
 
   return (
-    
-    <aside className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 ${isExpanded || isMobileOpen ? "w-[290px]" : isHovered ? "w-[290px]" : "w-[90px]"} ${isMobileOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`} onMouseEnter={() => !isExpanded && setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
+    <aside
+      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 ${
+        isExpanded || isMobileOpen ? "w-[290px]" : isHovered ? "w-[290px]" : "w-[90px]"
+      } ${isMobileOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
+      onMouseEnter={() => !isExpanded && setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <div className={`py-8 flex ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"}`}>
         <Link href="/">
           {isExpanded || isHovered || isMobileOpen ? (
@@ -226,7 +249,6 @@ const AppSidebar: React.FC = () => {
         </nav>
       </div>
     </aside>
-
   );
 };
 
