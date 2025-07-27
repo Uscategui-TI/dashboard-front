@@ -7,7 +7,14 @@ import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import Button from "@/components/shared/ui/button/Button";
 
 export default function FillFormPage() {
-  const { slug } = useParams();
+ const params = useParams<{ slug: string }>();
+
+  if (!params) {
+    return <div>Error: Parámetro faltante</div>;
+  }
+
+  const { slug } = params;
+
   const [questions, setQuestions] = useState<any[]>([]);
   const [answers, setAnswers] = useState<{ [key: number]: any }>({});
 

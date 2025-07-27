@@ -8,7 +8,14 @@ import { useEffect, useState } from "react";
 import Chart from "react-apexcharts";
 
 export default function FormResults() {
-    const { slug } = useParams();
+    const params = useParams<{ slug: string }>();
+
+    if (!params) {
+    return <div>Error: Parámetro faltante</div>;
+    }
+
+    const { slug } = params;
+
     const [summary, setSummary] = useState<any[]>([]);
     const [totalForms, setTotalForms] = useState(0);
 

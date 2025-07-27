@@ -2,13 +2,21 @@
 
 import { createQuestion, getFormBySlug } from "@/api/services/formService";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import Label from "@/components/form/Label";
 import Button from "@/components/shared/ui/button/Button";
 import { useParams, useRouter  } from "next/navigation";
 import { useEffect, useState } from "react";
 
+
+
 export default function AddQuestionPage() {
-  const { slug } = useParams();
+  const params = useParams<{ slug: string }>();
+
+  if (!params) {
+    return <div>Error: Parámetro faltante</div>;
+  }
+
+  const { slug } = params;
+  
   const router = useRouter();
   const [form, setForm] = useState<any>(null);
   const [text, setText] = useState("");

@@ -12,6 +12,7 @@ import TextArea from "@/components/form/input/TextArea";
 import { useModal } from "@/hooks/useModal";
 import AlertModal from "@/components/shared/ui/modal/AlertModal";
 import Avatar from "@/components/shared/ui/avatar/Avatar";
+import { formatearComentarios } from "@/components/solicitud/consulta/consulta";
 
 type Departamento = {
   id: number;
@@ -81,41 +82,6 @@ type ComentarioItem = {
   texto: string;
 };
 
-export const formatearComentarios = (comentario: string): ComentarioItem[] => {
-  if (!comentario) return [];
-
-  // Este regex extrae bloques como: [fecha] texto
-const regex = /\[(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?)\]([^\[]*)/g;
-
-  const resultado: ComentarioItem[] = [];
-  let match;
-
-  while ((match = regex.exec(comentario)) !== null) {
-    const fechaStr = match[1];
-    const texto = match[2].trim();
-
-    const fechaRecortada = fechaStr.replace(/\.(\d{3})\d+/, ".$1");
-    const fechaObj = new Date(fechaRecortada);
-
-    if (!isNaN(fechaObj.getTime())) {
-      const fechaFormateada = fechaObj.toLocaleString("es-ES", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-
-      resultado.push({
-        fecha: fechaObj,
-        fechaFormateada,
-        texto,
-      });
-    }
-  }
-
-  return resultado;
-};
 
 export default function SolicitudPage() {
   
