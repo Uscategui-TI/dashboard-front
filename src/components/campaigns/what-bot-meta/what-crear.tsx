@@ -7,8 +7,6 @@ import Textarea from "@/components/form/input/TextArea";
 import AlertModal from "@/components/shared/ui/modal/AlertModal";
 import SuccessModal from "@/components/shared/ui/modal/SuccessModal";
 
-
-
 const CATEGORIES = ["MARKETING", "AUTHENTICATION", "UTILITY"];
 const LANGUAGES = [
   { label: "Español", value: "es_CO" },
@@ -40,9 +38,6 @@ const TemplateCreator: React.FC<TemplateCreatorProps> = ({ onClose }) => {
   const [url, setUrl] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-
-
-
   const token = process.env.NEXT_PUBLIC_YOUR_ACCESS_TOKEN!;
   const whatsappId = process.env.NEXT_PUBLIC_WHATSAPP_BUSINESS_ID!;
   const version = process.env.NEXT_PUBLIC_GRAPH_API_VERSION || "v19.0";
@@ -52,23 +47,32 @@ const TemplateCreator: React.FC<TemplateCreatorProps> = ({ onClose }) => {
     description: "",
   });
 
+  const isAddButtonDisabled = () => {
+    const urlExists = buttons.some((btn) => btn.type === "URL");
+    const phoneExists = buttons.some((btn) => btn.type === "PHONE_NUMBER");
+    const quickReplyCount = buttons.filter((btn) => btn.type === "QUICK_REPLY").length;
+
+    if (buttons.length >= 5) return true;
+
+    switch (newButtonType) {
+      case "URL":
+        return urlExists;
+      case "PHONE_NUMBER":
+        return phoneExists;
+      case "QUICK_REPLY":
+        return quickReplyCount >= 2;
+      default:
+        return false;
+    }
+  };
 
   const addButton = () => {
+    if (!newButtonText.trim()) return;
+
     if (
-      (newButtonType === "PHONE_NUMBER" && !phoneNumber) ||
-      (newButtonType === "URL" && !url)
-    )
-      return;
-
-    if (buttons.length >= 5) {
-      alert("No puedes agregar más de 5 botones.");
-      return;
-    }
-
-    if (buttons.some((btn) => btn.type === "URL") && newButtonType === "URL") {
-      alert("Ya has agregado un botón de tipo URL.");
-      return;
-    }
+      (newButtonType === "PHONE_NUMBER" && !phoneNumber.trim()) ||
+      (newButtonType === "URL" && !url.trim())
+    ) return;
 
     const newButton: ButtonType = {
       type: newButtonType,
@@ -87,12 +91,10 @@ const TemplateCreator: React.FC<TemplateCreatorProps> = ({ onClose }) => {
     text.trim().toLowerCase().replace(/\s+/g, "_");
 
   const handleSubmit = async () => {
-    // Validación
     if (!name.trim() || !bodyText.trim() || !footerText.trim()) {
       showError("Campos obligatorios", "Los campos Nombre, Cuerpo y Pie del mensaje son obligatorios.");
       return;
     }
-
 
     if (buttons.length === 0) {
       showError("Botón requerido", "Debes agregar al menos un botón.");
@@ -113,18 +115,9 @@ const TemplateCreator: React.FC<TemplateCreatorProps> = ({ onClose }) => {
             ],
           },
         },
-        {
-          type: "BODY",
-          text: bodyText,
-        },
-        {
-          type: "FOOTER",
-          text: footerText,
-        },
-        {
-          type: "BUTTONS",
-          buttons,
-        },
+        { type: "BODY", text: bodyText },
+        { type: "FOOTER", text: footerText },
+        { type: "BUTTONS", buttons },
       ],
     };
 
@@ -152,30 +145,25 @@ const TemplateCreator: React.FC<TemplateCreatorProps> = ({ onClose }) => {
       showError("Error", "Error al enviar la plantilla.");
     }
   };
+
   const showError = (title: string, description: string) => {
     setErrorModal({ open: true, title, description });
   };
- 
+
   return (
     <div className="bg-white dark:bg-gray-900 p-6 rounded-xl max-h-[90vh] overflow-y-auto shadow-lg">
       <form className="space-y-4" autoComplete="off">
         <Label>Nombre Plantilla</Label>
-        <Input
-          value={name}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
-          placeholder="plantilla prueba"
-        />
+        <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="plantilla prueba" />
 
         <Label>Idioma</Label>
         <select
           className="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:text-white"
           value={language}
-          onChange={(e: ChangeEvent<HTMLSelectElement>) => setLanguage(e.target.value)}
+          onChange={(e) => setLanguage(e.target.value)}
         >
           {LANGUAGES.map((lang) => (
-            <option key={lang.value} value={lang.value}>
-              {lang.label}
-            </option>
+            <option key={lang.value} value={lang.value}>{lang.label}</option>
           ))}
         </select>
 
@@ -183,34 +171,24 @@ const TemplateCreator: React.FC<TemplateCreatorProps> = ({ onClose }) => {
         <select
           className="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:text-white"
           value={category}
-          onChange={(e: ChangeEvent<HTMLSelectElement>) => setCategory(e.target.value)}
+          onChange={(e) => setCategory(e.target.value)}
         >
           {CATEGORIES.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
-            </option>
+            <option key={cat} value={cat}>{cat}</option>
           ))}
         </select>
 
         <Label>Cuerpo Del Mensaje</Label>
-        <Textarea
-          value={bodyText}
-          onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setBodyText(e.target.value)}
-        />
+        <Textarea value={bodyText} onChange={(e) => setBodyText(e.target.value)} />
 
         <Label>Pie Del Mensaje</Label>
-        <Input
-          value={footerText}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => setFooterText(e.target.value)}
-        />
+        <Input value={footerText} onChange={(e) => setFooterText(e.target.value)} />
 
         <Label>Añadir Botón</Label>
         <div className="flex flex-wrap gap-2">
           <select
             value={newButtonType}
-            onChange={(e: ChangeEvent<HTMLSelectElement>) =>
-              setNewButtonType(e.target.value as ButtonType["type"])
-            }
+            onChange={(e) => setNewButtonType(e.target.value as ButtonType["type"])}
             className="border rounded px-3 py-2 dark:bg-gray-800 dark:text-white"
           >
             <option value="QUICK_REPLY">Respuesta Rápida</option>
@@ -220,27 +198,19 @@ const TemplateCreator: React.FC<TemplateCreatorProps> = ({ onClose }) => {
 
           <Input
             value={newButtonText}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => setNewButtonText(e.target.value)}
+            onChange={(e) => setNewButtonText(e.target.value)}
             placeholder="Texto del botón"
           />
 
           {newButtonType === "PHONE_NUMBER" && (
-            <Input
-              value={phoneNumber}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setPhoneNumber(e.target.value)}
-              placeholder="+573058221777"
-            />
+            <Input value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="+573058221777" />
           )}
 
           {newButtonType === "URL" && (
-            <Input
-              value={url}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setUrl(e.target.value)}
-              placeholder="https://tusitio.com"
-            />
+            <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://tusitio.com" />
           )}
 
-          <Button type="button" onClick={addButton}>
+          <Button type="button" onClick={addButton} disabled={isAddButtonDisabled()}>
             Agregar
           </Button>
         </div>
@@ -279,12 +249,7 @@ const TemplateCreator: React.FC<TemplateCreatorProps> = ({ onClose }) => {
         <Button type="button" onClick={handleSubmit} className="mt-4">
           Crear Plantilla en Meta
         </Button>
-        <Button
-          variant="outline"
-          type="button"
-          onClick={onClose}
-          className="ml-2.5 mt-4"
-        >
+        <Button variant="outline" type="button" onClick={onClose} className="ml-2.5 mt-4">
           Cancelar
         </Button>
       </form>
@@ -296,16 +261,16 @@ const TemplateCreator: React.FC<TemplateCreatorProps> = ({ onClose }) => {
         description={errorModal.description}
         colorClass="error"
       />
+
       <SuccessModal
         isOpen={showSuccessModal}
         onClose={() => {
           setShowSuccessModal(false);
-          onClose(); // cerrar el modal principal
+          onClose();
         }}
         title="¡Plantilla creada!"
         description="Tu plantilla fue creada exitosamente."
       />
-
     </div>
   );
 };

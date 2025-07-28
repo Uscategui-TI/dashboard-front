@@ -57,6 +57,7 @@ export default function EmailBroadcastPage() {
     const htmlBody = EmailTemplate({
       content: formData.message,
       imageUrl: formData.urlMedia,
+      buttonUrl1: formData.secondaryButtonUrl,
     });
 
     // Leer CSV y convertir a base64 para enviar en JSON (fetch no envía archivos multipart sin FormData)
@@ -128,7 +129,14 @@ export default function EmailBroadcastPage() {
                 register={register("message", { required: "El contenido es obligatorio" })}
               />
             </div>
-
+            <div className="col-span-6 sm:col-span-6">
+              <Label>URL para botón de "Más información" (opcional)</Label>
+              <Input
+                type="url"
+                placeholder="https://ejemplo.com/info"
+                {...register("secondaryButtonUrl")}
+              />
+            </div>
             <div className="col-span-6 sm:col-span-6">
               <Label>Adjuntar imagen (opcional)</Label>
               <ImageUpload

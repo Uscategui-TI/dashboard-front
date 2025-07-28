@@ -3,11 +3,13 @@ export function EmailTemplate({
   content,
   imageUrl,
   buttonUrl,
+  buttonUrl1
 }: {
   name?: string;
   content: string;
   imageUrl?: string;
   buttonUrl?: string;
+  buttonUrl1?: string;
 }) {
   return `
 <!DOCTYPE html>
@@ -34,7 +36,7 @@ export function EmailTemplate({
         <table width="600" bgcolor="#ffffff" style="border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.05);">
           <!-- Header -->
           <tr>
-            <td align="center" bgcolor="#4A90E2" style="padding: 20px 40px; color: #ffffff; font-size: 24px; font-weight: bold; border-radius: 8px 8px 0 0;">
+            <td align="center" bgcolor="#002147" style="padding: 20px 40px; color: #ffffff; font-size: 24px; font-weight: bold; border-radius: 8px 8px 0 0;">
               ¡Hola!
             </td>
           </tr>
@@ -61,9 +63,16 @@ export function EmailTemplate({
           <!-- CTA button -->
           <tr>
             <td align="center" style="padding: 0 40px 40px 40px;">
-              <a href="${buttonUrl || 'https://forms.gle/q6NPE1uebUEnaT828' }" target="_blank" rel="noopener noreferrer"
-                 style="background-color: #4A90E2; color: #ffffff; padding: 12px 24px; border-radius: 5px; font-weight: bold; display: inline-block;">
-                Ir al sitio
+              <a href="${buttonUrl || 'https://wa.me/573144327368'}" target="_blank" rel="noopener noreferrer"
+                style="background-color: #25D366; color: #ffffff; padding: 12px 24px; border-radius: 5px; font-weight: bold; display: inline-block; text-decoration: none;">
+                <img src="https://img.icons8.com/fluency/48/whatsapp.png"
+                    alt="WhatsApp" width="16" height="16"
+                    style="vertical-align: middle; margin-right: 8px;">
+                Escríbenos
+              </a>
+              <a href="${buttonUrl1 }" target="_blank" rel="noopener noreferrer"
+                 style="background-color: #002147; color: #ffffff; padding: 12px 24px; border-radius: 5px; font-weight: bold; display: inline-block;">
+                Inscríbete Por favor
               </a>
             </td>
           </tr>
@@ -71,7 +80,7 @@ export function EmailTemplate({
           <!-- Footer -->
           <tr>
             <td align="center" style="font-size: 12px; color: #888888; padding: 20px 40px 30px 40px; border-top: 1px solid #e0e0e0;">
-              Este correo fue enviado por USCATEGUI · Bogotá, Colombia<br />
+              Este correo fue enviado por el equipo de la seguridad (Comunicaciones Uscátegui)· Bogotá, Colombia<br />
               <a href="#" style="color:#888; text-decoration:underline;">Darse de baja</a> | <a href="#" style="color:#888; text-decoration:underline;">Política de privacidad</a>
             </td>
           </tr>
