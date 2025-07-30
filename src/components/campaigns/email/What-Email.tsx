@@ -11,8 +11,8 @@ import Input from "@/components/form/input/InputField";
 import TextAreaValidate from "@/components/form/input/TextAreaValidate";
 import CountUp from "react-countup";
 import { softPointBackend } from "@/api";
-
-import { EmailTemplate } from "@/components/campaigns/email/EmailTempleate"; // Ajusta la ruta según tu estructura
+import AlertModal from "@/components/shared/ui/modal/AlertModal";
+import { EmailTemplate } from "@/components/campaigns/email/EmailTempleate"; 
 
 
 
@@ -23,6 +23,9 @@ export default function EmailBroadcastPage() {
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [totalEmailsSent, setTotalEmailsSent] = useState<number | null>(null);
   const csvFileRef = useRef<HTMLInputElement | null>(null);
+  const [showErrorAlert, setShowErrorAlert] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
 
   const {
     register,
@@ -41,6 +44,30 @@ export default function EmailBroadcastPage() {
       return () => clearTimeout(timer);
     }
   }, [toastError]);
+  
+  const validateCsvEmailFile = async (file: File): Promise<boolean> => {
+    try {
+      const text = await file.text();
+      const lines = text
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(line => line.length > 0);
+
+      if (lines.length > 1000) {
+        setError("El archivo CSV no puede contener más de 1.000 correos.");
+        setShowErrorAlert(true);
+        return false;
+      }
+
+      return true;
+    } catch (e) {
+      setError("Error al leer el archivo CSV.");
+      setShowErrorAlert(true);
+      return false;
+    }
+  };
+
+
 
   const onSubmit = async (formData: any) => {
     const csvFile = csvFileRef.current?.files?.[0];
@@ -48,6 +75,9 @@ export default function EmailBroadcastPage() {
       setToastError("❌ Por favor selecciona un archivo CSV.");
       return;
     }
+
+    const isValid = await validateCsvEmailFile(csvFile);
+    if (!isValid) return;
 
     setLoading(true);
     setIsSending(true);
@@ -189,6 +219,16 @@ export default function EmailBroadcastPage() {
 
             {toastError && (
               <p className="text-red-600 font-semibold mt-2">{toastError}</p>
+            )}
+            {showErrorAlert && (
+              <AlertModal
+                isOpen={showErrorAlert}
+                onClose={() => setShowErrorAlert(false)}
+                title="❌ Error al enviar"
+                description={error || "Ocurrió un error inesperado."}
+                colorClass="error"
+                buttonText="Cerrar"
+              />
             )}
           </div>
         </form>

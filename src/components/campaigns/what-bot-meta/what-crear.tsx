@@ -139,7 +139,7 @@ const TemplateCreator: React.FC<TemplateCreatorProps> = ({ onClose }) => {
       if (res.ok) {
         setShowSuccessModal(true);
       } else {
-        alert("Error: " + JSON.stringify(result, null, 2));
+        showError("Error al crear la plantilla", result.error?.message || "La respuesta del servidor no fue exitosa.");
       }
     } catch (err: unknown) {
       showError("Error", "Error al enviar la plantilla.");

@@ -7,6 +7,7 @@ import FileInput from "@/components/form/input/FileInput";
 import Label from "@/components/form/Label";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import TextAreaValidate from "@/components/form/input/TextAreaValidate";
+import AlertModal from "@/components/shared/ui/modal/AlertModal";
 import { softPointBackend } from "@/api";
 
 export default function SmsBroadcastPage() {
@@ -15,6 +16,10 @@ export default function SmsBroadcastPage() {
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [responseMessage, setResponseMessage] = useState<string | null>(null);
   const csvFileRef = useRef<HTMLInputElement | null>(null);
+  const [showErrorAlert, setShowErrorAlert] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+
 
   const {
     register,
@@ -26,6 +31,23 @@ export default function SmsBroadcastPage() {
   } = useForm<FieldValues>({ defaultValues: {} });
 
   const message = watch("message");
+  
+  useEffect(() => {
+  const specialCharRegex = /[^a-zA-Z0-9\s.,áéíóúÁÉÍÓÚñÑ]/;
+
+  if (message && specialCharRegex.test(message)) {
+    setError("El mensaje no puede contener caracteres especiales.");
+    setShowErrorAlert(true);
+    setValue("message", message.replace(specialCharRegex, ""));
+  }
+
+  if (message && message.length > 160) {
+    setError("El mensaje no puede tener más de 160 caracteres.");
+    setShowErrorAlert(true);
+    setValue("message", message.substring(0, 160));
+  }
+}, [message, setValue]);
+
 
   useEffect(() => {
     if (toastError) {
@@ -33,6 +55,23 @@ export default function SmsBroadcastPage() {
       return () => clearTimeout(timer);
     }
   }, [toastError]);
+
+  const validateCsvFile = async (file: File) => {
+    const text = await file.text();
+    const lines = text
+      .split(/\r?\n/)
+      .map(line => line.trim())
+      .filter(line => line.length > 0);
+
+    if (lines.length > 1000) {
+      setError("El archivo CSV no puede contener más de 1000 números.");
+      setShowErrorAlert(true);
+      return false;
+    }
+
+    return true;
+  };
+
 
   // Función para convertir archivo a base64
   const toBase64 = (file: File) =>
@@ -53,6 +92,10 @@ export default function SmsBroadcastPage() {
       return;
     }
 
+    // ✅ Validación del CSV antes de enviar
+    const isValid = await validateCsvFile(csvFile);
+    if (!isValid) return;
+
     setLoading(true);
     setToastError(null);
     setShowSuccessMessage(false);
@@ -72,12 +115,10 @@ export default function SmsBroadcastPage() {
 
       const result = await response.json?.();
 
-
       setResponseMessage(result?.message || "sin novedades");
       setShowSuccessMessage(true);
       reset();
       if (csvFileRef.current) csvFileRef.current.value = "";
-      
     } catch (error: unknown) {
       if (error instanceof Error) {
         setToastError(error.message);
@@ -88,6 +129,7 @@ export default function SmsBroadcastPage() {
       setLoading(false);
     }
   };
+
 
   return (
     <>
@@ -145,6 +187,18 @@ export default function SmsBroadcastPage() {
             {toastError && (
               <p className="text-red-600 font-semibold mt-2">{toastError}</p>
             )}
+
+            {showErrorAlert && (
+              <AlertModal
+                isOpen={showErrorAlert}
+                onClose={() => setShowErrorAlert(false)}
+                title="❌ Error al enviar"
+                description={error || "Ocurrió un error inesperado."}
+                colorClass="error"
+                buttonText="Cerrar"
+              />
+            )}
+
           </div>
         </form>
       </div>

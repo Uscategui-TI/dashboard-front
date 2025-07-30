@@ -35,6 +35,29 @@ const BroadcastUploaderModal = ({
     setError(null);
   };
 
+  const validateCsvPhoneLimit = async (file: File): Promise<boolean> => {
+    try {
+      const text = await file.text();
+      const lines = text
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(line => line.length > 0);
+
+      if (lines.length > 1000) {
+        setError("⚠️ El archivo CSV no puede contener más de 1.000 números de teléfono.");
+        setShowErrorAlert(true);
+        return false;
+      }
+
+      return true;
+    } catch {
+      setError("❌ Error al leer el archivo CSV.");
+      setShowErrorAlert(true);
+      return false;
+    }
+  };
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -47,6 +70,9 @@ const BroadcastUploaderModal = ({
       setError("⚠️ El archivo debe ser un CSV válido (.csv).");
       return;
     }
+
+    const isValid = await validateCsvPhoneLimit(csvFile);
+    if (!isValid) return;
     
 
     try {
