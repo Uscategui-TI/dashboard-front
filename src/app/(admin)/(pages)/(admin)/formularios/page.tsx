@@ -23,7 +23,7 @@ export default function FormulariosPage() {
     useEffect(() => {
         const fetchForms = async () => {
         try {
-            const response = await fetch("http://localhost:8080/api/forms/all");
+            const response = await fetch("https://dashboardqa.uscateguicol.com/api/forms/all");
             if (!response.ok) throw new Error("Error al obtener formularios");
             const data = await response.json();
             setFormularios(data);
