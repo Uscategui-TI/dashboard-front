@@ -48,6 +48,7 @@ type UsuarioAsignado = {
   lastName: string;
   email: string;
   phone: string;
+  roles: string[];
 };
 
 type Solicitud = {
@@ -198,7 +199,7 @@ export default function SolicitudPage() {
                 <span className="text-gray-500 dark:text-gray-400 font-semibold">Código Privado:</span><br />
                 {solicitud.privateCode}{" "}
                 <a
-                  href={`https://dashboard.uscateguicol/consulta?code=${solicitud.privateCode}`}
+                  href={`/consulta?code=${solicitud.privateCode}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center text-blue-600 hover:underline ml-2"
@@ -334,7 +335,7 @@ export default function SolicitudPage() {
                 </p>
                 <p>
                   <strong className="text-gray-800 dark:text-white/90">Cargo: </strong>
-                  {solicitud.usuarioAsignado.phone}
+                  {solicitud.usuarioAsignado.roles[0]}
                 </p>
               </div>
             </div>

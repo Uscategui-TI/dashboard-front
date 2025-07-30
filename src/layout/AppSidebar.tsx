@@ -73,10 +73,10 @@ const navItems: NavItem[] = [
   {
     name: "Administracion",
     icon: <TableIcon />,
-    roles: ["Admin", "Secretario"],
+    roles: ["Admin"],
     subItems: [
       { name: "Usuarios", path: "/usuarios", roles: ["Admin"] },
-      { name: "Formularios", path: "/formularios", roles: ["Admin", "Secretario"] },
+      { name: "Formularios", path: "/formularios", roles: ["Admin"] },
     ],
   },
   {
@@ -92,7 +92,7 @@ const othersItems: NavItem[] = [
     icon: <PieChartIcon />,
     name: "Soporte",
     path: "/",
-    roles: ["Admin"],
+    roles: ["Admin", "Coordinador", "Secretario", "Periodista", "Pasante"],
   },
 ];
 

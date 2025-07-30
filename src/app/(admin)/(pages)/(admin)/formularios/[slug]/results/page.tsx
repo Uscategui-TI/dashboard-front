@@ -70,7 +70,7 @@ return (
 
                 const chartOptions: ApexOptions = {
                     chart: { type: chartType },
-                    labels:  labels ,
+                    labels: isPie ? labels : undefined,
                     xaxis: !isPie ? { categories: labels } : undefined,
                     theme: { mode: "dark" },
                     legend: { position: "bottom" },

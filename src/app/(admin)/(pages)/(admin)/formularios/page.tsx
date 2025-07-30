@@ -1,47 +1,78 @@
-"use client"
+"use client";
 
-import { useState } from "react";
-import { createForm } from "@/api/services/formService";
-import { useRouter } from "next/navigation";
-import PageBreadcrumb from "@/components/common/PageBreadCrumb";
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import { useNavigation } from "@/util";
 import Button from "@/components/shared/ui/button/Button";
 
-export default function CreateFormPage() {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const router = useRouter();
+type Form = {
+    id: number;
+    title: string;
+    description: string;
+    slug: string;
+};
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const form = await createForm({ title, description });
-    router.push(`/formularios/${form.slug}`);
-  };
+export default function FormulariosPage() {
 
-return (
-    <>
-        <PageBreadcrumb pageTitle="Formularios"/>
-        <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
-            <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90 mb-6">
-                Crear Formulario
-            </h1>
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <input 
-                    className="h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/10 dark:border-gray-700" 
-                    placeholder="Título" 
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)} 
-                />
-                <textarea 
-                    rows={6}
-                    className="shadow-sm border bg-gray-50 dark:border-gray-700 dark:bg-gray-900 border-gray-300 text-gray-900 sm:text-sm rounded-lg block w-full p-2.5 dark:text-white"
-                    placeholder="Descripción" 
-                    value={description} onChange={(e) => setDescription(e.target.value)} 
-                />
-                <div className="flex justify-end">
-                    <Button type="submit" size="md">Crear</Button>
-                </div>
-            </form>
+    const { redirectTo } = useNavigation();
+    
+    const [formularios, setFormularios] = useState<Form[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+
+    useEffect(() => {
+        const fetchForms = async () => {
+        try {
+            const response = await fetch("http://localhost:8080/api/forms/all");
+            if (!response.ok) throw new Error("Error al obtener formularios");
+            const data = await response.json();
+            setFormularios(data);
+        } catch (err: any) {
+            setError(err.message || "Error desconocido");
+        } finally {
+            setLoading(false);
+        }
+        };
+
+        fetchForms();
+    }, []);
+
+    return (
+        <div className="p-6">
+        <div className="flex justify-between items-center">
+            <h1 className="text-3xl font-bold text-white">Selecciona un formulario</h1>
+            <Button onClick={() => redirectTo(`/formularios/create`)}>Crear Formulario</Button>
         </div>
-    </>
+
+        {loading && <p className="text-gray-600">Cargando formularios...</p>}
+        {error && <p className="text-red-500">Error: {error}</p>}
+
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-9">
+            {formularios.map((form) => (
+            <div
+                key={form.id}
+                className="bg-white shadow-md rounded-lg p-4 border border-gray-200 hover:shadow-lg transition"
+            >
+                <h2 className="text-xl font-semibold mb-2">{form.title}</h2>
+                <p className="text-gray-600 mb-4">{form.description}</p>
+                <div className="flex gap-2">
+                    <Button
+                        onClick={() => redirectTo(`/formularios/${form.slug}/create`)}
+                        className="inline-block bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition"
+                    >
+                        Editar
+                    </Button>
+                    <Button
+                        onClick={() => redirectTo(`/formularios/${form.slug}/results`)}
+                        className="inline-block bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition"
+                    >
+                        Estadisticas
+                    </Button>
+                </div>
+            </div>
+            ))}
+        </div>
+        </div>
     );
 }

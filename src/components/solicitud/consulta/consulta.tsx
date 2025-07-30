@@ -2,8 +2,9 @@
 
 import { endPointBackend } from "@/api";
 import Avatar from "@/components/shared/ui/avatar/Avatar";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { FaYoutube, FaFacebookF, FaWhatsapp, FaGlobe } from "react-icons/fa";
+import { FaYoutube, FaFacebookF, FaWhatsapp, FaGlobe, FaInstagram } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 
 
@@ -65,25 +66,36 @@ const regex = /\[(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?)\]([^\[]*)/g
 };
 
 export default function ConsultaSolicitudPage() {
-  const [codigo, setCodigo] = useState("");
+  const searchParams = useSearchParams();
+  const codeFromURL = searchParams?.get("code") ?? ""; 
+
+  const [codigo, setCodigo] = useState(codeFromURL);
   const [solicitud, setSolicitud] = useState<any>(null);
   const [error, setError] = useState("");
   const resultRef = useRef<HTMLDivElement | null>(null);
 
-  const handleConsultar = async () => {
-    setError("");
-    setSolicitud(null);
-
-    if (!codigo.trim()) {
-      setError("Ingrese un código de solicitud.");
-      return;
+  useEffect(() => {
+    if (codeFromURL) {
+      handleConsultar(codeFromURL);
     }
+  }, [codeFromURL]);
 
-    endPointBackend({ accionBD: "Get-Solicitud", id: codigo })
-    .then((resp) => {
-      setSolicitud(resp.data);
-    })
-  };
+    const handleConsultar = async (codigoConsulta: string = codigo) => {
+      setError("");
+      setSolicitud(null);
+
+      if (!codigoConsulta.trim()) {
+        setError("Ingrese un código de solicitud.");
+        return;
+      }
+
+      try {
+        const resp = await endPointBackend({ accionBD: "Get-Solicitud", id: codigoConsulta });
+        setSolicitud(resp.data);
+      } catch (err) {
+        setError("Error al consultar la solicitud.");
+      }
+    };
 
   useEffect(() => {
     if (solicitud && resultRef.current) {
@@ -120,7 +132,7 @@ export default function ConsultaSolicitudPage() {
             className="flex-1 border rounded-lg px-4 py-2 text-gray-700 shadow-sm focus:ring-2 focus:ring-indigo-400"
           />
           <button
-            onClick={handleConsultar}
+            onClick={() => handleConsultar()}
             className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 flex items-center gap-2 transition-all"
           >
             Consultar
@@ -199,7 +211,7 @@ export default function ConsultaSolicitudPage() {
       <div className="fixed bottom-5 right-5 flex flex-col space-y-4 z-50">
         {/* YouTube */}
         <a
-          href="https://youtube.com/tu_canal"
+          href="https://www.youtube.com/@Boletinmes"
           target="_blank"
           rel="noopener noreferrer"
           className="bg-red-600 hover:bg-red-700 text-white p-3 rounded-full shadow-lg flex items-center justify-center"
@@ -210,7 +222,7 @@ export default function ConsultaSolicitudPage() {
 
         {/* Facebook */}
         <a
-          href="https://facebook.com/tu_pagina"
+          href="https://www.facebook.com/jjuscategui/"
           target="_blank"
           rel="noopener noreferrer"
           className="bg-blue-700 hover:bg-blue-800 text-white p-3 rounded-full shadow-lg flex items-center justify-center"
@@ -221,7 +233,7 @@ export default function ConsultaSolicitudPage() {
 
         {/* X (antes Twitter) */}
         <a
-          href="https://x.com/tu_usuario"
+          href="https://x.com/jjUscategui"
           target="_blank"
           rel="noopener noreferrer"
           aria-label="X"
@@ -231,9 +243,20 @@ export default function ConsultaSolicitudPage() {
           <FaXTwitter size={24} />
         </a>
 
+         {/* Instagram */}
+          <a
+            href="https://www.instagram.com/jjuscategui/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-pink-500 hover:bg-pink-600 text-white p-3 rounded-full shadow-lg flex items-center justify-center"
+            aria-label="Instagram"
+          >
+            <FaInstagram size={24} />
+          </a>
+
         {/* WhatsApp */}
         <a
-          href="https://wa.me/1234567890"  // Cambia por tu número en formato internacional sin signos
+          href="https://wa.me/+573102782407"  // Cambia por tu número en formato internacional sin signos
           target="_blank"
           rel="noopener noreferrer"
           className="bg-green-500 hover:bg-green-600 text-white p-3 rounded-full shadow-lg flex items-center justify-center"
@@ -244,7 +267,7 @@ export default function ConsultaSolicitudPage() {
 
         {/* Página web */}
         <a
-          href="https://tusitio.com"
+          href="https://uscateguicol.com/"
           target="_blank"
           rel="noopener noreferrer"
           className="bg-gray-800 hover:bg-gray-900 text-white p-3 rounded-full shadow-lg flex items-center justify-center"

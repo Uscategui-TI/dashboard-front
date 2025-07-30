@@ -105,6 +105,10 @@ const CategorySolicitudes = [
     { value: "PETICION", label: "Petición" },
     { value: "CONSTRUCCION", label: "Construcción" },
     { value: "PROPUESTA", label: "Propuesta" },
+    { value: "PETICION", label: "Derecho de petición" },
+    { value: "TUTELA", label: "Acción de tutela" },
+    { value: "SOLICITUD", label: "Solicitud" },
+    { value: "INFORMES", label: "Informes" }
 ];
 
 const PrioritySolicitudes = [
@@ -276,7 +280,7 @@ export default function RecentOrders() {
               </div>
 
               <div>
-                <Label className="block mb-1 text-gray-700 dark:text-gray-300">Mensaje</Label>
+                <Label className="block mb-1 text-gray-700 dark:text-gray-300">Solicitud</Label>
                 <TextArea
                   name="mensaje"
                   value={form.mensaje}

@@ -22,20 +22,26 @@ import SolicitudesChart from "./SolicitudesChart";
     [key: string]: number;
   };
 
-  const getEstadoVariant = (
-    estado: string
-  ): "success" | "warning" | "error"  => {
-    switch (estado) {
-      case "EN_PROCESO":
-        return "success";
-      case "PENDIENTE":
-        return "warning";
-      case "RECHAZADA":
-        return "error";
-      default:
-        return "error";
-    }
-  };
+const getEstadoVariant = (
+  estado: string
+): "success" | "warning" | "info" | "light" | "dark" | "primary" | "error" => {
+  switch (estado.toUpperCase()) {
+    case "EN_PROCESO":
+      return "info"; 
+    case "PENDIENTE":
+      return "warning";
+    case "RECHAZADA":
+      return "error"; 
+    case "APROBADO":
+      return "success"; 
+    case "PAUSADOS":
+      return "dark"; 
+    case "FINALIZADOS":
+      return "primary"; 
+    default:
+      return "light"; 
+  }
+};
   
   const columns = [
     { key: "publicCode", header: "Código Solicitud" },
@@ -165,4 +171,4 @@ export default function RecentOrders() {
         </div>
       </div>
     );
-  };
+};
