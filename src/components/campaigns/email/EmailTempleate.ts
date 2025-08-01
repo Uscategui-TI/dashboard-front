@@ -72,7 +72,7 @@ export function EmailTemplate({
               </a>
               <a href="${buttonUrl1 }" target="_blank" rel="noopener noreferrer"
                  style="background-color: #002147; color: #ffffff; padding: 12px 24px; border-radius: 5px; font-weight: bold; display: inline-block;">
-                Inscríbete Por favor
+                Pagina Web
               </a>
             </td>
           </tr>
