@@ -11,31 +11,28 @@ import Pagination from "@/components/shared/tables/Pagination";
 import EditProspectForm from "@/components/prospect/forms/editProspectorm";
 import ConfirmacionModal from "@/components/shared/ui/modal/ConfirmModal";
 import { endPointBackend } from "@/api";
+import type { ColumnConfig } from "@/components/shared/tables/GenericTable";
 
-const columns = [
-  { key: "name", header: "Nombres" },
-  { key: "lastName", header: "Apellidos" },
-  { key: "phone", header: "Celular" },
-  { key: "email", header: "Correo" },
-  { key: "document", header: "Documento" },
-  { key: "cargo", header: "Cargo / Ocupación" },
-  { key: "database", header: "Base de datos"},
+const columns: ColumnConfig<any>[] = [
+  { key: "name", header: "Nombres", filterType: "text" },
+  { key: "lastName", header: "Apellidos", filterType: "text" },
+  { key: "phone", header: "Celular", filterType: "text" },
+  { key: "email", header: "Correo", filterType: "text" },
+  { key: "document", header: "Documento", filterType: "text" },
+  { key: "cargo", header: "Cargo / Ocupación", filterType: "text" }
 ];
 
 export default function ProspectosPanel() {
-
   const { isOpen, openModal, closeModal } = useModal();
-
   const {
     isOpen: isCampaingModalOpen,
     openModal: openCampaingModal,
-    closeModal: closeCampaingModal
+    closeModal: closeCampaingModal,
   } = useModal();
-
   const {
     isOpen: isDifusionModalOpen,
     openModal: openDifusionModal,
-    closeModal: closeDifusionModal
+    closeModal: closeDifusionModal,
   } = useModal();
 
   const [data, setData] = useState<any[]>([]);
@@ -46,79 +43,122 @@ export default function ProspectosPanel() {
   const [editingProspect, setEditingProspect] = useState<any | null>(null);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [prospectToDelete, setProspectToDelete] = useState<any | null>(null);
-
+  const [columnFilters, setColumnFilters] = useState<Record<string, any>>({});
   const [selectedRows, setSelectedRows] = useState<any[]>([]);
+  const [selectedRowIds, setSelectedRowIds] = useState<string[]>([]);
+
+
 
   const confirmDelete = async () => {
     if (!prospectToDelete) return;
-    endPointBackend({ accionBD: "Delete-Prospect", id: prospectToDelete.document  })
-    .then((resp) => {
+    endPointBackend({ accionBD: "Delete-Prospect", id: prospectToDelete.document }).then(() => {
       setData((prev) => prev.filter((p) => p.document !== prospectToDelete.document));
       setShowConfirmDelete(false);
       setProspectToDelete(null);
-    }) 
+    });
   };
 
   useEffect(() => {
-    endPointBackend({ accionBD: "List-Prospects", params: { page, size, search: searchTerm } })
-    .then((resp) => {
-        setData(resp.data.content);
-        setTotalPages(resp.data.totalPages);
-    }) 
-  }, [page, size, searchTerm]);
+    endPointBackend({
+      accionBD: "List-Prospects",
+      params: {
+        page,
+        size,
+        search: searchTerm,
+        ...columnFilters,
+      },
+    }).then((resp) => {
+      setData(resp.data.content);
+      setTotalPages(resp.data.totalPages);
+    });
+  }, [page, size, searchTerm, columnFilters]);
 
-  
-  const getVisiblePages = () => {
-    const delta = 2;
-    const range = [];
-    const start = Math.max(0, page - delta);
-    const end = Math.min(totalPages - 1, page + delta);
-    for (let i = start; i <= end; i++) range.push(i);
-    return range;
+  const handleSelectAll = async (select: boolean) => {
+    if (select) {
+      const response = await fetch("/api/prospectos/ids?" + new URLSearchParams({
+        search: searchTerm,
+        name: columnFilters.name || "",
+        lastName: columnFilters.lastName || "",
+        phone: columnFilters.phone || "",
+        email: columnFilters.email || "",
+        document: columnFilters.document || "",
+        cargo: columnFilters.cargo || ""
+
+      }));
+
+      const json = await response.json();
+      const ids = json.data;
+      setSelectedRowIds(ids);
+    } else {
+      setSelectedRowIds([]);
+    }
   };
 
-  
 
   return (
     <>
-      <PageBreadcrumb pageTitle="Listar Prospectos"/>
+      <PageBreadcrumb pageTitle="Listar Prospectos" />
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div></div>
           <div className="flex gap-3">
-            <Button onClick={() => openModal()}>Registar</Button>
-    
-            {selectedRows && selectedRows.length != 0? (
-              <Button onClick={() => openCampaingModal()}>Crear Campaña</Button>
-            ) : null}
+            <Button onClick={openModal}>Registrar</Button>
+            {selectedRows.length !== 0 && (
+              <Button onClick={openCampaingModal}>Crear Campaña</Button>
+            )}
           </div>
         </div>
-  
+
         <div className="max-w-full overflow-x-auto">
           <GenericTable<any>
             columns={columns}
             data={data}
-            selectable={true}
-            searchableColumns={["name", "cargo","document"]}
-            onSearchChange={(value) => { setPage(0); setSearchTerm(value); }}
+            selectable
+            searchableColumns={["name", "cargo", "document"]}
+            onSearchChange={(value) => {
+              setPage(0);
+              setSearchTerm(value);
+            }}
+            onFilterChange={(filters: Record<string, string>) => {
+              setColumnFilters(filters);
+              setPage(0);
+            }}
             actions={(row) => (
               <div className="flex gap-2">
-                <Button size="sm" variant="outline" onClick={() => setEditingProspect(row) }>Editar</Button>
-                <Button size="sm" variant="outline" onClick={() =>{ setProspectToDelete(row); setShowConfirmDelete(true); } }>
+                <Button size="sm" variant="outline" onClick={() => setEditingProspect(row)}>
+                  Editar
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setProspectToDelete(row);
+                    setShowConfirmDelete(true);
+                  }}
+                >
                   Eliminar
                 </Button>
               </div>
             )}
-            onSelectionChange={(rows) => {
-              console.log("Registros seleccionados:", rows);
-              setSelectedRows(rows); 
-            }}
+            onSelectionChange={setSelectedRows}
+            onSelectAll={handleSelectAll}
           />
+          {selectedRows.length > 0 && (
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+              Prospectos seleccionados: <strong>{selectedRows.length}</strong>
+            </p>
+          )}
         </div>
-        <Pagination key={page} currentPage={page} onPageChange={setPage} totalPages={totalPages}/>
+
+        <Pagination
+          key={page}
+          currentPage={page}
+          onPageChange={setPage}
+          totalPages={totalPages}
+        />
       </div>
 
-      {/* Modal Crear Prospecto  */}
+      {/* Modal Crear Prospecto */}
       <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[1100px] p-6 lg:p-10">
         <div className="flex flex-col px-2 overflow-y-auto custom-scrollbar">
           <div className="mb-3">
@@ -126,10 +166,9 @@ export default function ProspectosPanel() {
               Creación de Prospectos
             </h5>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Agrega tus prospectos es importante que puedas adjuntar toda la infromación para mejorar las metricas
+              Agrega tus prospectos. Es importante que puedas adjuntar toda la información para mejorar las métricas.
             </p>
           </div>
-
           <PersonFormPage closeModal={closeModal} />
         </div>
       </Modal>
@@ -142,17 +181,15 @@ export default function ProspectosPanel() {
             setProspectToDelete(null);
           }}
           onConfirm={confirmDelete}
-          message={`¿Estás seguro de eliminar este registro"?`}
+          message={`¿Estás seguro de eliminar este registro?`}
         />
       )}
 
-      {/* Modal Elegir Capaña  */}
+      {/* Modal Elegir Campaña */}
       <Modal isOpen={isCampaingModalOpen} onClose={closeCampaingModal} className="max-w-[750px] p-6 lg:p-10">
         <div className="flex flex-col px-4 py-5 overflow-y-auto custom-scrollbar">
           <div className="mb-6">
-            <h5 className="mb-2 text-2xl font-bold text-gray-800 dark:text-white">
-              Selecciona la Campaña a Difundir
-            </h5>
+            <h5 className="mb-2 text-2xl font-bold text-gray-800 dark:text-white">Selecciona la Campaña a Difundir</h5>
             <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
               Puedes seleccionar estos proveedores para difundir tus mensajes, invitaciones, eventos y mucho más.
             </p>
@@ -163,100 +200,80 @@ export default function ProspectosPanel() {
           </p>
 
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 w-full">
-            <button
-              onClick={openDifusionModal}
-              className="flex items-center justify-center h-16 rounded-xl font-semibold text-white bg-yellow-500 hover:bg-yellow-600 shadow-md transition-all duration-200"
-            >
-              SMS
-            </button>
-            <button
-              onClick={openDifusionModal}
-              className="flex items-center justify-center h-16 rounded-xl font-semibold text-white bg-blue-500 hover:bg-blue-600 shadow-md transition-all duration-200"
-            >
-              Correo
-            </button>
-            <button
-              onClick={openDifusionModal}
-              className="flex items-center justify-center h-16 rounded-xl font-semibold text-white bg-green-500 hover:bg-green-600 shadow-md transition-all duration-200"
-            >
-              WhatsApp
-            </button>
-            <button
-              onClick={openDifusionModal}
-              className="flex items-center justify-center h-16 rounded-xl font-semibold text-white bg-indigo-500 hover:bg-indigo-600 shadow-md transition-all duration-200"
-            >
-              Telegram
-            </button>
+            {[
+              { label: "SMS", color: "yellow" },
+              { label: "Correo", color: "blue" },
+              { label: "WhatsApp", color: "green" },
+              { label: "Telegram", color: "indigo" },
+            ].map(({ label, color }) => (
+              <button
+                key={label}
+                onClick={openDifusionModal}
+                className={`flex items-center justify-center h-16 rounded-xl font-semibold text-white bg-${color}-500 hover:bg-${color}-600 shadow-md transition-all duration-200`}
+              >
+                {label}
+              </button>
+            ))}
           </div>
         </div>
       </Modal>
 
+      {/* Modal Editar Prospecto */}
       <Modal isOpen={!!editingProspect} onClose={() => setEditingProspect(null)} className="max-w-[800px] p-6 lg:p-10">
         <div className="flex flex-col px-2 overflow-y-auto custom-scrollbar">
-          <h5 className="mb-2 font-semibold text-gray-800 modal-title text-theme-xl dark:text-white/90 lg:text-2xl">Editar Prospecto</h5>
+          <h5 className="mb-2 font-semibold text-gray-800 modal-title text-theme-xl dark:text-white/90 lg:text-2xl">
+            Editar Prospecto
+          </h5>
           {editingProspect && (
             <EditProspectForm
               prospect={editingProspect}
               onClose={() => setEditingProspect(null)}
-              onUpdate={() => setPage(0)} // fuerza recarga de la página
+              onUpdate={() => setPage(0)}
             />
           )}
         </div>
       </Modal>
-      
-      {/* Modal Difundir campaña */}
-      <Modal
-        isOpen={isDifusionModalOpen} 
-        onClose={closeDifusionModal}
-        className="max-w-[950px] p-6 lg:p-10"
-      >
-       <div className="flex flex-col px-4 py-5 overflow-y-auto custom-scrollbar">
-        <div className="mb-6">
-          <h5 className="mb-2 text-2xl font-bold text-gray-800 dark:text-white">
-            Parametriza tu Campaña
-          </h5>
-          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-            Puedes seleccionar estos proveedores para difundir tus mensajes, invitaciones, eventos y mucho más.
-          </p>
-        </div>
 
-        <div className="flex flex-col gap-4 mt-4">
-          <label className="block text-sm text-gray-600 dark:text-gray-300">Personaliza tu Mensaje</label>
-          <textarea
-            rows={4}
-            // value={customMessage}
-            // onChange={(e) => setCustomMessage(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-          />
+      {/* Modal Difundir Campaña */}
+      <Modal isOpen={isDifusionModalOpen} onClose={closeDifusionModal} className="max-w-[950px] p-6 lg:p-10">
+        <div className="flex flex-col px-4 py-5 overflow-y-auto custom-scrollbar">
+          <div className="mb-6">
+            <h5 className="mb-2 text-2xl font-bold text-gray-800 dark:text-white">Parametriza tu Campaña</h5>
+            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+              Puedes seleccionar estos proveedores para difundir tus mensajes, invitaciones, eventos y mucho más.
+            </p>
+          </div>
 
-          <div className="mb-4">
-            <label className="block mb-2 text-sm text-gray-600 dark:text-gray-300">Adjunta tu archivo multimedia (opcional)</label>
-            {/* <ImageUpload onChange={(url) => setImageUrl(url)} value={imageUrl ?? ""} /> */}
+          <div className="flex flex-col gap-4 mt-4">
+            <label className="block text-sm text-gray-600 dark:text-gray-300">Personaliza tu Mensaje</label>
+            <textarea
+              rows={4}
+              className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+            />
+
+            <div className="mb-4">
+              <label className="block mb-2 text-sm text-gray-600 dark:text-gray-300">Adjunta tu archivo multimedia (opcional)</label>
+              {/* <ImageUpload onChange={(url) => setImageUrl(url)} value={imageUrl ?? ""} /> */}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 mt-6 modal-footer sm:justify-end">
+            <button
+              onClick={closeModal}
+              type="button"
+              className="flex w-full justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] sm:w-auto"
+            >
+              Volver
+            </button>
+            <button
+              type="button"
+              className="btn btn-success btn-update-event flex w-full justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 sm:w-auto"
+            >
+              Enviar Mensajes
+            </button>
           </div>
         </div>
-          
-        <div className="flex items-center gap-3 mt-6 modal-footer sm:justify-end">
-          <button
-            onClick={closeModal}
-            type="button"
-            className="flex w-full justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] sm:w-auto"
-          >
-            Volver
-          </button>
-          <button
-            // onClick={async () => {
-            //   closeModal()
-            //   await handleSendBirthdayMessages(customMessage, imageUrl);
-            // }}
-            type="button"
-            className="btn btn-success btn-update-event flex w-full justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 sm:w-auto"
-          >
-          Enviar Mensajes
-          </button>
-        </div> 
-      </div>
       </Modal>
-
     </>
   );
 }
