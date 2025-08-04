@@ -3,7 +3,7 @@ export async function createForm(data: {
   title: string;
   description: string;
 }) {
-  const res = await fetch("https://dashboardqa.uscateguicol.com/api/forms", {
+  const res = await fetch("https://auth-service-qa.up.railway.app/api/forms", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -24,7 +24,7 @@ export async function createQuestion(data: {
   options?: { optionText: string }[];
 }, slug: string | string[] | undefined) {
     console.log(data)
-  const res = await fetch(`https://dashboardqa.uscateguicol.com/api/questions/form/${slug}`, {
+  const res = await fetch(`https://auth-service-qa.up.railway.app/api/questions/form/${slug}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -37,14 +37,14 @@ export async function createQuestion(data: {
 }
 
 export async function getFormBySlug(slug: string) {
-  const res = await fetch(`https://dashboardqa.uscateguicol.com/api/questions/form/${slug}`);
+  const res = await fetch(`https://auth-service-qa.up.railway.app/api/questions/form/${slug}`);
 
   if (!res.ok) throw new Error("Formulario no encontrado");
   return await res.json(); // Devuelve las preguntas con sus opciones
 }
 
 export async function submitResponses(slug: string, answers: { question: { id: number }, answerText: string }[]) {
-  const res = await fetch(`https://dashboardqa.uscateguicol.com/api/responses/${slug}`, {
+  const res = await fetch(`https://auth-service-qa.up.railway.app/api/responses/${slug}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -56,7 +56,7 @@ export async function submitResponses(slug: string, answers: { question: { id: n
 }
 
 export async function getFormSummary(slug: string) {
-  const res = await fetch(`https://dashboardqa.uscateguicol.com/api/responses/form/${slug}/summary`);
+  const res = await fetch(`https://auth-service-qa.up.railway.app/api/responses/form/${slug}/summary`);
   if (!res.ok) throw new Error("No se pudo obtener el resumen");
   return await res.json();
 }
