@@ -9,6 +9,7 @@ export type ColumnConfig<T> = {
   header: string;
   render?: (row: T) => React.ReactNode;
   filterType?: "text" | "select" | "range";
+  selectedIds?: (string | number)[];
 };
 
 type GenericTableProps<T> = {
@@ -21,7 +22,9 @@ type GenericTableProps<T> = {
   onSearchChange?: (value: string) => void;
   onFilterChange?: (filters: Record<string, string>) => void;
   onSelectAll?: (select: boolean) => void;
+  selectedIds?: (string | number)[]; // ✅ AÑADE ESTA LÍNEA
 };
+
 
 export function GenericTable<T extends { id: string | number }>({
   columns,
@@ -37,8 +40,8 @@ export function GenericTable<T extends { id: string | number }>({
   const [selectedIds, setSelectedIds] = useState<(string | number)[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState<Record<string, string>>({});
-  const [selectedGlobalIds, setSelectedGlobalIds] = useState<(string | number)[]>([]);
-  const [selectAllActive, setSelectAllActive] = useState(false);
+  const [internalSelectedIds, setInternalSelectedIds] = useState<(string | number)[]>([]);
+
   
 
   // Emitir cambios de filtros hacia el padre
@@ -48,7 +51,8 @@ export function GenericTable<T extends { id: string | number }>({
     }
   }, [filters]);
 
-  const isSelected = (id: string | number) => selectedIds.includes(id);
+  const isSelected = (id: string | number) =>
+  (selectedIds ?? internalSelectedIds).includes(id);
   const isAllSelected = data.length > 0 && selectedIds.length === data.length;
 
   const filteredData: T[] = onSearchChange
@@ -102,20 +106,23 @@ export function GenericTable<T extends { id: string | number }>({
   }, [selectedIds]);
 
   const toggleSelect = (row: T) => {
-    setSelectedIds((prev) =>
-      prev.includes(row.id) ? prev.filter((id) => id !== row.id) : [...prev, row.id]
-    );
+  const currentIds = selectedIds ?? internalSelectedIds;
+    const updated = currentIds.includes(row.id)
+      ? currentIds.filter((id) => id !== row.id)
+      : [...currentIds, row.id];
+
+    if (!selectedIds) setInternalSelectedIds(updated); // solo si no es controlado externamente
+    onSelectionChange?.(data.filter(item => updated.includes(item.id)));
   };
 
   const toggleSelectAll = () => {
-    if (isAllSelected) {
-      setSelectedIds([]);
-      onSelectAll?.(false); // Notifica al padre que se deseleccionó todo
-    } else {
-      const ids = filteredData.map((item) => item.id);
-      setSelectedIds(ids);
-      onSelectAll?.(true); // Notifica al padre que se seleccionó todo
-    }
+    const allIds = filteredData.map((item) => item.id);
+    const shouldSelectAll = allIds.length > 0 && !allIds.every(id => isSelected(id));
+
+    const updated = shouldSelectAll ? allIds : [];
+
+    if (!selectedIds) setInternalSelectedIds(updated);
+    onSelectAll?.(shouldSelectAll);
   };
 
 

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 
 import FormInput from "@/components/form/FormInput";
-import FormSelect from "@/components/form/FormSelect";
+import FormSelectNumber from "@/components/form/FormSelectNumber";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/Input";
 import Select from "@/components/form/Select";
@@ -215,11 +215,11 @@ export default function PersonFormPage({ closeModal }: any) {
           />
         </div>
         <div className="col-span-3">
-          <FormSelect
+          <FormSelectNumber
             name="genderId"
             label="Género*"
             control={control}
-            options={genders ?? []}
+            options={genders}
             placeholder="Selecciona género"
             error={errors.genderId}
             keyReset={formResetKey}

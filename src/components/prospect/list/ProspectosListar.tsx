@@ -19,8 +19,11 @@ const columns: ColumnConfig<any>[] = [
   { key: "phone", header: "Celular", filterType: "text" },
   { key: "email", header: "Correo", filterType: "text" },
   { key: "document", header: "Documento", filterType: "text" },
-  { key: "cargo", header: "Cargo / Ocupación", filterType: "text" }
+  { key: "cargo", header: "Cargo / Ocupación", filterType: "text" },
+  { key:"database", header:"Base Datos", filterType: "text"}
 ];
+
+const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
 
 export default function ProspectosPanel() {
   const { isOpen, openModal, closeModal } = useModal();
@@ -75,24 +78,18 @@ export default function ProspectosPanel() {
 
   const handleSelectAll = async (select: boolean) => {
     if (select) {
-      const response = await fetch("/api/prospectos/ids?" + new URLSearchParams({
+      const response = await fetch(`${authUrl}/api/v1.0/prospects/ids?` + new URLSearchParams({
         search: searchTerm,
-        name: columnFilters.name || "",
-        lastName: columnFilters.lastName || "",
-        phone: columnFilters.phone || "",
-        email: columnFilters.email || "",
-        document: columnFilters.document || "",
-        cargo: columnFilters.cargo || ""
-
+        ...columnFilters
       }));
-
       const json = await response.json();
       const ids = json.data;
-      setSelectedRowIds(ids);
+      setSelectedRowIds(ids); // ✅ todos los IDs filtrados
     } else {
       setSelectedRowIds([]);
     }
   };
+
 
 
   return (
@@ -142,6 +139,7 @@ export default function ProspectosPanel() {
             )}
             onSelectionChange={setSelectedRows}
             onSelectAll={handleSelectAll}
+            selectedIds={selectedRowIds}
           />
           {selectedRows.length > 0 && (
             <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
