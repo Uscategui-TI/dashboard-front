@@ -56,7 +56,7 @@ export const getGenderDonutChartOptions = (
     legend: { position: "bottom" },
 });
   
-export const getChartOptionsLines = (categories: string[], viewMode: string): ApexOptions => ({
+export const getChartOptionsLines = (categories: string[], viewMode?: string): ApexOptions => ({
   chart: { type: "area", height: 310, toolbar: { show: false } },
   xaxis: {
     categories,

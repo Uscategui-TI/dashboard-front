@@ -242,7 +242,7 @@ export default function SolicitudPage() {
                   .map((comentario, index) => (
                     <div key={index} className="flex items-start space-x-3 my-4">
                       {/* Avatar */}
-                      <Avatar src="/images/user/user-01.jpg" size="small" status="online"/>
+                      <Avatar src="/images/logo/logo-uscate-icon.jpg" size="small" status="online"/>
                       {/* Comentario */}
                       <div>
                         <p className="text-xs text-gray-400">

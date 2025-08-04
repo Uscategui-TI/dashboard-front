@@ -240,6 +240,12 @@ export async function endPointBackend({ accionBD, id, body, params, isFormData }
             Url = `${urlIp}${urlPort}/v1.0/solicitud/${id}/consulta`;
             break;
         }
+        
+        case "Get-Solicitud-Char-Anio": {  
+            method = "GET";
+            Url = `${urlIp}${urlPort}/v1.0/solicitud/chart-anio`;
+            break;
+        }
 
         // SEVICIOS CATALOGOS
         case "List-Genders": {  

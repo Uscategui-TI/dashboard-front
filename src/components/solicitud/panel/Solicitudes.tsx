@@ -6,6 +6,9 @@ import axios from "@/lib/axiosInstance";
 import { GenericTable } from "@/components/shared/tables/GenericTable";
 import { EcommerceMetrics } from "./EcommerceMetrics";
 import SolicitudesChart from "./SolicitudesChart";
+import ReactApexChart from "react-apexcharts";
+import { endPointBackend } from "@/api";
+import { getChartOptionsLines } from "@/util";
 
   type EventStat = {
     id: string | number;
@@ -43,36 +46,39 @@ const getEstadoVariant = (
   }
 };
   
-  const columns = [
-    { key: "publicCode", header: "Código Solicitud" },
-    { key: "asunto", header: "Asunto" },
-    {
-      key: "Prospecto",
-      header: "Prospecto",
-      render: (row: EventStat) => row.prospecto?.document || "-",
-    },
-    { key: "categoria", header: "Categoria" },
-    {
-      key: "fechaCreacion",
-      header: "Fecha",
-      render: (row: EventStat) =>
-        new Date(row.fechaCreacion).toLocaleDateString(),
-    },
-    {
-      key: "estado",
-      header: "Estado",
-      render: (row: EventStat) => (
-        <Badge color={getEstadoVariant(row.estado)}>{row.estado}</Badge>
-      ),
-    },
-  ];
+const columns = [
+  { key: "publicCode", header: "Código Solicitud" },
+  { key: "asunto", header: "Asunto" },
+  {
+    key: "Prospecto",
+    header: "Prospecto",
+    render: (row: EventStat) => row.prospecto?.document || "-",
+  },
+  { key: "categoria", header: "Categoria" },
+  {
+    key: "fechaCreacion",
+    header: "Fecha",
+    render: (row: EventStat) =>
+      new Date(row.fechaCreacion).toLocaleDateString(),
+  },
+  {
+    key: "estado",
+    header: "Estado",
+    render: (row: EventStat) => (
+      <Badge color={getEstadoVariant(row.estado)}>{row.estado}</Badge>
+    ),
+  },
+];
 
-  
 export default function RecentOrders() {
   const [data, setData] = useState<EventStat[]>([]);
   const [prospects, setProspects] = useState(0);
   const [prevProspects, setPrevProspects] = useState(0);
   const [conteoPorEstado, setConteoPorEstado] = useState<ConteoPorEstado>({});
+
+  const [dataAnio, setDataAnio] = useState<any[]>([]);
+  const years = ["2019", "2020", "2021", "2022", "2023", "2024", "2025"];
+  const [solictudesYear, setSolictudesYear] = useState<string[]>(years);
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -97,9 +103,22 @@ export default function RecentOrders() {
       }
     };
 
+  endPointBackend({ accionBD: "Get-Solicitud-Char-Anio" })
+  .then((resp) => {
+    setSolictudesYear(resp.data.anio);
+    setDataAnio([
+      {
+        name: "Solicitudes",
+        data: resp.data.cantidad,
+      },
+    ]);
+  });
+ 
+
     fetchAllData();
   }, []);
-  
+
+
     return (
       <div className="p-4 space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -156,6 +175,17 @@ export default function RecentOrders() {
             prospects={prospects}
             prevProspects={prevProspects}
           />
+        </div>
+
+        <div className="max-w-full overflow-x-auto custom-scrollbar">
+            <div className="min-w-[1000px] xl:min-w-full">
+                <ReactApexChart
+                options={getChartOptionsLines(solictudesYear)}
+                series={dataAnio}
+                type="area"
+                height={310}
+                />
+            </div>
         </div>
   
         <div className="gap-4">
