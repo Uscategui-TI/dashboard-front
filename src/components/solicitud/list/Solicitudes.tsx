@@ -47,6 +47,7 @@ const initialForm = {
   usuarioAsignadoId: '',
 };
 
+
 const getEstadoVariant = (
   estado: string
 ): "success" | "warning" | "info" | "light" | "dark" | "primary" | "error" => {

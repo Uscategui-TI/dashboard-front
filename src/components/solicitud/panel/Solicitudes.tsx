@@ -6,9 +6,9 @@ import axios from "@/lib/axiosInstance";
 import { GenericTable } from "@/components/shared/tables/GenericTable";
 import { EcommerceMetrics } from "./EcommerceMetrics";
 import SolicitudesChart from "./SolicitudesChart";
-import ReactApexChart from "react-apexcharts";
 import { endPointBackend } from "@/api";
 import { getChartOptionsLines } from "@/util";
+import dynamic from "next/dynamic";
 
   type EventStat = {
     id: string | number;
@@ -69,6 +69,8 @@ const columns = [
     ),
   },
 ];
+
+const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 export default function RecentOrders() {
   const [data, setData] = useState<EventStat[]>([]);
