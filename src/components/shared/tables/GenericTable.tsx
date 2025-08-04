@@ -9,7 +9,6 @@ export type ColumnConfig<T> = {
   header: string;
   render?: (row: T) => React.ReactNode;
   filterType?: "text" | "select" | "range";
-  selectedIds?: (string | number)[];
 };
 
 type GenericTableProps<T> = {
@@ -22,9 +21,8 @@ type GenericTableProps<T> = {
   onSearchChange?: (value: string) => void;
   onFilterChange?: (filters: Record<string, string>) => void;
   onSelectAll?: (select: boolean) => void;
-  selectedIds?: (string | number)[]; // ✅ AÑADE ESTA LÍNEA
+  selectedIds?: (string | number)[];
 };
-
 
 export function GenericTable<T extends { id: string | number }>({
   columns,
@@ -36,33 +34,25 @@ export function GenericTable<T extends { id: string | number }>({
   onSearchChange,
   onFilterChange,
   onSelectAll,
+  selectedIds,
 }: GenericTableProps<T>) {
-  const [selectedIds, setSelectedIds] = useState<(string | number)[]>([]);
+  const [internalSelectedIds, setInternalSelectedIds] = useState<(string | number)[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState<Record<string, string>>({});
-  const [internalSelectedIds, setInternalSelectedIds] = useState<(string | number)[]>([]);
 
-  
+  const currentSelectedIds = selectedIds ?? internalSelectedIds;
 
-  // Emitir cambios de filtros hacia el padre
   useEffect(() => {
-    if (onFilterChange) {
-      onFilterChange(filters);
-    }
+    if (onFilterChange) onFilterChange(filters);
   }, [filters]);
-
-  const isSelected = (id: string | number) =>
-  (selectedIds ?? internalSelectedIds).includes(id);
-  const isAllSelected = data.length > 0 && selectedIds.length === data.length;
 
   const filteredData: T[] = onSearchChange
     ? data
     : data.filter((row) => {
         const matchesSearch =
-          !searchableColumns || searchableColumns.some((key) =>
-            String(row[key] ?? "")
-              .toLowerCase()
-              .includes(searchTerm.toLowerCase())
+          !searchableColumns ||
+          searchableColumns.some((key) =>
+            String(row[key] ?? "").toLowerCase().includes(searchTerm.toLowerCase())
           );
 
         const matchesFilters = Object.entries(filters).every(([key, value]) => {
@@ -100,38 +90,42 @@ export function GenericTable<T extends { id: string | number }>({
 
   useEffect(() => {
     if (onSelectionChange) {
-      const selected = data.filter((item) => selectedIds.includes(item.id));
+      const selected = data.filter((item) => currentSelectedIds.includes(item.id));
       onSelectionChange(selected);
     }
-  }, [selectedIds]);
+  }, [currentSelectedIds, data]);
+
+  const isSelected = (id: string | number) => currentSelectedIds.includes(id);
 
   const toggleSelect = (row: T) => {
-  const currentIds = selectedIds ?? internalSelectedIds;
-    const updated = currentIds.includes(row.id)
-      ? currentIds.filter((id) => id !== row.id)
-      : [...currentIds, row.id];
+    const updated = isSelected(row.id)
+      ? currentSelectedIds.filter((id) => id !== row.id)
+      : [...currentSelectedIds, row.id];
 
-    if (!selectedIds) setInternalSelectedIds(updated); // solo si no es controlado externamente
-    onSelectionChange?.(data.filter(item => updated.includes(item.id)));
+    if (!selectedIds) setInternalSelectedIds(updated);
+    onSelectionChange?.(data.filter((item) => updated.includes(item.id)));
   };
 
   const toggleSelectAll = () => {
-    const allIds = filteredData.map((item) => item.id);
-    const shouldSelectAll = allIds.length > 0 && !allIds.every(id => isSelected(id));
+    const filteredIds = filteredData.map((item) => item.id);
+    const allSelected = filteredIds.every((id) => currentSelectedIds.includes(id));
 
-    const updated = shouldSelectAll ? allIds : [];
+    const updated = allSelected
+      ? currentSelectedIds.filter((id) => !filteredIds.includes(id))
+      : Array.from(new Set([...currentSelectedIds, ...filteredIds]));
 
     if (!selectedIds) setInternalSelectedIds(updated);
-    onSelectAll?.(shouldSelectAll);
+    onSelectAll?.(!allSelected);
+    onSelectionChange?.(data.filter((item) => updated.includes(item.id)));
   };
 
-
+  const isAllSelected = filteredData.length > 0 && filteredData.every((row) => isSelected(row.id));
 
   return (
     <div className="w-full">
-      {/* Busqueda + Filtros */}
+      {/* Busqueda + Filtros + Contador de seleccionados */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 py-4">
-        {searchableColumns ? (
+        {searchableColumns && (
           <div className="flex items-center gap-3">
             <input
               type="text"
@@ -139,9 +133,7 @@ export function GenericTable<T extends { id: string | number }>({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && onSearchChange) {
-                  onSearchChange(searchTerm);
-                }
+                if (e.key === "Enter" && onSearchChange) onSearchChange(searchTerm);
               }}
               className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 shadow-sm focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
             />
@@ -157,11 +149,16 @@ export function GenericTable<T extends { id: string | number }>({
               </button>
             )}
           </div>
-        ) : null}
+        )}
 
+        {/* Total seleccionados */}
+        {selectable && (
+          <div className="text-sm text-gray-600 dark:text-gray-300">
+            Total seleccionados: <strong>{currentSelectedIds.length}</strong>
+          </div>
+        )}
       </div>
 
-      {/* Tabla */}
       <Table>
         <TableHeader className="border-gray-100 dark:border-gray-800 border-y">
           <TableRow>
@@ -171,103 +168,101 @@ export function GenericTable<T extends { id: string | number }>({
               </TableCell>
             )}
             {columns.map((col, i) => {
-            const key = String(col.key);
-            const value = filters[key] || "";
+              const key = String(col.key);
+              const value = filters[key] || "";
 
-            return (
-              <TableCell
-                key={i}
-                isHeader
-                className="py-3 font-medium text-gray-500 text-start dark:text-gray-400 relative"
-              >
-                <div className="flex items-center gap-1">
-                  {col.header}
-                  {col.filterType && (
-                    <Popover.Root>
-                      <Popover.Trigger asChild>
-                        <button className="ml-1 p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">
-                          <Funnel className="w-4 h-4" />
-                        </button>
-                      </Popover.Trigger>
-                      <Popover.Portal>
-                        <Popover.Content
-                          side="bottom"
-                          align="start"
-                          className="z-50 rounded border border-gray-200 bg-white p-3 shadow-md dark:border-gray-700 dark:bg-gray-800 w-56"
-                        >
-                          {col.filterType === "text" && (
-                            <input
-                              type="text"
-                              value={value}
-                              placeholder={`Filtrar ${col.header}`}
-                              onChange={(e) =>
-                                setFilters((prev) => ({
-                                  ...prev,
-                                  [key]: e.target.value,
-                                }))
-                              }
-                              className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:text-white"
-                            />
-                          )}
-
-                          {col.filterType === "range" && (() => {
-                            const range = value ? JSON.parse(value) : { min: "", max: "" };
-                            return (
-                              <div className="flex gap-2 mt-1">
-                                <input
-                                  type="number"
-                                  placeholder="Min"
-                                  value={range.min}
-                                  onChange={(e) =>
-                                    setFilters((prev) => ({
-                                      ...prev,
-                                      [key]: JSON.stringify({
-                                        ...range,
-                                        min: e.target.value,
-                                      }),
-                                    }))
-                                  }
-                                  className="w-1/2 px-2 py-1 border rounded dark:bg-gray-700 dark:text-white"
-                                />
-                                <input
-                                  type="number"
-                                  placeholder="Max"
-                                  value={range.max}
-                                  onChange={(e) =>
-                                    setFilters((prev) => ({
-                                      ...prev,
-                                      [key]: JSON.stringify({
-                                        ...range,
-                                        max: e.target.value,
-                                      }),
-                                    }))
-                                  }
-                                  className="w-1/2 px-2 py-1 border rounded dark:bg-gray-700 dark:text-white"
-                                />
-                              </div>
-                            );
-                          })()}
-
-                          <div className="mt-2 text-right">
-                            <button
-                              onClick={() =>
-                                setFilters((prev) => {
-                                  const newFilters = { ...prev };
-                                  delete newFilters[key];
-                                  return newFilters;
-                                })
-                              }
-                              className="text-xs text-blue-600 hover:underline"
-                            >
-                              Limpiar filtro
-                            </button>
-                          </div>
-                        </Popover.Content>
-                      </Popover.Portal>
-                    </Popover.Root>
-                  )}
-                </div>
-              </TableCell>
+              return (
+                <TableCell
+                  key={i}
+                  isHeader
+                  className="py-3 font-medium text-gray-500 text-start dark:text-gray-400 relative"
+                >
+                  <div className="flex items-center gap-1">
+                    {col.header}
+                    {col.filterType && (
+                      <Popover.Root>
+                        <Popover.Trigger asChild>
+                          <button className="ml-1 p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">
+                            <Funnel className="w-4 h-4" />
+                          </button>
+                        </Popover.Trigger>
+                        <Popover.Portal>
+                          <Popover.Content
+                            side="bottom"
+                            align="start"
+                            className="z-50 rounded border border-gray-200 bg-white p-3 shadow-md dark:border-gray-700 dark:bg-gray-800 w-56"
+                          >
+                            {col.filterType === "text" && (
+                              <input
+                                type="text"
+                                value={value}
+                                placeholder={`Filtrar ${col.header}`}
+                                onChange={(e) =>
+                                  setFilters((prev) => ({
+                                    ...prev,
+                                    [key]: e.target.value,
+                                  }))
+                                }
+                                className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:text-white"
+                              />
+                            )}
+                            {col.filterType === "range" && (() => {
+                              const range = value ? JSON.parse(value) : { min: "", max: "" };
+                              return (
+                                <div className="flex gap-2 mt-1">
+                                  <input
+                                    type="number"
+                                    placeholder="Min"
+                                    value={range.min}
+                                    onChange={(e) =>
+                                      setFilters((prev) => ({
+                                        ...prev,
+                                        [key]: JSON.stringify({
+                                          ...range,
+                                          min: e.target.value,
+                                        }),
+                                      }))
+                                    }
+                                    className="w-1/2 px-2 py-1 border rounded dark:bg-gray-700 dark:text-white"
+                                  />
+                                  <input
+                                    type="number"
+                                    placeholder="Max"
+                                    value={range.max}
+                                    onChange={(e) =>
+                                      setFilters((prev) => ({
+                                        ...prev,
+                                        [key]: JSON.stringify({
+                                          ...range,
+                                          max: e.target.value,
+                                        }),
+                                      }))
+                                    }
+                                    className="w-1/2 px-2 py-1 border rounded dark:bg-gray-700 dark:text-white"
+                                  />
+                                </div>
+                              );
+                            })()}
+                            <div className="mt-2 text-right">
+                              <button
+                                onClick={() =>
+                                  setFilters((prev) => {
+                                    const newFilters = { ...prev };
+                                    delete newFilters[key];
+                                    return newFilters;
+                                  })
+                                }
+                                className="text-xs text-blue-600 hover:underline"
+                              >
+                                Limpiar filtro
+                              </button>
+                            </div>
+                          </Popover.Content>
+                        </Popover.Portal>
+                      </Popover.Root>
+                    )}
+                  </div>
+                </TableCell>
               );
             })}
             {actions && (
@@ -286,7 +281,11 @@ export function GenericTable<T extends { id: string | number }>({
             <TableRow key={row.id}>
               {selectable && (
                 <TableCell className="p-3">
-                  <Checkbox checked={isSelected(row.id)} onChange={() => toggleSelect(row)} label="" />
+                  <Checkbox
+                    checked={isSelected(row.id)}
+                    onChange={() => toggleSelect(row)}
+                    label=""
+                  />
                 </TableCell>
               )}
               {columns.map(({ key, render }, i) => (

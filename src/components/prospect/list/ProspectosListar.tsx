@@ -20,7 +20,7 @@ const columns: ColumnConfig<any>[] = [
   { key: "email", header: "Correo", filterType: "text" },
   { key: "document", header: "Documento", filterType: "text" },
   { key: "cargo", header: "Cargo / Ocupación", filterType: "text" },
-  { key:"database", header:"Base Datos", filterType: "text"}
+  { key: "database", header: "Base Datos", filterType: "text" },
 ];
 
 const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
@@ -50,8 +50,6 @@ export default function ProspectosPanel() {
   const [selectedRows, setSelectedRows] = useState<any[]>([]);
   const [selectedRowIds, setSelectedRowIds] = useState<string[]>([]);
 
-
-
   const confirmDelete = async () => {
     if (!prospectToDelete) return;
     endPointBackend({ accionBD: "Delete-Prospect", id: prospectToDelete.document }).then(() => {
@@ -78,18 +76,51 @@ export default function ProspectosPanel() {
 
   const handleSelectAll = async (select: boolean) => {
     if (select) {
-      const response = await fetch(`${authUrl}/api/v1.0/prospects/ids?` + new URLSearchParams({
-        search: searchTerm,
-        ...columnFilters
-      }));
+      const response = await fetch(
+        `${authUrl}/api/v1.0/prospects/ids?` +
+          new URLSearchParams({
+            search: searchTerm,
+            ...columnFilters,
+          })
+      );
       const json = await response.json();
-      const ids = json.data;
-      setSelectedRowIds(ids); // ✅ todos los IDs filtrados
+
+      const fullProspects = json.data;
+      setSelectedRowIds(fullProspects.map((p: any) => p.id));
+      setSelectedRows(fullProspects);
     } else {
       setSelectedRowIds([]);
+      setSelectedRows([]);
     }
   };
 
+  // ✅ Maneja selección individual sin romper la selección global
+  const handleSelectionChange = (pageSelectedProspects: any[]) => {
+    const newSelectedIds = pageSelectedProspects.map((p) => p.id);
+    const currentIds = new Set(selectedRowIds);
+
+    const isSame =
+      newSelectedIds.length === selectedRowIds.length &&
+      newSelectedIds.every((id) => currentIds.has(id));
+
+    if (isSame) return; // ❗Previene update infinito
+
+    const updatedMap = new Map(selectedRows.map((p) => [p.id, p]));
+
+    pageSelectedProspects.forEach((p) => {
+      updatedMap.set(p.id, p);
+    });
+
+    const visibleIds = data.map((p) => p.id);
+    for (let id of visibleIds) {
+      if (!newSelectedIds.includes(id)) {
+        updatedMap.delete(id);
+      }
+    }
+
+    setSelectedRows(Array.from(updatedMap.values()));
+    setSelectedRowIds(Array.from(updatedMap.keys()));
+  };
 
 
   return (
@@ -97,7 +128,8 @@ export default function ProspectosPanel() {
       <PageBreadcrumb pageTitle="Listar Prospectos" />
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div></div>
+          <div className="text-sm text-gray-700 dark:text-gray-300">
+          </div>
           <div className="flex gap-3">
             <Button onClick={openModal}>Registrar</Button>
             {selectedRows.length !== 0 && (
@@ -137,15 +169,10 @@ export default function ProspectosPanel() {
                 </Button>
               </div>
             )}
-            onSelectionChange={setSelectedRows}
+            onSelectionChange={handleSelectionChange}
             onSelectAll={handleSelectAll}
             selectedIds={selectedRowIds}
           />
-          {selectedRows.length > 0 && (
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-              Prospectos seleccionados: <strong>{selectedRows.length}</strong>
-            </p>
-          )}
         </div>
 
         <Pagination
