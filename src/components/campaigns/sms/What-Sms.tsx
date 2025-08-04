@@ -135,7 +135,7 @@ export default function SmsBroadcastPage() {
     <>
       <PageBreadcrumb pageTitle="Envío Masivo de SMS" />
       <div className="min-h-screen rounded-2xl border flex flex-col gap-6 border-gray-200 bg-white px-5 py-7 dark:border-gray-800 dark:bg-white/[0.03] xl:px-10 xl:py-12">
-        <form onSubmit={handleSubmit(onSubmit)} encType="multipart/form-data">
+        <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid grid-cols-6 gap-6">
             <div className="col-span-6">
               <Label>Mensaje de texto</Label>
