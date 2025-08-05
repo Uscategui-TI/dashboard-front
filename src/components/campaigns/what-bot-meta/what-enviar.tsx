@@ -5,6 +5,7 @@ import axios from "axios";
 import { ImageUpload } from "@/components/form/form-elements/ImageUpload";
 import AlertModal from "@/components/shared/ui/modal/AlertModal";
 
+const urlMeta = process.env.NEXT_PUBLIC_WHATSAPP_URL_META
 
 type Props = {
   onClose: () => void;
@@ -84,7 +85,7 @@ const BroadcastUploaderModal = ({
       formData.append("messageTemplate", messageTemplate);
       formData.append("mediaUrl", imageUrl); // URL ya subida desde Cloudinary
 
-      const res = await axios.post("https://bot-meta-qa.up.railway.app/upload", formData);
+      const res = await axios.post(`${urlMeta}/upload`, formData);
 
       setResponse(res.data);
 

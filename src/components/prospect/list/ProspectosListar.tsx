@@ -12,6 +12,10 @@ import EditProspectForm from "@/components/prospect/forms/editProspectorm";
 import ConfirmacionModal from "@/components/shared/ui/modal/ConfirmModal";
 import { endPointBackend } from "@/api";
 import type { ColumnConfig } from "@/components/shared/tables/GenericTable";
+import SmsModal from "@/components/campaigns/sms/SmsModal";
+import EmailModal from "@/components/campaigns/email/EmailModal";
+import WhatsAppBroadcastModal from "@/components/campaigns/what-bot-meta/WhatsAppBroadcastModal"
+
 
 const columns: ColumnConfig<any>[] = [
   { key: "name", header: "Nombres", filterType: "text" },
@@ -23,6 +27,7 @@ const columns: ColumnConfig<any>[] = [
   { key: "database", header: "Base Datos", filterType: "text" },
 ];
 
+const softProvider = process.env.NEXT_PUBLIC_PROVIDER_SERVER;
 const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
 
 export default function ProspectosPanel() {
@@ -32,11 +37,10 @@ export default function ProspectosPanel() {
     openModal: openCampaingModal,
     closeModal: closeCampaingModal,
   } = useModal();
-  const {
-    isOpen: isDifusionModalOpen,
-    openModal: openDifusionModal,
-    closeModal: closeDifusionModal,
-  } = useModal();
+  const [campaignModal, setCampaignModal] = useState<{
+    open: boolean;
+    type: "SMS" | "Correo" | "WhatsApp✔️" | "Telegram" | null;
+  }>({ open: false, type: null });
 
   const [data, setData] = useState<any[]>([]);
   const [page, setPage] = useState(0);
@@ -49,6 +53,10 @@ export default function ProspectosPanel() {
   const [columnFilters, setColumnFilters] = useState<Record<string, any>>({});
   const [selectedRows, setSelectedRows] = useState<any[]>([]);
   const [selectedRowIds, setSelectedRowIds] = useState<string[]>([]);
+  
+  
+
+
 
   const confirmDelete = async () => {
     if (!prospectToDelete) return;
@@ -93,6 +101,10 @@ export default function ProspectosPanel() {
       setSelectedRows([]);
     }
   };
+  const handleOpenCampaignType = (type: "SMS" | "Correo" | "WhatsApp✔️" | "Telegram") => {
+    setCampaignModal({ open: true, type });
+  };
+
 
   // ✅ Maneja selección individual sin romper la selección global
   const handleSelectionChange = (pageSelectedProspects: any[]) => {
@@ -121,6 +133,49 @@ export default function ProspectosPanel() {
     setSelectedRows(Array.from(updatedMap.values()));
     setSelectedRowIds(Array.from(updatedMap.keys()));
   };
+
+
+  const handleSendSms = (message: string) => {
+    const phoneNumbers = selectedRows.map((p) => p.phone);
+    
+    // 🔽 Aquí haces tu petición al backend
+    fetch(`${softProvider}/api/sms/list`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ numbers: phoneNumbers, message }),
+    })
+    .then(res => res.json())
+    .then(data => {
+      console.log("✅ SMS enviados:", data);
+    })
+    .catch(err => {
+      console.error("❌ Error enviando SMS:", err);
+    });
+  };
+
+  const handleSendEmail = async (payload: {
+    subject: string;
+    htmlContent: string;
+    recipients: string[];
+  }) => {
+    try {
+      const response = await fetch(`${softProvider}/api/email/send-list`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+      console.log("✅ Correos enviados:", data);
+    } catch (error) {
+      console.error("❌ Error al enviar correos:", error);
+    }
+  };
+
+
+
 
 
   return (
@@ -228,12 +283,12 @@ export default function ProspectosPanel() {
             {[
               { label: "SMS", color: "yellow" },
               { label: "Correo", color: "blue" },
-              { label: "WhatsApp", color: "green" },
+              { label: "WhatsApp✔️", color: "green" },
               { label: "Telegram", color: "indigo" },
             ].map(({ label, color }) => (
               <button
                 key={label}
-                onClick={openDifusionModal}
+                onClick={() => handleOpenCampaignType(label as "SMS" | "Correo" | "WhatsApp✔️" | "Telegram")}
                 className={`flex items-center justify-center h-16 rounded-xl font-semibold text-white bg-${color}-500 hover:bg-${color}-600 shadow-md transition-all duration-200`}
               >
                 {label}
@@ -259,46 +314,42 @@ export default function ProspectosPanel() {
         </div>
       </Modal>
 
-      {/* Modal Difundir Campaña */}
-      <Modal isOpen={isDifusionModalOpen} onClose={closeDifusionModal} className="max-w-[950px] p-6 lg:p-10">
-        <div className="flex flex-col px-4 py-5 overflow-y-auto custom-scrollbar">
-          <div className="mb-6">
-            <h5 className="mb-2 text-2xl font-bold text-gray-800 dark:text-white">Parametriza tu Campaña</h5>
-            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-              Puedes seleccionar estos proveedores para difundir tus mensajes, invitaciones, eventos y mucho más.
-            </p>
-          </div>
+      {/*aqui hiba el modal general*/}
 
-          <div className="flex flex-col gap-4 mt-4">
-            <label className="block text-sm text-gray-600 dark:text-gray-300">Personaliza tu Mensaje</label>
-            <textarea
-              rows={4}
-              className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-            />
 
-            <div className="mb-4">
-              <label className="block mb-2 text-sm text-gray-600 dark:text-gray-300">Adjunta tu archivo multimedia (opcional)</label>
-              {/* <ImageUpload onChange={(url) => setImageUrl(url)} value={imageUrl ?? ""} /> */}
-            </div>
-          </div>
+      {campaignModal.open && campaignModal.type === "SMS" && (
+        <SmsModal
+          isOpen
+          onClose={() => setCampaignModal({ open: false, type: null })}
+          phoneNumbers={selectedRows.map((p) => p.phone)}
+          onSend={handleSendSms}
+        />
+      )}
 
-          <div className="flex items-center gap-3 mt-6 modal-footer sm:justify-end">
-            <button
-              onClick={closeModal}
-              type="button"
-              className="flex w-full justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] sm:w-auto"
-            >
-              Volver
-            </button>
-            <button
-              type="button"
-              className="btn btn-success btn-update-event flex w-full justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 sm:w-auto"
-            >
-              Enviar Mensajes
-            </button>
-          </div>
+      {campaignModal.open && campaignModal.type === "Correo" && (
+        <EmailModal
+          isOpen
+          onClose={() => setCampaignModal({ open: false, type: null })}
+          recipients={selectedRows.map((p) => p.email)}
+          onSend={handleSendEmail}
+        />
+      )}
+
+      {campaignModal.open && campaignModal.type === "WhatsApp✔️" && (
+        <WhatsAppBroadcastModal
+          isOpen
+          onClose={() => setCampaignModal({ open: false, type: null })}
+          phoneNumbers={selectedRows.map((p) => p.phone)}
+        />
+      )}
+
+      {campaignModal.open && campaignModal.type === "Telegram" && (
+        <div>
+          <p>✈️ Configurar difusión por Telegram</p>
         </div>
-      </Modal>
+      )}
+
+
     </>
   );
 }

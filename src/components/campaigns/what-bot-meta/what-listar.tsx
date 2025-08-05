@@ -14,7 +14,7 @@ import BroadcastUploaderModal from "@/components/campaigns/what-bot-meta/what-en
 
 const token = process.env.NEXT_PUBLIC_YOUR_ACCESS_TOKEN!;
 const whatsappId = process.env.NEXT_PUBLIC_WHATSAPP_BUSINESS_ID!;
-const version = process.env.NEXT_PUBLIC_GRAPH_API_VERSION || "v19.0";
+const version = process.env.NEXT_PUBLIC_GRAPH_API_VERSION || "v23.0";
 const PAGE_SIZE = 10;
 
 const templateColumns = [
