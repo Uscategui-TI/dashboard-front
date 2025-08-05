@@ -40,6 +40,7 @@ const TemplateCreator: React.FC<TemplateCreatorProps> = ({ onClose }) => {
 
   const token = process.env.NEXT_PUBLIC_YOUR_ACCESS_TOKEN!;
   const whatsappId = process.env.NEXT_PUBLIC_WHATSAPP_BUSINESS_ID!;
+  const imgMeta = process.env.NEXT_PUBLIC_WHATSAPP_META_IMG
   const version = process.env.NEXT_PUBLIC_GRAPH_API_VERSION || "v19.0";
   const [errorModal, setErrorModal] = useState({
     open: false,
@@ -111,7 +112,7 @@ const TemplateCreator: React.FC<TemplateCreatorProps> = ({ onClose }) => {
           format: "IMAGE",
           example: {
             header_handle: [
-              "4:a2FwYXguanBn:aW1hZ2UvanBn:ARbugtm4wmVcaPWEHVJPWnc_D96u6kYgmFrcsWffDDdC__QWGGSLKrbXhDtSbz-QPn2SxzG6_ZvlLXnsMs59orZUawNcxOzt5yrN0n3Sei65vQ:e:1753771644:684218694480053:61578886730891:ARbmCVOgiO7VS6-PGK4",
+              `${imgMeta}`,
             ],
           },
         },
