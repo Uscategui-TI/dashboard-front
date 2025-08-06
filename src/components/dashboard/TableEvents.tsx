@@ -20,6 +20,7 @@ interface EventStat {
   status: "Finalizado" | "En proceso" | "Error";
   totalBroadcasts: number;
   totalMessagesSent: number;
+  provedor: string;
   endDate: string;
   imageUrl: string;
 }
@@ -79,6 +80,9 @@ export default function TableEvents() {
                 Total Mensajes
               </TableCell>
               <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
+                Provedor
+              </TableCell>
+              <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
                 Fecha fin
               </TableCell>
               <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
@@ -116,6 +120,9 @@ export default function TableEvents() {
                 </TableCell>
                 <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                   {event.totalMessagesSent}
+                </TableCell>
+                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                  {event.provedor}
                 </TableCell>
                 <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                   {event.endDate || "-"}
