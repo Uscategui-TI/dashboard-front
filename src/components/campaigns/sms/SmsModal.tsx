@@ -181,7 +181,7 @@ const SmsModal = ({ isOpen, onClose, phoneNumbers, onSend }: SmsModalProps) => {
           )}
         </div>
 
-        <div>
+        <div className="rounded-md">
           <Label>Selecciona tu evento</Label>
           <Select
             value={selectedEventName}

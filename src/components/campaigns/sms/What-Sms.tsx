@@ -258,10 +258,10 @@ export default function SmsBroadcastPage() {
               <FileInput ref={csvFileRef} />
             </div>
 
-            <div className="col-span-6">
+            <div className="col-span-6 ">
               <Label>Seleccionar evento</Label>
               <select
-                className="border px-3 py-2 w-full dark:text-gray-100 bg-gray-800"
+                className="border px-3 py-2 w-full dark:text-gray-100 bg-gray-800 rounded-md"
                 value={selectedEvent}
                 onChange={(e) => setSelectedEvent(e.target.value)}
                 required

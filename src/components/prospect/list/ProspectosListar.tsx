@@ -299,7 +299,7 @@ export default function ProspectosPanel() {
               { label: "SMS", color: "yellow" },
               { label: "Correo", color: "blue" },
               { label: "WhatsApp✔️", color: "green" },
-              { label: "WhatsApp", color: "indigo" },
+              { label: "WhatsApp", color: "green" },
             ].map(({ label, color }) => (
               <button
                 key={label}

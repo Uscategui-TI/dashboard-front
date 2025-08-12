@@ -237,7 +237,7 @@ const WhatsAppBroadcastModal = ({ isOpen, onClose, phoneNumbers }: Props) => {
           <select
             value={selectedEventName}
             onChange={(e) => setSelectedEventName(e.target.value)}
-            className="w-full border px-3 py-2 rounded dark:bg-gray-800"
+            className="w-full border px-3 py-2 dark:bg-gray-800 rounded-md"
           >
             <option value="">-- Elige un evento --</option>
             {events.map((event) => (

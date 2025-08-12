@@ -238,11 +238,11 @@ const BroadcastUploaderModal = ({
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">🎉 Seleccionar evento</label>
+          <label className="block text-sm font-medium mb-1 ">🎉 Seleccionar evento</label>
           <select
             value={eventName}
             onChange={(e) => setEventName(e.target.value)}
-            className="border px-3 py-2 w-full dark:text-gray-100 bg-gray-800"
+            className="border px-3 py-2 w-full dark:text-gray-100 bg-gray-800 rounded-md"
             required
           >
             <option value="">-- Selecciona un evento --</option>

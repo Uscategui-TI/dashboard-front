@@ -223,7 +223,7 @@ export default function EmailModal({ isOpen, onClose, recipients, onSend }: Prop
           />
         </div>
 
-        <div>
+        <div className="rounded-md">
           <Label>URL del botón (opcional)</Label>
           <Input
             type="url"
