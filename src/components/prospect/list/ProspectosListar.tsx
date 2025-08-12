@@ -15,6 +15,8 @@ import type { ColumnConfig } from "@/components/shared/tables/GenericTable";
 import SmsModal from "@/components/campaigns/sms/SmsModal";
 import EmailModal from "@/components/campaigns/email/EmailModal";
 import WhatsAppBroadcastModal from "@/components/campaigns/what-bot-meta/WhatsAppBroadcastModal"
+import WhatsAppModal from "@/components/campaigns/what-panel/WhatsAppModal";
+
 
 
 const columns: ColumnConfig<any>[] = [
@@ -29,6 +31,7 @@ const columns: ColumnConfig<any>[] = [
 
 const softProvider = process.env.NEXT_PUBLIC_PROVIDER_SERVER;
 const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
+const apiWhatsApp = process.env.NEXT_PUBLIC_WHATSAPP_URL;
 
 export default function ProspectosPanel() {
   const { isOpen, openModal, closeModal } = useModal();
@@ -39,7 +42,7 @@ export default function ProspectosPanel() {
   } = useModal();
   const [campaignModal, setCampaignModal] = useState<{
     open: boolean;
-    type: "SMS" | "Correo" | "WhatsApp✔️" | "Telegram" | null;
+    type: "SMS" | "Correo" | "WhatsApp✔️" | "WhatsApp" | null;
   }>({ open: false, type: null });
 
   const [data, setData] = useState<any[]>([]);
@@ -101,12 +104,12 @@ export default function ProspectosPanel() {
       setSelectedRows([]);
     }
   };
-  const handleOpenCampaignType = (type: "SMS" | "Correo" | "WhatsApp✔️" | "Telegram") => {
+  const handleOpenCampaignType = (type: "SMS" | "Correo" | "WhatsApp✔️" | "WhatsApp") => {
     setCampaignModal({ open: true, type });
   };
 
 
-  // ✅ Maneja selección individual sin romper la selección global
+  
   const handleSelectionChange = (pageSelectedProspects: any[]) => {
     const newSelectedIds = pageSelectedProspects.map((p) => p.id);
     const currentIds = new Set(selectedRowIds);
@@ -115,7 +118,7 @@ export default function ProspectosPanel() {
       newSelectedIds.length === selectedRowIds.length &&
       newSelectedIds.every((id) => currentIds.has(id));
 
-    if (isSame) return; // ❗Previene update infinito
+    if (isSame) return; 
 
     const updatedMap = new Map(selectedRows.map((p) => [p.id, p]));
 
@@ -138,7 +141,6 @@ export default function ProspectosPanel() {
   const handleSendSms = (message: string) => {
     const phoneNumbers = selectedRows.map((p) => p.phone);
     
-    // 🔽 Aquí haces tu petición al backend
     fetch(`${softProvider}/api/sms/list`, {
       method: "POST",
       headers: {
@@ -174,9 +176,22 @@ export default function ProspectosPanel() {
     }
   };
 
+  const handleSendWhatsApp = (message: string, urlMedia: string) => {
+    const phoneNumbers = selectedRows.map((p) => p.phone);
 
-
-
+    fetch(`${apiWhatsApp}/broadcast-direct`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ numbers: phoneNumbers, message, urlMedia }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("✅ WhatsApp enviados:", data);
+      })
+      .catch((err) => {
+        console.error("❌ Error enviando WhatsApp:", err);
+      });
+  };
 
   return (
     <>
@@ -284,11 +299,11 @@ export default function ProspectosPanel() {
               { label: "SMS", color: "yellow" },
               { label: "Correo", color: "blue" },
               { label: "WhatsApp✔️", color: "green" },
-              { label: "Telegram", color: "indigo" },
+              { label: "WhatsApp", color: "indigo" },
             ].map(({ label, color }) => (
               <button
                 key={label}
-                onClick={() => handleOpenCampaignType(label as "SMS" | "Correo" | "WhatsApp✔️" | "Telegram")}
+                onClick={() => handleOpenCampaignType(label as "SMS" | "Correo" | "WhatsApp✔️" | "WhatsApp")}
                 className={`flex items-center justify-center h-16 rounded-xl font-semibold text-white bg-${color}-500 hover:bg-${color}-600 shadow-md transition-all duration-200`}
               >
                 {label}
@@ -343,13 +358,14 @@ export default function ProspectosPanel() {
         />
       )}
 
-      {campaignModal.open && campaignModal.type === "Telegram" && (
-        <div>
-          <p>✈️ Configurar difusión por Telegram</p>
-        </div>
+      {campaignModal.open && campaignModal.type === "WhatsApp" && (
+        <WhatsAppModal
+          isOpen={campaignModal.open}
+          onClose={() => setCampaignModal({ open: false, type: null })}
+          phoneNumbers={selectedRows.map((p) => p.phone)}
+          onSend={handleSendWhatsApp}
+        />
       )}
-
-
     </>
   );
 }

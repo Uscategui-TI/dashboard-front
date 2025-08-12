@@ -6,8 +6,8 @@ interface ModalProps {
   onClose: () => void;
   className?: string;
   children: React.ReactNode;
-  showCloseButton?: boolean; // New prop to control close button visibility
-  isFullscreen?: boolean; // Default to false for backwards compatibility
+  showCloseButton?: boolean; // Controla la visibilidad del botón de cerrar
+  isFullscreen?: boolean; // Default a false
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -15,11 +15,11 @@ export const Modal: React.FC<ModalProps> = ({
   onClose,
   children,
   className,
-  showCloseButton = true, // Default to true for backwards compatibility
+  showCloseButton = true,
   isFullscreen = false,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
-   const [animate, setAnimate] = useState(false);
+  const [animate, setAnimate] = useState(false);
 
   // Esc key handler
   useEffect(() => {
@@ -59,9 +59,8 @@ export const Modal: React.FC<ModalProps> = ({
     ? "w-full h-full"
     : "relative w-full rounded-3xl bg-white dark:bg-gray-900";
 
-
   return (
-    <div className="fixed inset-0 flex items-center justify-center overflow-y-auto modal z-99999">
+    <div className="fixed inset-0 flex items-center justify-center overflow-y-auto modal z-99999 p-4">
       {!isFullscreen && (
         <div
           className="fixed inset-0 h-full w-full bg-gray-500/50 backdrop-blur-[0.5px]"
@@ -75,6 +74,7 @@ export const Modal: React.FC<ModalProps> = ({
           transition-all duration-300 ease-in-out
           transform
           ${animate ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 translate-y-4"}
+          max-h-screen overflow-y-auto
         `}
         onClick={(e) => e.stopPropagation()}
       >
