@@ -73,9 +73,9 @@ export default function TableEvents() {
               <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
                 Eventos
               </TableCell>
-              <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
+              {/* <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
                 Total difusiones
-              </TableCell>
+              </TableCell> */}
               <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
                 Total Mensajes
               </TableCell>
@@ -115,9 +115,9 @@ export default function TableEvents() {
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                {/* <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                   {event.totalBroadcasts || "-"}
-                </TableCell>
+                </TableCell> */}
                 <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                   {event.totalMessagesSent}
                 </TableCell>

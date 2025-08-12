@@ -9,6 +9,13 @@ import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import TextAreaValidate from "@/components/form/input/TextAreaValidate";
 import AlertModal from "@/components/shared/ui/modal/AlertModal";
 import { softPointBackend } from "@/api";
+import axios from "axios";
+import Cookies from "js-cookie";
+
+type MyEvent = {
+  eventName: string;
+  id: number;
+};
 
 export default function SmsBroadcastPage() {
   const [loading, setLoading] = useState(false);
@@ -18,8 +25,9 @@ export default function SmsBroadcastPage() {
   const csvFileRef = useRef<HTMLInputElement | null>(null);
   const [showErrorAlert, setShowErrorAlert] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
 
+  const [events, setEvents] = useState<MyEvent[]>([]);
+  const [selectedEvent, setSelectedEvent] = useState<string>("");
 
   const {
     register,
@@ -31,23 +39,52 @@ export default function SmsBroadcastPage() {
   } = useForm<FieldValues>({ defaultValues: {} });
 
   const message = watch("message");
-  
+
   useEffect(() => {
-  const specialCharRegex = /[^a-zA-Z0-9\s.,áéíóúÁÉÍÓÚñÑ]/;
+    // Cargar eventos al montar
+    const fetchEvents = async () => {
+      try {
+        const token = Cookies.get("token");
+        if (!token) {
+          setError("❌ Token no disponible para cargar eventos");
+          setShowErrorAlert(true);
+          return;
+        }
+        const authUrl = process.env.NEXT_PUBLIC_AUTH_URL || "";
+        const response = await axios.get(`${authUrl}/api/v1.0/events/list`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-  if (message && specialCharRegex.test(message)) {
-    setError("El mensaje no puede contener caracteres especiales.");
-    setShowErrorAlert(true);
-    setValue("message", message.replace(specialCharRegex, ""));
-  }
+        const eventsArray = response.data?.data?.active;
+        if (Array.isArray(eventsArray)) {
+          setEvents(eventsArray);
+        } else {
+          setEvents([]);
+          setError("❌ Respuesta inesperada al cargar eventos");
+          setShowErrorAlert(true);
+        }
+      } catch (error) {
+        setError("❌ Error al cargar eventos");
+        setShowErrorAlert(true);
+        console.error(error);
+      }
+    };
+    fetchEvents();
+  }, []);
 
-  if (message && message.length > 160) {
-    setError("El mensaje no puede tener más de 160 caracteres.");
-    setShowErrorAlert(true);
-    setValue("message", message.substring(0, 160));
-  }
-}, [message, setValue]);
-
+  useEffect(() => {
+    const specialCharRegex = /[^a-zA-Z0-9\s.,áéíóúÁÉÍÓÚñÑ]/;
+    if (message && specialCharRegex.test(message)) {
+      setError("El mensaje no puede contener caracteres especiales.");
+      setShowErrorAlert(true);
+      setValue("message", message.replace(specialCharRegex, ""));
+    }
+    if (message && message.length > 160) {
+      setError("El mensaje no puede tener más de 160 caracteres.");
+      setShowErrorAlert(true);
+      setValue("message", message.substring(0, 160));
+    }
+  }, [message, setValue]);
 
   useEffect(() => {
     if (toastError) {
@@ -60,18 +97,15 @@ export default function SmsBroadcastPage() {
     const text = await file.text();
     const lines = text
       .split(/\r?\n/)
-      .map(line => line.trim())
-      .filter(line => line.length > 0);
-
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
     if (lines.length > 1000) {
       setError("El archivo CSV no puede contener más de 1000 números.");
       setShowErrorAlert(true);
       return false;
     }
-
     return true;
   };
-
 
   // Función para convertir archivo a base64
   const toBase64 = (file: File) =>
@@ -82,8 +116,56 @@ export default function SmsBroadcastPage() {
         if (typeof reader.result === "string") resolve(reader.result);
         else reject("No se pudo leer el archivo");
       };
-      reader.onerror = error => reject(error);
+      reader.onerror = (error) => reject(error);
     });
+
+  const saveStats = async ({
+    message,
+    csvCount,
+    eventName,
+  }: {
+    message: string;
+    csvCount: number;
+    eventName: string;
+  }) => {
+    try {
+      const token = Cookies.get("token");
+      if (!token) {
+        setError("❌ Token no disponible para guardar estadísticas");
+        setShowErrorAlert(true);
+        return;
+      }
+
+      const authUrl = process.env.NEXT_PUBLIC_AUTH_URL || "";
+      const formattedDate = new Date().toISOString().split("T")[0];
+
+      await axios.post(
+        `${authUrl}/api/v1.0/broadcasts/all`,
+        {
+          subject: message,
+          totalMessagesSent: csvCount,
+          status: "Finalizado",
+          date: formattedDate,
+          eventName,
+          type: "Informativo",
+          provedor: "sms",
+          endDate: formattedDate,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    } catch (error: any) {
+      setError(
+        "❌ Error al guardar estadísticas: " +
+          (error.response?.data?.message || error.message)
+      );
+      setShowErrorAlert(true);
+    }
+  };
 
   const onSubmit = async (data: any) => {
     const csvFile = csvFileRef.current?.files?.[0];
@@ -92,7 +174,11 @@ export default function SmsBroadcastPage() {
       return;
     }
 
-    // ✅ Validación del CSV antes de enviar
+    if (!selectedEvent) {
+      setToastError("Debes seleccionar un evento.");
+      return;
+    }
+
     const isValid = await validateCsvFile(csvFile);
     if (!isValid) return;
 
@@ -106,6 +192,7 @@ export default function SmsBroadcastPage() {
       const body = {
         message: data.message,
         csvFileBase64: csvBase64,
+        eventName: selectedEvent,
       };
 
       const response = await softPointBackend({
@@ -117,8 +204,20 @@ export default function SmsBroadcastPage() {
 
       setResponseMessage(result?.message || "sin novedades");
       setShowSuccessMessage(true);
+
+      // Guardar estadísticas
+      const lines = (await csvFile.text())
+        .split(/\r?\n/)
+        .filter((line) => line.trim().length > 0);
+      await saveStats({
+        message: data.message,
+        csvCount: lines.length,
+        eventName: selectedEvent,
+      });
+
       reset();
       if (csvFileRef.current) csvFileRef.current.value = "";
+      setSelectedEvent("");
     } catch (error: unknown) {
       if (error instanceof Error) {
         setToastError(error.message);
@@ -129,7 +228,6 @@ export default function SmsBroadcastPage() {
       setLoading(false);
     }
   };
-
 
   return (
     <>
@@ -144,14 +242,37 @@ export default function SmsBroadcastPage() {
                 rows={6}
                 placeholder="Escribe el mensaje que se enviará por SMS"
                 error={!!errors.message}
-                hint={typeof errors.message?.message === "string" ? errors.message.message : undefined}
-                register={register("message", { required: "El mensaje es obligatorio" })}
+                hint={
+                  typeof errors.message?.message === "string"
+                    ? errors.message.message
+                    : undefined
+                }
+                register={register("message", {
+                  required: "El mensaje es obligatorio",
+                })}
               />
             </div>
 
             <div className="col-span-6">
               <Label>Archivo CSV con números</Label>
               <FileInput ref={csvFileRef} />
+            </div>
+
+            <div className="col-span-6">
+              <Label>Seleccionar evento</Label>
+              <select
+                className="border px-3 py-2 w-full dark:text-gray-100 bg-gray-800"
+                value={selectedEvent}
+                onChange={(e) => setSelectedEvent(e.target.value)}
+                required
+              >
+                <option value="">-- Selecciona un evento --</option>
+                {events.map((e) => (
+                  <option key={e.id} value={e.eventName}>
+                    {e.eventName}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="col-span-6 flex space-x-4">
@@ -172,6 +293,7 @@ export default function SmsBroadcastPage() {
                   if (csvFileRef.current) csvFileRef.current.value = "";
                   setToastError(null);
                   setShowSuccessMessage(false);
+                  setSelectedEvent("");
                 }}
               >
                 Limpiar formulario
@@ -198,7 +320,6 @@ export default function SmsBroadcastPage() {
                 buttonText="Cerrar"
               />
             )}
-
           </div>
         </form>
       </div>
