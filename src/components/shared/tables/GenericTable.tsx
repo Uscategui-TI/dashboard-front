@@ -9,6 +9,7 @@ export type ColumnConfig<T> = {
   header: string;
   render?: (row: T) => React.ReactNode;
   filterType?: "text" | "select" | "range";
+  filterOptions?: string[];
 };
 
 type GenericTableProps<T> = {
@@ -206,6 +207,27 @@ export function GenericTable<T extends { id: string | number }>({
                                 className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:text-white"
                               />
                             )}
+
+                            {col.filterType === "select" && (
+                              <select
+                                value={value}
+                                onChange={(e) =>
+                                  setFilters((prev) => ({
+                                    ...prev,
+                                    [key]: e.target.value,
+                                  }))
+                                }
+                                className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:text-white"
+                              >
+                                <option value="">Todos</option>
+                                {col.filterOptions?.map((option) => (
+                                  <option key={option} value={option}>
+                                    {option}
+                                  </option>
+                                ))}
+                              </select>
+                            )}
+
                             {col.filterType === "range" && (() => {
                               const range = value ? JSON.parse(value) : { min: "", max: "" };
                               return (
@@ -243,6 +265,7 @@ export function GenericTable<T extends { id: string | number }>({
                                 </div>
                               );
                             })()}
+
                             <div className="mt-2 text-right">
                               <button
                                 onClick={() =>
@@ -258,6 +281,7 @@ export function GenericTable<T extends { id: string | number }>({
                               </button>
                             </div>
                           </Popover.Content>
+
                         </Popover.Portal>
                       </Popover.Root>
                     )}

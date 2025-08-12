@@ -26,7 +26,19 @@ const columns: ColumnConfig<any>[] = [
   { key: "email", header: "Correo", filterType: "text" },
   { key: "document", header: "Documento", filterType: "text" },
   { key: "cargo", header: "Cargo / Ocupación", filterType: "text" },
-  { key: "database", header: "Base Datos", filterType: "text" },
+  {
+    key: "database",
+    header: "Base Datos",
+    filterType: "select",
+    filterOptions: [
+      "Principal",
+      "Propiedad Horizontal",
+      "SLP Retirados",
+      "Organizaciones",
+      "UAN",
+      "TELEFONO JJ",
+    ],
+  },
 ];
 
 const softProvider = process.env.NEXT_PUBLIC_PROVIDER_SERVER;

@@ -36,7 +36,7 @@ const navItems: NavItem[] = [
     icon: <CalenderIcon />,
     name: "Calendario",
     path: "/calendar",
-    roles: ["Admin", "Coordinador", "Secretario"],
+    roles: ["Admin", "Coordinador", "Secretario", "Pasante"],
   },
   {
     icon: <TaskIcon />,

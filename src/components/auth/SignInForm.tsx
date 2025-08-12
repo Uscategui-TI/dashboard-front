@@ -1,5 +1,5 @@
 "use client";
-import Checkbox from "@/components/form/input/Checkbox";
+
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import Button from "@/components/shared/ui/button/Button";
@@ -27,33 +27,42 @@ export default function SignInForm() {
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
+  e.preventDefault();
+  setError(null);
+  setLoading(true);
 
-    try {
-      const { data } = await axios.post(`${authUrl}/api/v1.0/auth/login`, loginData, {
-        headers: { "Content-Type": "application/json" },
-        withCredentials: true,
-      });
+  try {
+    const { data } = await axios.post(`${authUrl}/api/v1.0/auth/login`, loginData, {
+      headers: { "Content-Type": "application/json" },
+      withCredentials: true,
+    });
 
-      const resp = data.data
-      if (resp.token && resp.roles) {
-        Cookies.set("token", resp.token);
-        localStorage.setItem("roles", JSON.stringify(resp.roles));
-        router.push("/");
+    const resp = data.data;
+    if (resp.token && resp.roles) {
+      Cookies.set("token", resp.token);
+      localStorage.setItem("roles", JSON.stringify(resp.roles));
+
+      // Aquí defines roles que van a solicitudes
+      const redirectToSolicitudes = resp.roles.includes("Pasante") || resp.roles.includes("Secretario");
+
+      if (redirectToSolicitudes) {
+        router.push("/solicitud-panel");
       } else {
-        throw new Error("No se recibió un token o roles en la respuesta");
+        router.push("/");
       }
-    } catch (error: any) {
-      console.error("Error en la autenticación:", error);
-      setError(error.response?.data?.message || "Credenciales inválidas");
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("roles");
-    } finally {
-      setLoading(false);
+    } else {
+      throw new Error("No se recibió un token o roles en la respuesta");
     }
-  };
+  } catch (error: any) {
+    console.error("Error en la autenticación:", error);
+    setError(error.response?.data?.message || "Credenciales inválidas");
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("roles");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="flex flex-col flex-1 lg:w-1/2 w-full">
