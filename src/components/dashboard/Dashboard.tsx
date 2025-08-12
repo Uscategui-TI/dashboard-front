@@ -64,21 +64,20 @@ export const Dashboard = () => {
         
         endPointBackend({ accionBD: "Recent-Broadcast" })
         .then((resp) => {
-                const stats = resp.data;
-                // Agrupar por año
-                const counts: Record<string, number> = {};
-                stats.forEach((stat: any) => {
-                    const year = new Date(stat.createdAt).getFullYear();
-                    counts[year] = (counts[year] || 0) + 1;
-                });
-        
-                const sortedYears = Object.keys(counts).sort();
-                const data = sortedYears.map((year) => counts[year]);
-        
-                setCategories(sortedYears);
-                setSeries([{ name: "Eventos", data }]);
-        })   
+            const stats = Array.isArray(resp.data.recentEvents) ? resp.data.recentEvents : [];
+            
+            const counts: Record<string, number> = {};
+            stats.forEach((stat: any) => {
+                const year = new Date(stat.createdAt).getFullYear();
+                counts[year] = (counts[year] || 0) + 1;
+            });
 
+            const sortedYears = Object.keys(counts).sort();
+            const data = sortedYears.map((year) => counts[year]);
+
+            setCategories(sortedYears);
+            setSeries([{ name: "Eventos", data }]);
+        });
         endPointBackend({ accionBD: "Genders-Chart" })
         .then((resp) => {
             setSeriesGender([resp.data.femenino, resp.data.masculino]);
