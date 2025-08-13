@@ -53,6 +53,7 @@ export default function WhatPanelPage() {
     type: string;
     status: string;
     endDate: string;
+    provedor: string;
   }>(null);
   const router = useRouter();
 
@@ -144,6 +145,7 @@ export default function WhatPanelPage() {
         type: String(formData.eventType || ""),
         status: String(formData.eventStatus || ""),
         endDate: today,
+        provedor: "WhatsApp",
       };
 
       setPendingStat(newPendingStat);
@@ -164,6 +166,7 @@ export default function WhatPanelPage() {
     type,
     status,
     endDate,
+    provedor
   }: {
     eventName: string;
     total: number;
@@ -171,6 +174,7 @@ export default function WhatPanelPage() {
     type: string;
     status: string;
     endDate: string;
+    provedor:string;
   }) => {
     try {
       const token = Cookies.get("token"); // o localStorage.getItem("token")
@@ -191,6 +195,7 @@ export default function WhatPanelPage() {
           type,
           status,
           endDate,
+          provedor,
         },
         {
           headers: {
