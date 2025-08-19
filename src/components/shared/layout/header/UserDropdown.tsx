@@ -13,6 +13,7 @@ interface User {
   name: string;
   lastName: string;
   email: string;
+  UrlImage:string;
 }
 
 export default function UserDropdown() {
@@ -36,6 +37,7 @@ export default function UserDropdown() {
           name: data.name,
           lastName: data.lastName,
           email: data.email,
+          UrlImage: data.UrlImage,
         });
       } catch (err) {
         console.error("Error al obtener el usuario:", err);
@@ -70,7 +72,12 @@ export default function UserDropdown() {
         className="flex items-center text-gray-700 dark:text-gray-400 dropdown-toggle"
       >
         <span className="mr-3 overflow-hidden rounded-full h-11 w-11">
-          <Image width={44} height={44} src="/images/user/logo-uscate-icon.jpg" alt="User" />
+          <Image
+                        width={80}
+                        height={80}
+                        src={user?.UrlImage|| "/images/user/logo-uscate-icon.jpg"} 
+                        alt="user"
+                      />
         </span>
         <span className="block mr-1 font-medium text-theme-sm">
           Hola, {user ? user.name : "Cargando..."}
