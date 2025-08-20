@@ -3,15 +3,13 @@ import React from "react";
 
 interface BreadcrumbProps {
   pageTitle: string;
+  homeHref?: string; // 👈 nueva prop opcional
 }
 
-const PageBreadcrumb: React.FC<BreadcrumbProps> = ({ pageTitle }) => {
+const PageBreadcrumb: React.FC<BreadcrumbProps> = ({ pageTitle, homeHref = "/" }) => {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-      <h2
-        className="text-xl font-semibold text-gray-800 dark:text-white/90"
-        x-text="pageName"
-      >
+      <h2 className="text-xl font-semibold text-gray-800 dark:text-white/90">
         {pageTitle}
       </h2>
       <nav>
@@ -19,7 +17,7 @@ const PageBreadcrumb: React.FC<BreadcrumbProps> = ({ pageTitle }) => {
           <li>
             <Link
               className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400"
-              href="/"
+              href={homeHref} // 👈 ahora dinámico
             >
               Home
               <svg

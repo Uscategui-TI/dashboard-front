@@ -1,4 +1,3 @@
-
 "use client"
 // pages/solicitud/[id].tsx
 import { useParams } from "next/navigation"
@@ -13,6 +12,7 @@ import { useModal } from "@/hooks/useModal";
 import AlertModal from "@/components/shared/ui/modal/AlertModal";
 import Avatar from "@/components/shared/ui/avatar/Avatar";
 import { formatearComentarios } from "@/components/solicitud/consulta/consulta";
+import { FileUpload } from "@/components/form/form-elements/FileUpload";
 
 type Departamento = {
   id: number;
@@ -62,6 +62,7 @@ type Solicitud = {
   publicCode: string;
   privateCode: string;
   prospecto: Prospecto;
+  fileUrl?: string;
   usuarioAsignado: UsuarioAsignado;
 };
 
@@ -95,6 +96,8 @@ export default function SolicitudPage() {
   const [nuevoComentario, setNuevoComentario] = useState("");
   const [assignedUser, setAssignedUser] = useState("");
   const [usuarios, setUsuarios] = useState<{ value: string; label: string }[]>([]);
+  const [nuevoArchivoUrl, setNuevoArchivoUrl] = useState<string | null>(null);
+
 
   // MODALES
   const successModal = useModal();
@@ -131,7 +134,6 @@ export default function SolicitudPage() {
   }, [id]);
 
   const handleUpdate = async () => {
-
     try {
       const resp = await endPointBackend({
         accionBD: "Update-Solicitud",
@@ -140,11 +142,11 @@ export default function SolicitudPage() {
           estado: estado,
           comentario: nuevoComentario,
           usuarioAsignadoId: assignedUser,
+          fileUrl: nuevoArchivoUrl ?? solicitud?.fileUrl, // 👈 Usa nuevo si existe, si no el actual
         }
       });
 
-      // Cierra el modal
-      // Actualiza el estado local sin recargar
+      // Actualiza el estado local
       setSolicitud(prev =>
         prev
           ? {
@@ -155,11 +157,13 @@ export default function SolicitudPage() {
                 ...prev.usuarioAsignado,
                 id: assignedUser,
               },
+              fileUrl: nuevoArchivoUrl ?? prev.fileUrl, // 👈 también aquí
             }
           : null
       );
 
       setNuevoComentario("");
+      setNuevoArchivoUrl(null); // limpia el estado
       setSuccessMessage(resp.message);  
       successModal.openModal();
     } catch (error) {
@@ -168,6 +172,7 @@ export default function SolicitudPage() {
       errorModal.openModal();
     }
   };
+
 
   const filteredOptions = useMemo(() => {
     return estado === "PENDIENTE"
@@ -180,7 +185,7 @@ export default function SolicitudPage() {
 
   return (
     <>
-      <PageBreadcrumb pageTitle="Gestionar solicitud"/>
+      <PageBreadcrumb pageTitle="Gestionar solicitud" homeHref="/solicitud-listar"/>
       <div>
         <div className="flex flex-col lg:flex-row gap-6 text-white">
           {/* Panel izquierdo */}
@@ -220,7 +225,35 @@ export default function SolicitudPage() {
                 <span className="whitespace-pre-line">{solicitud.mensaje}</span>
               </p>
             </div>
-
+            {/* Archivo adjunto */}
+            {solicitud.fileUrl ? (
+              <div className="my-4">
+                <Label className="block mb-2 text-gray-700 dark:text-gray-300 font-semibold text-base">
+                  Archivo adjunto
+                </Label>
+                <a
+                  href={solicitud.fileUrl}
+                  download
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline flex items-center mb-2"
+                >
+                  📎 Descargar archivo
+                </a>
+                <FileUpload onChange={(url) => setNuevoArchivoUrl(url)} />
+                {nuevoArchivoUrl && (
+                  <p className="text-green-600 mt-2">Nuevo archivo listo para guardar ✅</p>
+                )}
+              </div>
+            ) : (
+              <div className="my-4">
+                <p className="text-gray-500 italic">No hay archivo adjunto</p>
+                <FileUpload onChange={(url) => setNuevoArchivoUrl(url)} />
+                {nuevoArchivoUrl && (
+                  <p className="text-green-600 mt-2">Nuevo archivo listo para guardar ✅</p>
+                )}
+              </div>
+            )}
             <div className="my-6">
               <Label className="block mb-2 font-semibold text-gray-800 dark:text-white/900">Comentario</Label>
               <TextArea
@@ -232,7 +265,6 @@ export default function SolicitudPage() {
                 hint="El texto no debe ser mayor a 400 caracteres"
               />
             </div>
-
             <div>
               <Label className="block mb-2 text-gray-700 dark:text-gray-300 font-semibold text-base">Historial de Comentarios</Label>
               <div className="text-sm text-gray-700">
