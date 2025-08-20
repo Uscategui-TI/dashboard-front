@@ -392,9 +392,17 @@ export default function RecentOrders() {
                 {form.fileUrl && (
                   <p className="mt-2 text-xs text-green-600">
                     Archivo cargado:{" "}
-                    <a href={form.fileUrl} target="_blank" className="underline">
-                      {form.fileUrl}
-                    </a>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const res = await fetch(`/api/s3-upload?fileName=${encodeURIComponent(form.fileUrl)}`);
+                        const { url } = await res.json();
+                        window.open(url, "_blank"); // abre en nueva pestaña → descarga
+                      }}
+                      className="underline text-blue-600"
+                    >
+                      Descargar archivo
+                    </button>
                   </p>
                 )}
               </div>
