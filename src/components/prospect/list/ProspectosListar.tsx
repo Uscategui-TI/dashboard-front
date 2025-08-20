@@ -25,6 +25,7 @@ const columns: ColumnConfig<any>[] = [
   { key: "phone", header: "Celular", filterType: "text" },
   { key: "email", header: "Correo", filterType: "text" },
   { key: "document", header: "Documento", filterType: "text" },
+  { key: "messageEvent", header: "Eventos", filterType: "text", render: (row) => row.messageEvent?.eventName ?? "" },
   { key: "cargo", header: "Cargo / Ocupación", filterType: "text" },
   {
     key: "database",
@@ -231,7 +232,15 @@ export default function ProspectosPanel() {
               setSearchTerm(value);
             }}
             onFilterChange={(filters: Record<string, string>) => {
-              setColumnFilters(filters);
+              const transformedFilters: Record<string, string> = { ...filters };
+
+              // 👇 si el filtro es por evento, usa el campo correcto
+              if (filters.messageEvent) {
+                transformedFilters["eventName"] = filters.messageEvent;
+                delete transformedFilters.messageEvent;
+              }
+
+              setColumnFilters(transformedFilters);
               setPage(0);
             }}
             actions={(row) => (

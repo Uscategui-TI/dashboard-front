@@ -17,6 +17,7 @@ import PersonFormPage from "@/components/prospect/forms/CreateProspect.form";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import ConfirmModal from "@/components/shared/ui/modal/ConfirmModal";
 import { useNavigation } from "@/util";
+import { FileUpload } from "@/components/form/form-elements/FileUpload";
 
 type EventStat = {
   id: string | number;
@@ -45,6 +46,7 @@ const initialForm = {
   prioridad: "PENDIENTE",
   comentario: "",
   usuarioAsignadoId: '',
+  fileUrl: "",
 };
 
 
@@ -217,6 +219,36 @@ export default function RecentOrders() {
       setUsuarios(options);
     });
   }, []);
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      // pedir signed URL
+      const res = await fetch("/api/s3-upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileName: file.name, fileType: file.type }),
+      });
+
+      const { url } = await res.json();
+
+      // subir el archivo a S3
+      await fetch(url, {
+        method: "PUT",
+        headers: { "Content-Type": file.type },
+        body: file,
+      });
+
+      // guardar la URL pública en el formulario
+      const publicUrl = url.split("?")[0]; // quitar query params de la signed URL
+      setForm((prev: any) => ({ ...prev, fileUrl: publicUrl }));
+
+    } catch (error) {
+      console.error("Error subiendo archivo:", error);
+    }
+  };
+
 
 
 
@@ -257,29 +289,49 @@ export default function RecentOrders() {
         </div>
         <Pagination key={page} currentPage={page} onPageChange={setPage} totalPages={totalPages}/>
 
+        
         {/* MODAL CREAR SOLICITUD */}
-        <Modal isOpen={createSolicitudModal.isOpen} onClose={createSolicitudModal.closeModal} className="max-w-[700px] p-6 lg:p-10">
+        <Modal
+          isOpen={createSolicitudModal.isOpen}
+          onClose={createSolicitudModal.closeModal}
+          className="max-w-[700px] p-6 lg:p-10"
+        >
           <div className="flex flex-col px-2 overflow-y-auto custom-scrollbar">
             <div>
               <h5 className="mb-2 font-semibold text-gray-800 modal-title text-theme-xl dark:text-white/90 lg:text-2xl">
                 Crear Solicitud
               </h5>
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                Digita la información de la solicitud para llevar la tazabilidad de los prospectos
+                Digita la información de la solicitud para llevar la trazabilidad de los prospectos
               </p>
             </div>
 
             <div className="space-y-4">
+              {/* Documento */}
               <div>
-                <Label className="block mb-1 text-gray-700 dark:text-gray-300">Documento del Prospecto</Label>
-                <Input name="documento" placeholder="Número de documento" value={form.documento} onChange={handleChange}/>
+                <Label className="block mb-1 text-gray-700 dark:text-gray-300">
+                  Documento del Prospecto
+                </Label>
+                <Input
+                  name="documento"
+                  placeholder="Número de documento"
+                  value={form.documento}
+                  onChange={handleChange}
+                />
               </div>
 
+              {/* Asunto */}
               <div>
                 <Label className="block mb-1 text-gray-700 dark:text-gray-300">Asunto</Label>
-                <Input name="asunto" placeholder="Título o asunto de la solicitud" value={form.asunto} onChange={handleChange}/>
+                <Input
+                  name="asunto"
+                  placeholder="Título o asunto de la solicitud"
+                  value={form.asunto}
+                  onChange={handleChange}
+                />
               </div>
 
+              {/* Mensaje */}
               <div>
                 <Label className="block mb-1 text-gray-700 dark:text-gray-300">Solicitud</Label>
                 <TextArea
@@ -293,16 +345,29 @@ export default function RecentOrders() {
                 />
               </div>
 
+              {/* Categoría */}
               <div>
                 <Label className="block mb-1 text-gray-700 dark:text-gray-300">Categoría</Label>
-                <Select name="categoria" options={CategorySolicitudes} value={form.categoria} onChange={handleChange}/>
+                <Select
+                  name="categoria"
+                  options={CategorySolicitudes}
+                  value={form.categoria}
+                  onChange={handleChange}
+                />
               </div>
 
+              {/* Prioridad */}
               <div>
                 <Label className="block mb-1 text-gray-700 dark:text-gray-300">Prioridad</Label>
-                <Select name="prioridad" options={PrioritySolicitudes} value={form.prioridad} onChange={handleChange}/>
+                <Select
+                  name="prioridad"
+                  options={PrioritySolicitudes}
+                  value={form.prioridad}
+                  onChange={handleChange}
+                />
               </div>
-              
+
+              {/* Usuario asignado */}
               <div>
                 <Label className="block mb-1 text-gray-700 dark:text-gray-300">Asignar Usuario</Label>
                 <Select
@@ -312,7 +377,30 @@ export default function RecentOrders() {
                   onChange={handleChange}
                 />
               </div>
+
+              {/* Archivo (usa FileUpload) */}
+              <div>
+                <Label className="block mb-1 text-gray-700 dark:text-gray-300">Archivo</Label>
+                <FileUpload
+                  onChange={(url) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      fileUrl: url, // 👈 guardamos la URL en el form
+                    }))
+                  }
+                />
+                {form.fileUrl && (
+                  <p className="mt-2 text-xs text-green-600">
+                    Archivo cargado:{" "}
+                    <a href={form.fileUrl} target="_blank" className="underline">
+                      {form.fileUrl}
+                    </a>
+                  </p>
+                )}
+              </div>
             </div>
+
+            {/* Botones */}
             <div className="flex items-center gap-3 mt-6 modal-footer sm:justify-end">
               <button
                 onClick={createSolicitudModal.closeModal}
@@ -328,9 +416,10 @@ export default function RecentOrders() {
               >
                 Crear
               </button>
-            </div> 
+            </div>
           </div>
         </Modal>
+
 
         {/* MODAL CREAR PROSPECTO  */}
         <Modal isOpen={prospectModal.isOpen} onClose={prospectModal.closeModal} className="max-w-[1100px] p-6 lg:p-10">
