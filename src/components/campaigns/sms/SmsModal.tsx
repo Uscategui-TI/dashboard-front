@@ -10,7 +10,7 @@ type SmsModalProps = {
   isOpen: boolean;
   onClose: () => void;
   phoneNumbers: string[];
-  onSend: (message: string) => void;
+  onSend: (payload: { message: string; flash: boolean }) => void;
 };
 
 const authUrl = process.env.NEXT_PUBLIC_AUTH_URL || "";
@@ -28,6 +28,7 @@ const isValidMessage = (text: string) => {
 
 const SmsModal = ({ isOpen, onClose, phoneNumbers, onSend }: SmsModalProps) => {
   const [message, setMessage] = useState("");
+  const [isFlash, setIsFlash] = useState(false);
   const [toastSuccess, setToastSuccess] = useState<string | null>(null);
   const [toastError, setToastError] = useState<string | null>(null);
   const [selectedEventName, setSelectedEventName] = useState<string>("");
@@ -123,7 +124,7 @@ const SmsModal = ({ isOpen, onClose, phoneNumbers, onSend }: SmsModalProps) => {
     const trimmed = message.trim();
     if (trimmed && trimmed.length <= 160 && isValidMessage(trimmed)) {
       try {
-        await onSend(trimmed);
+        await onSend({ message: trimmed, flash: isFlash });
         await saveSmsStats({
           message: trimmed,
           totalMessagesSent: phoneNumbers.length,
@@ -193,6 +194,20 @@ const SmsModal = ({ isOpen, onClose, phoneNumbers, onSend }: SmsModalProps) => {
             onChange={(e) => setSelectedEventName(e.target.value)}
           />
         </div>
+        <div className="col-span-6">
+          <label className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              checked={isFlash}
+              onChange={(e) => setIsFlash(e.target.checked)}
+              className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+            />
+            <span className="text-gray-700 dark:text-gray-200">
+              Enviar como SMS Flash
+            </span>
+          </label>
+        </div>
+
 
         <div className="flex justify-end gap-3">
           <Button variant="outline" onClick={onClose}>

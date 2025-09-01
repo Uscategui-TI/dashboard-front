@@ -25,7 +25,7 @@ export default function SmsBroadcastPage() {
   const csvFileRef = useRef<HTMLInputElement | null>(null);
   const [showErrorAlert, setShowErrorAlert] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
+  const [isFlash, setIsFlash] = useState(false);
   const [events, setEvents] = useState<MyEvent[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<string>("");
 
@@ -193,6 +193,7 @@ export default function SmsBroadcastPage() {
         message: data.message,
         csvFileBase64: csvBase64,
         eventName: selectedEvent,
+        flash: isFlash,
       };
 
       const response = await softPointBackend({
@@ -274,6 +275,20 @@ export default function SmsBroadcastPage() {
                 ))}
               </select>
             </div>
+            <div className="col-span-6">
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={isFlash}
+                onChange={(e) => setIsFlash(e.target.checked)}
+                className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+              />
+              <span className="text-gray-700 dark:text-gray-200">
+                Enviar como SMS Flash
+              </span>
+            </label>
+          </div>
+
 
             <div className="col-span-6 flex space-x-4">
               <Button

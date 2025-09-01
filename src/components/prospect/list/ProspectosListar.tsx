@@ -36,8 +36,9 @@ const columns: ColumnConfig<any>[] = [
       "Propiedad Horizontal",
       "SLP Retirados",
       "Organizaciones",
-      "UAN",
+      "DEPARTAMENTOS",
       "TELEFONO JJ",
+      "EJERCITO",
     ],
   },
 ];
@@ -126,32 +127,49 @@ export default function ProspectosPanel() {
   const handleSelectionChange = (pageSelectedProspects: any[]) => {
     const newSelectedIds = pageSelectedProspects.map((p) => p.id);
     const currentIds = new Set(selectedRowIds);
-
+  
+    
     const isSame =
       newSelectedIds.length === selectedRowIds.length &&
       newSelectedIds.every((id) => currentIds.has(id));
-
+  
     if (isSame) return; 
-
+  
+    
     const updatedMap = new Map(selectedRows.map((p) => [p.id, p]));
-
+  
+    
     pageSelectedProspects.forEach((p) => {
       updatedMap.set(p.id, p);
     });
-
+  
+    
     const visibleIds = data.map((p) => p.id);
     for (let id of visibleIds) {
       if (!newSelectedIds.includes(id)) {
         updatedMap.delete(id);
       }
     }
-
-    setSelectedRows(Array.from(updatedMap.values()));
-    setSelectedRowIds(Array.from(updatedMap.keys()));
+  
+    
+    const newRows = Array.from(updatedMap.values());
+    const newIds = Array.from(updatedMap.keys());
+  
+    
+    if (
+      newIds.length === selectedRowIds.length &&
+      newIds.every((id, idx) => id === selectedRowIds[idx])
+    ) {
+      return;
+    }
+  
+    setSelectedRows(newRows);
+    setSelectedRowIds(newIds);
   };
+  
 
 
-  const handleSendSms = (message: string) => {
+  const handleSendSms = ({ message, flash }: { message: string; flash: boolean }) => {
     const phoneNumbers = selectedRows.map((p) => p.phone);
     
     fetch(`${softProvider}/api/sms/list`, {
@@ -159,7 +177,7 @@ export default function ProspectosPanel() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ numbers: phoneNumbers, message }),
+      body: JSON.stringify({ numbers: phoneNumbers, message, flash }),
     })
     .then(res => res.json())
     .then(data => {
@@ -169,6 +187,7 @@ export default function ProspectosPanel() {
       console.error("❌ Error enviando SMS:", err);
     });
   };
+  
 
   const handleSendEmail = async (payload: {
     subject: string;
