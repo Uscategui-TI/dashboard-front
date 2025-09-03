@@ -339,8 +339,8 @@ export default function SolicitudPage() {
               </p>
               <p className="mb-1 text-gray-500 dark:text-gray-400">
                 <strong className="text-gray-800 dark:text-white/90">Ubicación:</strong>{" "}
-                {solicitud.prospecto.municipality.name},{" "}
-                {solicitud.prospecto.department.name}
+                {solicitud?.prospecto?.municipality?.name},{" "}
+                {solicitud?.prospecto?.department?.name}
               </p>
               <p className="mb-1 text-gray-500 dark:text-gray-400">
                 <strong className="text-gray-800 dark:text-white/90">Cargo:</strong> {solicitud.prospecto.cargo}
