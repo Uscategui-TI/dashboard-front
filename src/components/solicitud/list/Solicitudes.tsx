@@ -108,7 +108,7 @@ const CategorySolicitudes = [
     { value: "PETICION", label: "Petición" },
     { value: "CONSTRUCCION", label: "Construcción" },
     { value: "PROPUESTA", label: "Propuesta" },
-    { value: "PETICION", label: "Derecho de petición" },
+    { value: "DERECHO_PETICION", label: "Derecho de petición" },
     { value: "TUTELA", label: "Acción de tutela" },
     { value: "SOLICITUD", label: "Solicitud" },
     { value: "INFORMES", label: "Informes" }
