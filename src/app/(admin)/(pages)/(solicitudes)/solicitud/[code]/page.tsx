@@ -162,16 +162,31 @@ export default function SolicitudPage() {
               subject: "Nueva solicitud asignada",
               recipients: [usuarioSeleccionado.email],
               htmlContent: `
-                <h2>Hola ${usuarioSeleccionado.label.split(" (")[0]},</h2>
-                <p>Se te ha asignado una nueva solicitud en el sistema.</p>
-                <p><strong>Asunto:</strong> ${solicitud?.asunto}</p>
-                <p><strong>Mensaje:</strong> ${solicitud?.mensaje}</p>
-                <p><a href="${window.location.origin}/solicitud/${solicitud?.id}" target="_blank">
-                  👉 Ver solicitud
-                </a></p>
-                <hr/>
-                <p style="font-size:12px;color:#666">Este es un mensaje automático, no responder.</p>
-              `,
+                      <h2 style="color: #4CAF50; font-family: 'Arial', sans-serif;">¡Hola ${usuarioSeleccionado.label.split(" (")[0]}!</h2>
+
+                      <p style="font-size: 16px; font-family: 'Arial', sans-serif; color: #333;">
+                        Se te ha asignado una nueva solicitud en el sistema. Por favor, revisa los detalles a continuación:
+                      </p>
+
+                      <div style="background-color: #f4f4f4; padding: 15px; border-radius: 8px; margin-top: 20px; font-family: 'Arial', sans-serif; color: #333;">
+                        <p><strong style="color: #333;">Asunto:</strong> ${solicitud?.asunto}</p>
+                        <p><strong style="color: #333;">Mensaje:</strong> ${solicitud?.mensaje}</p>
+                      </div>
+
+                      <p style="font-size: 16px; font-family: 'Arial', sans-serif; color: #333;">
+                        <a href="${window.location.origin}/solicitud/${resp.data?.id}" target="_blank" 
+                          style="color: #007bff; text-decoration: none; font-weight: bold;">
+                          👉 Ver solicitud
+                        </a>
+                      </p>
+
+                      <hr style="border: 0; border-top: 1px solid #ccc; margin: 20px 0;" />
+
+                      <p style="font-size: 12px; color: #666; font-family: 'Arial', sans-serif; text-align: center;">
+                        Este es un mensaje automático, por favor no respondas.
+                      </p>
+
+                    `,
             }),
           });
           console.log("✅ Correo de notificación enviado");
