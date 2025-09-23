@@ -6,7 +6,7 @@ export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // Rutas públicas permitidas sin token
-  const publicPaths = ["/signin", "/signup", "/reset-password", "/public", "/consulta"];
+  const publicPaths = ["/signin", "/signup", "/reset-password", "/public", "/consulta","/actualizacion"];
   const isPublic = publicPaths.some((path) => pathname.startsWith(path));
 
   if (!token && !isPublic) {

@@ -6,6 +6,7 @@ import axios from "@/lib/axiosInstance";
 import { endPointBackend } from "@/api";
 import FormInput from "@/components/form/FormInput";
 import FormSelect from "@/components/form/FormSelect";
+import FormSelectNumber from "@/components/form/FormSelectNumber";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/Input";
 import Button from "@/components/shared/ui/button/Button";
@@ -30,6 +31,7 @@ type ProspectForm = {
   localidad: number | null;
   idEvento: number | null;
   canalId: number | null;
+  messageEvent?: number | null;
 };
 
 const transformProspect = (p: any): ProspectForm => ({
@@ -152,16 +154,27 @@ endPointBackend({ accionBD: "List-Genders" })
   }, [selectedMunicipality, municipalities]);
 
   const onSubmit = async (formData: ProspectForm) => {
+    // Construimos los campos modificados comparando con el prospecto original
     const modifiedFields = Object.entries(formData).reduce((acc, [key, value]) => {
       const typedKey = key as keyof ProspectForm;
       const originalValue = transformedProspect[typedKey];
 
-      if (value !== null && value !== "" && String(value) !== String(originalValue)) {
+      // Solo agregamos si hay un cambio
+      if (
+        value !== null &&
+        value !== "" &&
+        (originalValue === null || String(value) !== String(originalValue))
+      ) {
         (acc as any)[typedKey] = value;
       }
-
       return acc;
     }, {} as Partial<ProspectForm>);
+
+    // Siempre aseguramos mapear idEvento a messageEvent para el backend
+    if (formData.idEvento !== undefined) {
+      modifiedFields.messageEvent = formData.idEvento;
+      delete modifiedFields.idEvento; // opcional, ya no se necesita
+    }
 
     if (Object.keys(modifiedFields).length === 0) {
       console.log("⛔ Nada fue modificado.");
@@ -169,13 +182,18 @@ endPointBackend({ accionBD: "List-Genders" })
     }
 
     try {
-      await axios.put(`${authUrl}/api/v1.0/prospects/update/${prospect.document}`, modifiedFields);
+      await axios.put(
+        `${authUrl}/api/v1.0/prospects/update/${prospect.document}`,
+        modifiedFields
+      );
+      console.log("✅ Prospecto actualizado correctamente");
       onUpdate();
       onClose();
     } catch (error) {
       console.error("❌ Error actualizando prospecto:", error);
     }
   };
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-6 gap-6">
       <div className="col-span-3">
@@ -185,7 +203,14 @@ endPointBackend({ accionBD: "List-Genders" })
         <FormInput label="Apellido" registration={register("lastName")} error={errors.lastName as FieldError} />
       </div>
       <div className="col-span-3">
-        <FormSelect name="genderId" label="Género" control={control} options={genders} placeholder="Selecciona género" error={errors.genderId as FieldError} />
+        <FormSelectNumber
+          name="genderId"
+          label="Género*"
+          control={control}
+          options={genders}
+          placeholder="Selecciona género"
+          error={errors.genderId}
+        />
       </div>
       <div className="col-span-3">
         <FormInput label="Teléfono" registration={register("phone")} error={errors.phone as FieldError} />
@@ -201,17 +226,17 @@ endPointBackend({ accionBD: "List-Genders" })
       <div className="col-span-3">
         <Label>Departamento</Label>
         <Controller
-          name="departmentId"
-          control={control}
-          render={({ field }) => (
-            <Select
-              options={departments.map((d: any) => ({ value: d.id, label: d.name }))}
-              value={field.value !== null ? String(field.value) : undefined}
-              onChange={(val) => field.onChange(Number(val))}
-              placeholder="Selecciona un departamento"
-            />
-          )}
-        />
+            name="departmentId"
+            control={control}
+            render={({ field }) => (
+              <Select
+                options={departments.map((d: any) => ({ value: d.id, label: d.name }))}
+                value={field.value !== null ? String(field.value) : undefined}
+                onChange={(e) => field.onChange(Number(e.target.value))}
+                placeholder="Selecciona un departamento"
+              />
+            )}
+          />
       </div>
       <div className="col-span-3">
         <Label>Municipio</Label>
@@ -220,11 +245,11 @@ endPointBackend({ accionBD: "List-Genders" })
           control={control}
           render={({ field }) => (
             <Select
-              options={filteredMunicipalities.map((m: any) => ({ value: m.id, label: m.name }))}
-              value={field.value !== null ? String(field.value) : undefined}
-              onChange={(val) => field.onChange(Number(val))}
-              placeholder="Selecciona un municipio"
-            />
+                options={filteredMunicipalities.map((m: any) => ({ value: m.id, label: m.name }))}
+                value={field.value !== null ? String(field.value) : undefined}
+                onChange={(e) => field.onChange(Number(e.target.value))}
+                placeholder="Selecciona un municipio"
+              />
           )}
         />
       </div>
@@ -234,32 +259,32 @@ endPointBackend({ accionBD: "List-Genders" })
       <div className="col-span-3">
         <Label>Evento</Label>
         <Controller
-          name="idEvento"
-          control={control}
-          render={({ field }) => (
-            <Select
-              options={events.map((e: any) => ({ value: e.id, label: e.eventName }))}
-              value={field.value !== null ? String(field.value) : undefined}
-              onChange={(val) => field.onChange(Number(val))}
-              placeholder="Selecciona un evento"
-            />
-          )}
-        />
+            name="idEvento"
+            control={control}
+            render={({ field }) => (
+              <Select
+                options={events.map((e: any) => ({ value: e.id, label: e.eventName }))}
+                value={field.value !== null ? String(field.value) : undefined}
+                onChange={(e) => field.onChange(Number(e.target.value))}
+                placeholder="Selecciona un evento"
+              />
+            )}
+          />
       </div>
       <div className="col-span-3">
         <Label>Canal</Label>
-        <Controller
-          name="canalId"
-          control={control}
-          render={({ field }) => (
-            <Select
-              options={canales.map((c: any) => ({ value: c.id, label: c.nombre }))}
-              value={field.value !== null ? String(field.value) : undefined}
-              onChange={(e) => field.onChange(Number(e))}
-              placeholder="Selecciona un canal"
+          <Controller
+              name="canalId"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  options={canales.map((c: any) => ({ value: c.id, label: c.nombre }))}
+                  value={field.value !== null ? String(field.value) : undefined}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                  placeholder="Selecciona un canal"
+                />
+              )}
             />
-          )}
-        />
       </div>
       <div className="col-span-3">
         <Label>Fecha de nacimiento</Label>
@@ -275,7 +300,7 @@ endPointBackend({ accionBD: "List-Genders" })
               <Select
                 options={communes.map((c: any) => ({ value: c.id, label: c.name }))}
                 value={field.value !== null ? String(field.value) : undefined}
-                onChange={(val) => field.onChange(Number(val))}
+                onChange={(e) => field.onChange(Number(e.target.value))}
                 placeholder="Selecciona una comuna"
               />
             )}

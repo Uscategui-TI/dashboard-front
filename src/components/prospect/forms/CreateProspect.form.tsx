@@ -143,13 +143,21 @@ export default function PersonFormPage({ closeModal }: any) {
     }
   }, [selectedMunicipality, municipalities]);
 
-  const onSubmit = async (data: ProspectForm) => {
-    endPointBackend({ accionBD: "Create-Prospect", body: data})
+const onSubmit = async (data: ProspectForm) => {
+  setLoading(true);
+  setErrorMessage("");
+  setSuccessMessage("");
+
+  // Mapeo para que el backend reciba messageEvent
+  const payload = {
+    ...data,
+    messageEvent: data.idEvento, // ✅ convertir idEvento a messageEvent
+  };
+
+  endPointBackend({ accionBD: "Create-Prospect", body: payload })
     .then((resp) => {
       switch (resp.status) {
-        case 'OK': {   
-          setLoading(true);
-          setErrorMessage("");
+        case "OK": {
           setSuccessMessage("Formulario enviado exitosamente ✅");
           reset({
             name: "",
@@ -168,21 +176,23 @@ export default function PersonFormPage({ closeModal }: any) {
             idEvento: null,
             canalId: null,
           });
-          setFormResetKey(prev => prev + 1);
+          setFormResetKey((prev) => prev + 1);
           setFilteredMunicipalities([]);
           setShowCommune(false);
           setShowLocality(false);
           closeModal();
-          break
+          break;
         }
-        case 400: { 
-          setErrorMessage("Ya existe una persona registrada con este número de documento.");
+        case 400: {
+          setErrorMessage(
+            "Ya existe una persona registrada con este número de documento."
+          );
           setTimeout(() => setErrorMessage(""), 5000);
-          break
+          break;
         }
       }
-      
     })
+
     .finally(() => {
       setLoading(false);
       setTimeout(() => setSuccessMessage(""), 3000);
@@ -251,7 +261,7 @@ export default function PersonFormPage({ closeModal }: any) {
                 key={formResetKey}
                 options={departments.map((d: any) => ({ value: d.id, label: d.name }))}
                 value={field.value !== null ? String(field.value) : undefined}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
+                onChange={(e) => field.onChange(Number(e.target.value))}
                 placeholder="Selecciona un departamento"
               />
             )}
