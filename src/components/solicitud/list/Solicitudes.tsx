@@ -19,6 +19,13 @@ import ConfirmModal from "@/components/shared/ui/modal/ConfirmModal";
 import { useNavigation } from "@/util";
 import { FileUpload } from "@/components/form/form-elements/FileUpload";
 
+type UsuarioOption = {
+  value: string;
+  label: string;
+  email: string;
+};
+
+
 type EventStat = {
   id: string | number;
   asunto: string;
@@ -127,7 +134,7 @@ export default function RecentOrders() {
   const [totalPages, setTotalPages] = useState(0);
   const [form, setForm] = useState(initialForm);
   const [searchTerm, setSearchTerm] = useState("");
-  const [usuarios, setUsuarios] = useState<{ value: string; label: string }[]>([]);
+  const [usuarios, setUsuarios] = useState<UsuarioOption[]>([]);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [idToDelete, setIdToDelete] = useState<string | number | null>(null);
 
@@ -174,28 +181,65 @@ export default function RecentOrders() {
   };
   
   const handleCreate = async () => {
-    endPointBackend({ accionBD: "Create-Solicitud", body: form })
-    .then((resp) => {
+    try {
+      const resp = await endPointBackend({ accionBD: "Create-Solicitud", body: form });
+
       switch (resp.status) {
-        case 'OK': {   
+        case "OK": {
           setForm(initialForm);
           setData(prev => [resp.data, ...prev]);
-          setSuccessMessage(resp.message)
-          successModal.openModal()
-          break
+          setSuccessMessage(resp.message);
+          successModal.openModal();
+
+          // 📩 Enviar correo si se asignó un usuario
+          if (form.usuarioAsignadoId) {
+            const usuarioSeleccionado = usuarios.find(u => u.value === form.usuarioAsignadoId);
+            if (usuarioSeleccionado?.email) {
+              try {
+                await fetch(`${process.env.NEXT_PUBLIC_PROVIDER_SERVER}/api/email/send-list`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    subject: "Nueva solicitud asignada",
+                    recipients: [usuarioSeleccionado.email],
+                    htmlContent: `
+                      <h2>Hola ${usuarioSeleccionado.label.split(" (")[0]},</h2>
+                      <p>Se te ha asignado una nueva solicitud en el sistema.</p>
+                      <p><strong>Asunto:</strong> ${form.asunto}</p>
+                      <p><strong>Mensaje:</strong> ${form.mensaje}</p>
+                      <p><a href="${window.location.origin}/solicitud/${resp.data?.id}" target="_blank">
+                        👉 Ver solicitud
+                      </a></p>
+                      <hr/>
+                      <p style="font-size:12px;color:#666">Este es un mensaje automático, no responder.</p>
+                    `,
+                  }),
+                });
+                console.log("✅ Correo de notificación enviado");
+              } catch (emailError) {
+                console.error("❌ Error enviando correo:", emailError);
+              }
+            }
+          }
+
+          break;
         }
-        case 400: { 
+        case 400: {
           setForm(initialForm);
-          setErrorMessage(resp.message)
-          errorModal.openModal()
-          break
+          setErrorMessage(resp.message);
+          errorModal.openModal();
+          break;
         }
       }
-    })
-    .finally(() => {
-      createSolicitudModal.closeModal()
-    })
+    } catch (error: any) {
+      setErrorMessage("Ocurrió un error al crear la solicitud.");
+      errorModal.openModal();
+    } finally {
+      createSolicitudModal.closeModal();
+    }
   };
+
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -203,22 +247,23 @@ export default function RecentOrders() {
   };
 
 
-  useEffect(() => {
-    endPointBackend({ accionBD: "List-Usuarios" }).then((resp) => {
+useEffect(() => {
+  endPointBackend({ accionBD: "List-Usuarios" }).then((resp) => {
+    const usersArray = Object.keys(resp)
+      .filter(key => !isNaN(Number(key))) 
+      .sort((a, b) => Number(a) - Number(b))
+      .map(key => resp[key]);
 
-      const usersArray = Object.keys(resp)
-        .filter(key => !isNaN(Number(key))) 
-        .sort((a, b) => Number(a) - Number(b))
-        .map(key => resp[key]);
+    const options: UsuarioOption[] = usersArray.map((user: any) => ({
+      value: String(user.id), 
+      label: `${user.nombreCompleto} (${user.roles?.[0] || 'Sin rol'})`,
+      email: user.email,
+    }));
 
-      const options = usersArray.map((user: any) => ({
-        value: String(user.id), 
-        label: `${user.nombreCompleto} (${user.roles?.[0] || 'Sin rol'})`,
-      }));
+    setUsuarios(options);
+  });
+}, []);
 
-      setUsuarios(options);
-    });
-  }, []);
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;

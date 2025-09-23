@@ -14,6 +14,12 @@ import Avatar from "@/components/shared/ui/avatar/Avatar";
 import { formatearComentarios } from "@/components/solicitud/consulta/consulta";
 import { FileUpload } from "@/components/form/form-elements/FileUpload";
 
+type UsuarioOption = {
+  value: string;
+  label: string;
+  email: string;
+};
+
 type Departamento = {
   id: number;
   name: string;
@@ -86,7 +92,6 @@ type ComentarioItem = {
 
 
 export default function SolicitudPage() {
-  
   const params = useParams();
   const rawId = params?.code;
   const id = Array.isArray(rawId) ? rawId[0] : rawId;
@@ -95,38 +100,36 @@ export default function SolicitudPage() {
   const [estado, setEstado] = useState("");
   const [nuevoComentario, setNuevoComentario] = useState("");
   const [assignedUser, setAssignedUser] = useState("");
-  const [usuarios, setUsuarios] = useState<{ value: string; label: string }[]>([]);
+  const [usuarios, setUsuarios] = useState<UsuarioOption[]>([]);
   const [nuevoArchivoUrl, setNuevoArchivoUrl] = useState<string | null>(null);
-
 
   // MODALES
   const successModal = useModal();
   const errorModal = useModal();
 
   // MENSAJES ALERTS
-  const [successMessage, setSuccessMessage] = useState<string>('');
-  const [errorMessage, setErrorMessage] = useState<string>('');
-  
+  const [successMessage, setSuccessMessage] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   useEffect(() => {
     if (id) {
-    endPointBackend({ accionBD: "Get-Solicitud", id: id })
-      .then((resp) => {
+      endPointBackend({ accionBD: "Get-Solicitud", id: id }).then((resp) => {
         setSolicitud(resp.data);
         setEstado(resp.data.estado);
-        setAssignedUser(resp.data.usuarioAsignado.id)
-      })
+        setAssignedUser(resp.data.usuarioAsignado.id);
+      });
     }
 
     endPointBackend({ accionBD: "List-Usuarios" }).then((resp) => {
       const usersArray = Object.keys(resp)
-        .filter(key => !isNaN(Number(key))) 
+        .filter((key) => !isNaN(Number(key)))
         .sort((a, b) => Number(a) - Number(b))
-        .map(key => resp[key]);
+        .map((key) => resp[key]);
 
-      const options = usersArray.map((user: any) => ({
-        value: String(user.id), 
-        label: `${user.nombreCompleto} (${user.roles?.[0] || 'Sin rol'})`,
+      const options: UsuarioOption[] = usersArray.map((user: any) => ({
+        value: String(user.id),
+        label: `${user.nombreCompleto} (${user.roles?.[0] || "Sin rol"})`,
+        email: user.email,
       }));
 
       setUsuarios(options);
@@ -135,6 +138,9 @@ export default function SolicitudPage() {
 
   const handleUpdate = async () => {
     try {
+      // Buscar datos del usuario seleccionado
+      const usuarioSeleccionado = usuarios.find((u) => u.value === assignedUser);
+
       const resp = await endPointBackend({
         accionBD: "Update-Solicitud",
         id: solicitud?.id,
@@ -142,12 +148,40 @@ export default function SolicitudPage() {
           estado: estado,
           comentario: nuevoComentario,
           usuarioAsignadoId: assignedUser,
-          fileUrl: nuevoArchivoUrl ?? solicitud?.fileUrl, // 👈 Usa nuevo si existe, si no el actual
-        }
+          fileUrl: nuevoArchivoUrl ?? solicitud?.fileUrl,
+        },
       });
 
+      // ✅ Enviar correo al usuario asignado
+      if (usuarioSeleccionado?.email) {
+        try {
+          await fetch(`${process.env.NEXT_PUBLIC_PROVIDER_SERVER}/api/email/send-list`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              subject: "Nueva solicitud asignada",
+              recipients: [usuarioSeleccionado.email],
+              htmlContent: `
+                <h2>Hola ${usuarioSeleccionado.label.split(" (")[0]},</h2>
+                <p>Se te ha asignado una nueva solicitud en el sistema.</p>
+                <p><strong>Asunto:</strong> ${solicitud?.asunto}</p>
+                <p><strong>Mensaje:</strong> ${solicitud?.mensaje}</p>
+                <p><a href="${window.location.origin}/solicitud/${solicitud?.id}" target="_blank">
+                  👉 Ver solicitud
+                </a></p>
+                <hr/>
+                <p style="font-size:12px;color:#666">Este es un mensaje automático, no responder.</p>
+              `,
+            }),
+          });
+          console.log("✅ Correo de notificación enviado");
+        } catch (emailError) {
+          console.error("❌ Error enviando correo:", emailError);
+        }
+      }
+
       // Actualiza el estado local
-      setSolicitud(prev =>
+      setSolicitud((prev) =>
         prev
           ? {
               ...prev,
@@ -156,15 +190,16 @@ export default function SolicitudPage() {
               usuarioAsignado: {
                 ...prev.usuarioAsignado,
                 id: assignedUser,
+                email: usuarioSeleccionado?.email || prev.usuarioAsignado.email,
               },
-              fileUrl: nuevoArchivoUrl ?? prev.fileUrl, // 👈 también aquí
+              fileUrl: nuevoArchivoUrl ?? prev.fileUrl,
             }
           : null
       );
 
       setNuevoComentario("");
-      setNuevoArchivoUrl(null); // limpia el estado
-      setSuccessMessage(resp.message);  
+      setNuevoArchivoUrl(null);
+      setSuccessMessage(resp.message);
       successModal.openModal();
     } catch (error) {
       console.error("Error actualizando solicitud:", error);
@@ -173,13 +208,11 @@ export default function SolicitudPage() {
     }
   };
 
-
   const filteredOptions = useMemo(() => {
     return estado === "PENDIENTE"
-      ? StatusSolicitudes.filter(opt => opt.value !== "FINALIZADOS")
+      ? StatusSolicitudes.filter((opt) => opt.value !== "FINALIZADOS")
       : StatusSolicitudes;
   }, [estado]);
-
 
   if (!solicitud) return <p>Cargando...</p>;
 
