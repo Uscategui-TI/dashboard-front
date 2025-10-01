@@ -53,68 +53,71 @@ const Calendar: React.FC = () => {
     formState: { errors: errorsGeneral },
   } = useForm<FieldValues>({ defaultValues: {} });
   
-  const urlMedia = watch("urlMedia");
   
+  
+  
+  const fetchEvents = async () => {
+    const resp = await endPointBackend({ accionBD: "List-Events" });
+    const data = resp.data.all;
+
+    const formattedEvents: CalendarEvent[] = data.map((event: any) => ({
+      id: event.id.toString(),
+      title: event.eventName,
+      start: event.startDate,
+      end: event.endDate,
+      allDay: true,
+      extendedProps: {
+        calendar: event.color,
+        imageUrl: event.imageUrl,
+      },
+    }));
+
+    setEvents(formattedEvents);
+  };
   
   useEffect(() => {
-    endPointBackend({ accionBD: "List-Events" })
-    .then((resp) => {
-      const data = resp.data.all;
-
-      const formattedEvents: CalendarEvent[] = data.map((event: any) => ({
-        id: event.id.toString(),
-        title: event.eventName,
-        start: event.startDate,
-        end: event.endDate,
-        allDay: true,
-        extendedProps: {
-          calendar: event.color,
-          imageUrl: event.imageUrl,
-        },
-      }));
-
-      setEvents(formattedEvents);
-    })
+    fetchEvents();
   }, []);
-  
+
   const createEvent = async () => {
-    endPointBackend({ 
-        accionBD: "Create-Events",
+    await endPointBackend({
+      accionBD: "Create-Events",
+      body: {
+        eventName: eventData.title,
+        color: eventData.level,
+        startDate: eventData.startDate,
+        endDate: eventData.endDate,
+        imageUrl: eventData.urlMedia,
+      },
+    });
+
+    await fetchEvents(); // 👈 refrescar después de crear
+    closeModal();
+    resetModalFields();
+  };
+  
+  const handleAddOrUpdateEvent = async () => {
+    if (selectedEvent) {
+      await endPointBackend({
+        accionBD: "Update-Events",
+        id: selectedEvent.id,
         body: {
           eventName: eventData.title,
           color: eventData.level,
           startDate: eventData.startDate,
           endDate: eventData.endDate,
           imageUrl: eventData.urlMedia,
-        }
-      })
-    .then((resp) => {
+        },
+      });
+
+      await fetchEvents(); // 👈 refrescar después de actualizar
       closeModal();
       resetModalFields();
-    })
-  };
-  
-  const handleAddOrUpdateEvent = async () => {
-    if (selectedEvent) {
-        endPointBackend({ 
-          accionBD: "Update-Events",
-          id: selectedEvent.id,
-          body: {
-            eventName: eventData.title,
-            color: eventData.level,
-            startDate: eventData.startDate,
-            endDate: eventData.endDate,
-            imageUrl: eventData.urlMedia,
-          }
-        })
-      .then((resp) => {
-        closeModal();
-        resetModalFields();
-      })
     } else {
       createEvent();
     }
   };
+
   
   const handleDateSelect = (selectInfo: DateSelectArg) => {
     resetModalFields();

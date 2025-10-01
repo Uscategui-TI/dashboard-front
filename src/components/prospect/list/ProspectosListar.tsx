@@ -18,7 +18,6 @@ import WhatsAppBroadcastModal from "@/components/campaigns/what-bot-meta/WhatsAp
 import WhatsAppModal from "@/components/campaigns/what-panel/WhatsAppModal";
 
 
-
 const columns: ColumnConfig<any>[] = [
   { key: "name", header: "Nombres", filterType: "text" },
   { key: "lastName", header: "Apellidos", filterType: "text" },
@@ -54,6 +53,7 @@ export default function ProspectosPanel() {
     openModal: openCampaingModal,
     closeModal: closeCampaingModal,
   } = useModal();
+
   const [campaignModal, setCampaignModal] = useState<{
     open: boolean;
     type: "SMS" | "Correo" | "WhatsApp✔️" | "WhatsApp" | null;
@@ -70,22 +70,10 @@ export default function ProspectosPanel() {
   const [columnFilters, setColumnFilters] = useState<Record<string, any>>({});
   const [selectedRows, setSelectedRows] = useState<any[]>([]);
   const [selectedRowIds, setSelectedRowIds] = useState<string[]>([]);
-  
-  
 
-
-
-  const confirmDelete = async () => {
-    if (!prospectToDelete) return;
-    endPointBackend({ accionBD: "Delete-Prospect", id: prospectToDelete.document }).then(() => {
-      setData((prev) => prev.filter((p) => p.document !== prospectToDelete.document));
-      setShowConfirmDelete(false);
-      setProspectToDelete(null);
-    });
-  };
-
-  useEffect(() => {
-    endPointBackend({
+  // 🔄 centralizar fetch
+  const fetchData = async () => {
+    const resp = await endPointBackend({
       accionBD: "List-Prospects",
       params: {
         page,
@@ -93,11 +81,22 @@ export default function ProspectosPanel() {
         search: searchTerm,
         ...columnFilters,
       },
-    }).then((resp) => {
-      setData(resp.data.content);
-      setTotalPages(resp.data.totalPages);
     });
+    setData(resp.data.content);
+    setTotalPages(resp.data.totalPages);
+  };
+
+  useEffect(() => {
+    fetchData();
   }, [page, size, searchTerm, columnFilters]);
+
+  const confirmDelete = async () => {
+    if (!prospectToDelete) return;
+    await endPointBackend({ accionBD: "Delete-Prospect", id: prospectToDelete.document });
+    setShowConfirmDelete(false);
+    setProspectToDelete(null);
+    fetchData(); // 👈 refresca después de borrar
+  };
 
   const handleSelectAll = async (select: boolean) => {
     if (select) {
@@ -118,89 +117,66 @@ export default function ProspectosPanel() {
       setSelectedRows([]);
     }
   };
+
   const handleOpenCampaignType = (type: "SMS" | "Correo" | "WhatsApp✔️" | "WhatsApp") => {
     setCampaignModal({ open: true, type });
   };
 
-
-  
   const handleSelectionChange = (pageSelectedProspects: any[]) => {
     const newSelectedIds = pageSelectedProspects.map((p) => p.id);
     const currentIds = new Set(selectedRowIds);
-  
-    
+
     const isSame =
       newSelectedIds.length === selectedRowIds.length &&
       newSelectedIds.every((id) => currentIds.has(id));
-  
-    if (isSame) return; 
-  
-    
+
+    if (isSame) return;
+
     const updatedMap = new Map(selectedRows.map((p) => [p.id, p]));
-  
-    
     pageSelectedProspects.forEach((p) => {
       updatedMap.set(p.id, p);
     });
-  
-    
+
     const visibleIds = data.map((p) => p.id);
     for (let id of visibleIds) {
       if (!newSelectedIds.includes(id)) {
         updatedMap.delete(id);
       }
     }
-  
-    
+
     const newRows = Array.from(updatedMap.values());
     const newIds = Array.from(updatedMap.keys());
-  
-    
+
     if (
       newIds.length === selectedRowIds.length &&
       newIds.every((id, idx) => id === selectedRowIds[idx])
     ) {
       return;
     }
-  
+
     setSelectedRows(newRows);
     setSelectedRowIds(newIds);
   };
-  
-
 
   const handleSendSms = ({ message, flash }: { message: string; flash: boolean }) => {
     const phoneNumbers = selectedRows.map((p) => p.phone);
-    
     fetch(`${softProvider}/api/sms/list`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ numbers: phoneNumbers, message, flash }),
     })
-    .then(res => res.json())
-    .then(data => {
-      console.log("✅ SMS enviados:", data);
-    })
-    .catch(err => {
-      console.error("❌ Error enviando SMS:", err);
-    });
+      .then(res => res.json())
+      .then(data => console.log("✅ SMS enviados:", data))
+      .catch(err => console.error("❌ Error enviando SMS:", err));
   };
-  
 
-  const handleSendEmail = async (payload: {
-    subject: string;
-    htmlContent: string;
-    recipients: string[];
-  }) => {
+  const handleSendEmail = async (payload: { subject: string; htmlContent: string; recipients: string[] }) => {
     try {
       const response = await fetch(`${softProvider}/api/email/send-list`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-
       const data = await response.json();
       console.log("✅ Correos enviados:", data);
     } catch (error) {
@@ -210,19 +186,14 @@ export default function ProspectosPanel() {
 
   const handleSendWhatsApp = (message: string, urlMedia: string) => {
     const phoneNumbers = selectedRows.map((p) => p.phone);
-
     fetch(`${apiWhatsApp}/broadcast-direct`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ numbers: phoneNumbers, message, urlMedia }),
     })
       .then((res) => res.json())
-      .then((data) => {
-        console.log("✅ WhatsApp enviados:", data);
-      })
-      .catch((err) => {
-        console.error("❌ Error enviando WhatsApp:", err);
-      });
+      .then((data) => console.log("✅ WhatsApp enviados:", data))
+      .catch((err) => console.error("❌ Error enviando WhatsApp:", err));
   };
 
   return (
@@ -230,8 +201,7 @@ export default function ProspectosPanel() {
       <PageBreadcrumb pageTitle="Listar Prospectos" homeHref="/prospect-panel" />
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-sm text-gray-700 dark:text-gray-300">
-          </div>
+          <div className="text-sm text-gray-700 dark:text-gray-300"></div>
           <div className="flex gap-3">
             <Button onClick={openModal}>Registrar</Button>
             {selectedRows.length !== 0 && (
@@ -252,13 +222,10 @@ export default function ProspectosPanel() {
             }}
             onFilterChange={(filters: Record<string, string>) => {
               const transformedFilters: Record<string, string> = { ...filters };
-
-              // 👇 si el filtro es por evento, usa el campo correcto
               if (filters.messageEvent) {
                 transformedFilters["eventName"] = filters.messageEvent;
                 delete transformedFilters.messageEvent;
               }
-
               setColumnFilters(transformedFilters);
               setPage(0);
             }}
@@ -304,7 +271,8 @@ export default function ProspectosPanel() {
               Agrega tus prospectos. Es importante que puedas adjuntar toda la información para mejorar las métricas.
             </p>
           </div>
-          <PersonFormPage closeModal={closeModal} />
+          {/* 👇 ahora al guardar, refresca la tabla */}
+          <PersonFormPage closeModal={closeModal} onSaved={fetchData} />
         </div>
       </Modal>
 
@@ -329,11 +297,9 @@ export default function ProspectosPanel() {
               Puedes seleccionar estos proveedores para difundir tus mensajes, invitaciones, eventos y mucho más.
             </p>
           </div>
-
           <p className="mb-5 text-sm text-gray-700 dark:text-gray-300">
             Cuentas con <span className="font-semibold">{selectedRows.length}</span> prospectos seleccionados.
           </p>
-
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 w-full">
             {[
               { label: "SMS", color: "yellow" },
@@ -363,15 +329,13 @@ export default function ProspectosPanel() {
             <EditProspectForm
               prospect={editingProspect}
               onClose={() => setEditingProspect(null)}
-              onUpdate={() => setPage(0)}
+              onUpdate={fetchData} // 👈 refresca después de editar
             />
           )}
         </div>
       </Modal>
 
-      {/*aqui hiba el modal general*/}
-
-
+      {/* Modales de campañas */}
       {campaignModal.open && campaignModal.type === "SMS" && (
         <SmsModal
           isOpen

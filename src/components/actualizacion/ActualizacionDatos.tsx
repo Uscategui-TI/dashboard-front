@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { endPointBackend } from "@/api";
-import EditProspectForm from "@/components/prospect/forms/editProspectorm";
-import PersonFormPage from "@/components/prospect/forms/CreateProspect.form";
+import EditProspectForm from "@/components/prospect/forms/UpdateProspect";
+import PersonFormPage from "@/components/prospect/forms/Createprospectpublic";
 import { FaYoutube, FaFacebookF, FaWhatsapp, FaGlobe, FaInstagram } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 
