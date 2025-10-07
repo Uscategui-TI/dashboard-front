@@ -63,7 +63,7 @@ export function EmailTemplate({
           <!-- CTA button -->
           <tr>
             <td align="center" style="padding: 0 40px 40px 40px;">
-              <a href="${buttonUrl || 'https://wa.me/573144327368'}" target="_blank" rel="noopener noreferrer"
+              <a href="${buttonUrl || 'https://wa.me/573102782407'}" target="_blank" rel="noopener noreferrer"
                 style="background-color: #25D366; color: #ffffff; padding: 12px 24px; border-radius: 5px; font-weight: bold; display: inline-block; text-decoration: none;">
                 <img src="https://img.icons8.com/fluency/48/whatsapp.png"
                     alt="WhatsApp" width="16" height="16"
