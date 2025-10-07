@@ -37,7 +37,7 @@ export function EmailTemplate({
           <!-- Header -->
           <tr>
             <td align="center" bgcolor="#002147" style="padding: 20px 40px; color: #ffffff; font-size: 24px; font-weight: bold; border-radius: 8px 8px 0 0;">
-              ¡Hola!
+              ¡Veteranos y familias!
             </td>
           </tr>
 
@@ -72,7 +72,7 @@ export function EmailTemplate({
               </a>
               <a href="${buttonUrl1 }" target="_blank" rel="noopener noreferrer"
                  style="background-color: #002147; color: #ffffff; padding: 12px 24px; border-radius: 5px; font-weight: bold; display: inline-block;">
-                Pagina Web
+                Inscríbete
               </a>
             </td>
           </tr>
