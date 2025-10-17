@@ -70,10 +70,10 @@ export function EmailTemplate({
                     style="vertical-align: middle; margin-right: 8px;">
                 Escríbenos
               </a>
-              <a href="${buttonUrl1 }" target="_blank" rel="noopener noreferrer"
+             <!-- <a href="${buttonUrl1 }" target="_blank" rel="noopener noreferrer"
                  style="background-color: #002147; color: #ffffff; padding: 12px 24px; border-radius: 5px; font-weight: bold; display: inline-block;">
                 Inscríbete
-              </a>
+              </a>-->
             </td>
           </tr>
 
