@@ -37,7 +37,7 @@ export function EmailTemplate({
           <!-- Header -->
           <tr>
             <td align="center" bgcolor="#002147" style="padding: 20px 40px; color: #ffffff; font-size: 24px; font-weight: bold; border-radius: 8px 8px 0 0;">
-              ¡Veteranos y familias!
+             Reunión de amigos
             </td>
           </tr>
 
