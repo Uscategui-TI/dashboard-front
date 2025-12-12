@@ -276,7 +276,7 @@ export default function SolicitudDetallePage({ params }: { params: Promise<{ id:
             <div className="border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] rounded-xl p-6 shadow-md border">
                 <div className="flex items-center gap-2 mb-4">
                     <h2 className="font-semibold text-gray-800 text-xl dark:text-white/90">Historial de Respuestas</h2>
-                    <Badge color="light" className="rounded-full px-2">{solicitud.respuestas?.length || 0}</Badge>
+                    <Badge color="light">{solicitud.respuestas?.length || 0}</Badge>
                 </div>
                 
                 <div className="space-y-4 max-h-[400px] overflow-y-auto mb-6 custom-scrollbar pr-2">
