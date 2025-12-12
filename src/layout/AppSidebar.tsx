@@ -71,6 +71,15 @@ const navItems: NavItem[] = [
     ],
   },
   {
+    name: "Peticiones Apliación",
+    icon: <SolicitudIcon />,
+    roles: ["Admin", "Secretario", "Pasante", "Periodista"],
+    subItems: [
+      // { name: "Panel Peticiones", path: "/solicitud-panel", roles: ["Admin", "Secretario", "Pasante", "Periodista"] },
+      { name: "Seguimiento Peticiones", path: "/peticiones", roles: ["Admin", "Secretario", "Pasante", "Periodista"] },
+    ],
+  },
+  {
     name: "Administracion",
     icon: <TableIcon />,
     roles: ["Admin"],
